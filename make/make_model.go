@@ -1,6 +1,8 @@
 package make
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/config"
@@ -9,6 +11,13 @@ import (
 
 const (
 	modelUsageStr = "model NAME"
+)
+
+var (
+	modelUsageErrStr = fmt.Sprintf(
+		"expected '%s'.\nNAME is a required argument for the model command",
+		bizUsageStr,
+	)
 )
 
 // ModelOptions is an option struct to support 'model' sub command.
@@ -45,7 +54,7 @@ func NewCmdModel() *cobra.Command {
 // Validate makes sure there is no discrepancy in command options.
 func (o *ModelOptions) Validate(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return cmdutil.UsageErrorf(cmd, cmdUsageErrStr)
+		return cmdutil.UsageErrorf(cmd, modelUsageErrStr)
 	}
 
 	o.MakeOptionsFromPath(config.Cfg.Directory.Model, args[0])

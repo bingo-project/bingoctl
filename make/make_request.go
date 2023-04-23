@@ -1,6 +1,8 @@
 package make
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/config"
@@ -9,6 +11,13 @@ import (
 
 const (
 	requestUsageStr = "request NAME"
+)
+
+var (
+	requestUsageErrStr = fmt.Sprintf(
+		"expected '%s'.\nNAME is a required argument for the request command",
+		bizUsageStr,
+	)
 )
 
 // RequestOptions is an option struct to support 'request' sub command.
@@ -45,7 +54,7 @@ func NewCmdRequest() *cobra.Command {
 // Validate makes sure there is no discrepancy in command options.
 func (o *RequestOptions) Validate(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return cmdutil.UsageErrorf(cmd, cmdUsageErrStr)
+		return cmdutil.UsageErrorf(cmd, requestUsageErrStr)
 	}
 
 	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
