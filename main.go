@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/config"
+	makecmd "github.com/bingo-project/bingoctl/make"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func NewBingoCtlCommand() *cobra.Command {
 	cmds.PersistentFlags().StringVarP(&CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
 
 	// Add commands
+	cmds.AddCommand(makecmd.NewCmdMake())
 
 	return cmds
 }
