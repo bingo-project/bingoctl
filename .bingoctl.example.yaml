@@ -1,0 +1,12 @@
+version: v1
+
+root-package: your-pkg-name
+
+directory:
+  cmd: internal/goerctl/cmd
+  model: internal/pkg/model
+  store: internal/apiserver/store
+  request: pkg/api/v1
+  biz: internal/apiserver/biz
+  controller: internal/apiserver/controller
+  middleware: internal/pkg/middleware
