@@ -12,8 +12,9 @@ const (
 
 var (
     {{.VariableName}}UsageErrStr = fmt.Sprintf(
-    "expected '%s'.\nNAME is a required argument for the {{.VariableName}} command",
-    {{.VariableName}}UsageStr,
+        "expected '%s'.\nNAME is a required argument for the {{.VariableName}} command",
+        {{.VariableName}}UsageStr,
+    )
 )
 
 // {{.StructName}}Options is an option struct to support '{{.VariableName}}' sub command.
