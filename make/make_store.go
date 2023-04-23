@@ -43,6 +43,8 @@ func NewCmdStore() *cobra.Command {
 		},
 	}
 
+	cmd.PersistentFlags().StringVarP(&o.ModelName, "model", "m", "", "Model name.")
+
 	return cmd
 }
 
