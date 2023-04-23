@@ -90,54 +90,59 @@ func (o *CrudOptions) Run(args []string) error {
 	fmt.Println("Generating files...")
 
 	// 1.Model
+	o.Name = "model"
 	o.MakeOptionsFromPath(config.Cfg.Directory.Model, args[0])
-	err := cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o)
+	err := cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
 	if err != nil {
 		fmt.Println("Generating model failed, err:", err)
 	}
 
 	// 2.Store
+	o.Name = "store"
 	o.Directory = ""
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Store, args[0])
 	if o.ModelName == "" {
 		o.ModelName = o.StructName
 	}
-	cmdTemplateBytes, _ := tplFS.ReadFile("tpl/store.tpl")
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o)
+	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
+	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating store failed, err:", err)
 	}
 
 	// 3.Request
+	o.Name = "request"
 	o.Directory = ""
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
-	cmdTemplateBytes, _ = tplFS.ReadFile("tpl/request.tpl")
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o)
+	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
+	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating request failed, err:", err)
 	}
 
 	// 4.Biz
+	o.Name = "biz"
 	o.Directory = ""
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Biz, args[0])
-	cmdTemplateBytes, _ = tplFS.ReadFile("tpl/biz.tpl")
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o)
+	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
+	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating biz failed, err:", err)
 	}
 
 	// 5.Controller
+	o.Name = "controller"
 	o.Directory = ""
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Controller, args[0])
 	if o.ModelName == "" {
 		o.ModelName = o.StructName
 	}
-	cmdTemplateBytes, _ = tplFS.ReadFile("tpl/controller.tpl")
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o)
+	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
+	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating controller failed, err:", err)
 	}

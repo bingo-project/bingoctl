@@ -68,6 +68,7 @@ func (o *ControllerOptions) Validate(cmd *cobra.Command, args []string) error {
 
 	o.MakeOptionsFromPath(config.Cfg.Directory.Controller, args[0])
 
+	o.Name = "controller"
 	o.RootPackage = config.Cfg.RootPackage
 	o.BizPath = config.Cfg.Directory.Biz
 	o.StorePath = config.Cfg.Directory.Store
@@ -83,7 +84,7 @@ func (o *ControllerOptions) Validate(cmd *cobra.Command, args []string) error {
 // Complete completes all the required options.
 func (o *ControllerOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile("tpl/controller.tpl")
+	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	cmdTemplate = string(cmdTemplateBytes)
 
 	return nil
@@ -91,5 +92,5 @@ func (o *ControllerOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ControllerOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o)
+	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
 }

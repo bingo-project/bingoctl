@@ -8,14 +8,14 @@ import (
 )
 
 // GenerateGoCode generate go source file.
-func GenerateGoCode(filePath, codeTemplate string, o any) error {
+func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 	directory := GetDirectoryFromPath(filePath)
 	err := os.MkdirAll(directory, 0755)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("cmd").Parse(codeTemplate)
+	tmpl, err := template.New(name).Parse(codeTemplate)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func GenerateGoCode(filePath, codeTemplate string, o any) error {
 		return err
 	}
 
-	fmt.Printf("Code generated: %s\n", filePath)
+	fmt.Printf("generated %s: %s\n", name, filePath)
 
 	return nil
 }

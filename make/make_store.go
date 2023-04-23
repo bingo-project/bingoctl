@@ -1,6 +1,8 @@
 package make
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/config"
@@ -56,6 +58,7 @@ func (o *StoreOptions) Validate(cmd *cobra.Command, args []string) error {
 
 	o.MakeOptionsFromPath(config.Cfg.Directory.Store, args[0])
 
+	o.Name = "store"
 	o.RootPackage = config.Cfg.RootPackage
 	o.ModelPath = config.Cfg.Directory.Model
 	if o.ModelName == "" {
@@ -68,7 +71,7 @@ func (o *StoreOptions) Validate(cmd *cobra.Command, args []string) error {
 // Complete completes all the required options.
 func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile("tpl/store.tpl")
+	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	cmdTemplate = string(cmdTemplateBytes)
 
 	return nil
@@ -76,5 +79,5 @@ func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o)
+	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
 }

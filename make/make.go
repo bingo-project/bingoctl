@@ -17,6 +17,7 @@ var (
 )
 
 type Options struct {
+	Name               string
 	FilePath           string
 	Directory          string
 	PackageName        string

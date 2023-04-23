@@ -59,13 +59,15 @@ func (o *RequestOptions) Validate(cmd *cobra.Command, args []string) error {
 
 	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
 
+	o.Name = "request"
+
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *RequestOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile("tpl/request.tpl")
+	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	cmdTemplate = string(cmdTemplateBytes)
 
 	return nil
@@ -73,5 +75,5 @@ func (o *RequestOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RequestOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o)
+	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
 }
