@@ -3,7 +3,7 @@ version: v1
 root-package: your-pkg-name
 
 directory:
-  cmd: internal/goerctl/cmd
+  cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
   request: pkg/api/v1

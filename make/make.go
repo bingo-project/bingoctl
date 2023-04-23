@@ -13,6 +13,7 @@ import (
 
 var (
 	makeExample = "make cmd"
+	opt         = NewOptions()
 )
 
 type Options struct {
@@ -27,6 +28,11 @@ type Options struct {
 	TableName          string
 }
 
+// NewOptions returns an initialized CmdOptions instance.
+func NewOptions() *Options {
+	return &Options{}
+}
+
 // NewCmdMake returns new initialized instance of 'new' sub command.
 func NewCmdMake() *cobra.Command {
 	cmd := &cobra.Command{
@@ -37,7 +43,11 @@ func NewCmdMake() *cobra.Command {
 		Run:                   util.DefaultSubCommandRun(),
 	}
 
+	cmd.PersistentFlags().StringVarP(&opt.Directory, "directory", "d", "", "Where to create the file.")
+	cmd.PersistentFlags().StringVarP(&opt.PackageName, "package", "p", "", "Name of the package.")
+
 	// Add subcommands
+	cmd.AddCommand(NewCmdCMD())
 
 	return cmd
 }
