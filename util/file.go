@@ -31,7 +31,7 @@ func GenerateGoCode(filePath, codeTemplate string, o any) error {
 		return err
 	}
 
-	fmt.Printf("Command file generated: %s\n", filePath)
+	fmt.Printf("Code generated: %s\n", filePath)
 
 	return nil
 }
