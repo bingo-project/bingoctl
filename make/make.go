@@ -48,6 +48,7 @@ func NewCmdMake() *cobra.Command {
 
 	// Add subcommands
 	cmd.AddCommand(NewCmdCMD())
+	cmd.AddCommand(NewCmdModel())
 
 	return cmd
 }
