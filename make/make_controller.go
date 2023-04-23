@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	controllerUsageStr = "controller"
+	controllerUsageStr = "controller NAME"
 )
 
 var (
@@ -46,7 +46,7 @@ func NewCmdController() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   controllerUsageStr,
 		DisableFlagsInUseLine: true,
-		Short:                 "A brief description of your command",
+		Short:                 "Generate controller code",
 		TraverseChildren:      true,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Validate(cmd, args))

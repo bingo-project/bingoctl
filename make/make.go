@@ -55,6 +55,7 @@ func NewCmdMake() *cobra.Command {
 	cmd.AddCommand(NewCmdBiz())
 	cmd.AddCommand(NewCmdController())
 	cmd.AddCommand(NewCmdCrud())
+	cmd.AddCommand(NewCmdMiddleware())
 
 	return cmd
 }

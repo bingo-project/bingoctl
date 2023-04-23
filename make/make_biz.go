@@ -45,7 +45,7 @@ func NewCmdBiz() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   bizUsageStr,
 		DisableFlagsInUseLine: true,
-		Short:                 "A brief description of your command",
+		Short:                 "Generate biz code",
 		TraverseChildren:      true,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Validate(cmd, args))
