@@ -1,13 +1,21 @@
 package config
 
+import (
+	"gorm.io/gorm"
+
+	"github.com/bingo-project/bingoctl/pkg/db"
+)
+
 var (
 	Cfg *Config
+	DB  *gorm.DB
 )
 
 type Config struct {
-	Version     string `mapstructure:"version" json:"version" yaml:"version"`
-	RootPackage string `mapstructure:"root-package" json:"root_package" yaml:"root-package"`
-	Directory   Directory
+	Version      string `mapstructure:"version" json:"version" yaml:"version"`
+	RootPackage  string `mapstructure:"root-package" json:"root_package" yaml:"root-package"`
+	Directory    Directory
+	MysqlOptions *db.MySQLOptions `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 }
 
 type Directory struct {

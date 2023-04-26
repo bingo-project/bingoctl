@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/cmd/create"
+	"github.com/bingo-project/bingoctl/cmd/gen"
 	makecmd "github.com/bingo-project/bingoctl/cmd/make"
 	"github.com/bingo-project/bingoctl/config"
 )
@@ -34,6 +35,7 @@ func NewBingoCtlCommand() *cobra.Command {
 	// Add commands
 	cmds.AddCommand(makecmd.NewCmdMake())
 	cmds.AddCommand(create.NewCmdCreate())
+	cmds.AddCommand(gen.NewCmdGen())
 
 	return cmds
 }
