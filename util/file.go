@@ -17,13 +17,21 @@ func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 		return nil
 	}
 
+	// Log
+	fmt.Printf(" - Generating: ")
+	console.Info(filePath)
+
 	directory := GetDirectoryFromPath(filePath)
 	err := os.MkdirAll(directory, 0755)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New(name).Parse(codeTemplate)
+	tmpl := template.New(name)
+	if name == "init" {
+		tmpl.Delims("{[", "]}")
+	}
+	tmpl, err = tmpl.Parse(codeTemplate)
 	if err != nil {
 		return err
 	}
@@ -38,8 +46,6 @@ func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("generated %s: %s\n", name, filePath)
 
 	return nil
 }

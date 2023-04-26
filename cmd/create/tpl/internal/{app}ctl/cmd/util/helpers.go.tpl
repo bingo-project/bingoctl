@@ -3,13 +3,15 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
-	"runtime"
 	"strings"
 
+	"github.com/marmotedu/errors"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+
+	"{[.RootPackage]}/internal/pkg/log"
 )
 
 const (
@@ -51,6 +53,11 @@ func CheckErr(err error) {
 // checkErr formats a given error as a string and calls the passed handleErr
 // func with that string and an exit code.
 func checkErr(err error, handleErr func(string, int)) {
+	// unwrap aggregates of 1
+	if agg, ok := err.(errors.Aggregate); ok && len(agg.Errors()) == 1 {
+		err = agg.Errors()[0]
+	}
+
 	if err == nil {
 		return
 	}
@@ -59,15 +66,19 @@ func checkErr(err error, handleErr func(string, int)) {
 	case err == ErrExit:
 		handleErr("", DefaultErrorExitCode)
 	default:
-		msg, ok := StandardErrorMessage(err)
-		if !ok {
-			msg = err.Error()
-			if !strings.HasPrefix(msg, "error: ") {
-				msg = fmt.Sprintf("error: %s", msg)
+		switch err := err.(type) {
+		case errors.Aggregate:
+			handleErr(MultipleErrors(``, err.Errors()), DefaultErrorExitCode)
+		default: // for any other error type
+			msg, ok := StandardErrorMessage(err)
+			if !ok {
+				msg = err.Error()
+				if !strings.HasPrefix(msg, "error: ") {
+					msg = fmt.Sprintf("error: %s", msg)
+				}
 			}
+			handleErr(msg, DefaultErrorExitCode)
 		}
-
-		handleErr(msg, DefaultErrorExitCode)
 	}
 }
 
@@ -78,10 +89,10 @@ func checkErr(err error, handleErr func(string, int)) {
 // commands.
 func StandardErrorMessage(err error) (string, bool) {
 	if debugErr, ok := err.(debugError); ok {
-		log.Println(debugErr.DebugError())
+		log.Infow(debugErr.DebugError())
 	}
 	if t, ok := err.(*url.Error); ok {
-		log.Printf("Connection error: %s %s: %v", t.Op, t.URL, t.Err)
+		log.Infow("Connection error: %s %s: %v", t.Op, t.URL, t.Err)
 		if strings.Contains(t.Err.Error(), "connection refused") {
 			host := t.URL
 			if server, err := url.Parse(t.URL); err == nil {
@@ -117,6 +128,22 @@ func MultipleErrors(prefix string, errs []error) string {
 // MultilineError returns a string representing an error that splits sub errors into their own
 // lines. The returned string will end with a newline.
 func MultilineError(prefix string, err error) string {
+	if agg, ok := err.(errors.Aggregate); ok {
+		errs := errors.Flatten(agg).Errors()
+		buf := &bytes.Buffer{}
+		switch len(errs) {
+		case 0:
+			return fmt.Sprintf("%s%v\n", prefix, err)
+		case 1:
+			return fmt.Sprintf("%s%v\n", prefix, messageForError(errs[0]))
+		default:
+			fmt.Fprintln(buf, prefix)
+			for _, err := range errs {
+				fmt.Fprintf(buf, "* %v\n", messageForError(err))
+			}
+			return buf.String()
+		}
+	}
 	return fmt.Sprintf("%s%s\n", prefix, err)
 }
 
@@ -146,21 +173,18 @@ func RequireNoArguments(c *cobra.Command, args []string) {
 	}
 }
 
-func GetGoVersion() string {
-	arr := strings.Split(runtime.Version()[2:], ".")
+func TableWriterDefaultConfig(table *tablewriter.Table) *tablewriter.Table {
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("  ") // pad with two space
+	table.SetNoWhiteSpace(true)
 
-	return arr[0] + "." + arr[1]
-}
-
-func PathExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-
-	return false, err
+	return table
 }
