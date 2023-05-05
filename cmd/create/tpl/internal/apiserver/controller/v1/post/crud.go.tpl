@@ -22,7 +22,7 @@ import (
 // @Success	   200		{object}	v1.ListPostResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts [GET]
+// @Router    /v1/posts [GET].
 func (ctrl *PostController) List(c *gin.Context) {
 	log.C(c).Infow("List post function called")
 
@@ -54,7 +54,7 @@ func (ctrl *PostController) List(c *gin.Context) {
 // @Success	   200		{object}	v1.GetPostResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts [POST]
+// @Router    /v1/posts [POST].
 func (ctrl *PostController) Create(c *gin.Context) {
 	log.C(c).Infow("Create post function called")
 
@@ -92,7 +92,7 @@ func (ctrl *PostController) Create(c *gin.Context) {
 // @Success	   200		{object}	v1.ListPostResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts/{postID} [GET]
+// @Router    /v1/posts/{postID} [GET].
 func (ctrl *PostController) Get(c *gin.Context) {
 	log.C(c).Infow("Get post function called")
 
@@ -118,7 +118,7 @@ func (ctrl *PostController) Get(c *gin.Context) {
 // @Success	   200		{object}	nil
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts/{postID} [PUT]
+// @Router    /v1/posts/{postID} [PUT].
 func (ctrl *PostController) Update(c *gin.Context) {
 	log.C(c).Infow("Update post function called")
 
@@ -156,7 +156,7 @@ func (ctrl *PostController) Update(c *gin.Context) {
 // @Success	   200		{object}	nil
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts/{postID} [DELETE]
+// @Router    /v1/posts/{postID} [DELETE].
 func (ctrl *PostController) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete post function called")
 
@@ -180,7 +180,7 @@ func (ctrl *PostController) Delete(c *gin.Context) {
 // @Success	   200		{object}	nil
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/posts/{postID} [DELETE]
+// @Router    /v1/posts/{postID} [DELETE].
 func (ctrl *PostController) DeleteCollection(c *gin.Context) {
 	log.C(c).Infow("Batch delete post function called")
 

@@ -21,7 +21,7 @@ import (
 // @Success	   200		{object}	v1.ListUserResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/users [GET]
+// @Router    /v1/users [GET].
 func (ctrl *UserController) List(c *gin.Context) {
 	log.C(c).Infow("List user function called")
 
@@ -53,7 +53,7 @@ func (ctrl *UserController) List(c *gin.Context) {
 // @Success	   200		{object}	v1.GetUserResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/users [POST]
+// @Router    /v1/users [POST].
 func (ctrl *UserController) Create(c *gin.Context) {
 	log.C(c).Infow("Create user function called")
 
@@ -99,7 +99,7 @@ func (ctrl *UserController) Create(c *gin.Context) {
 // @Success	   200		{object}	v1.ListUserResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/users/{name} [GET]
+// @Router    /v1/users/{name} [GET].
 func (ctrl *UserController) Get(c *gin.Context) {
 	log.C(c).Infow("Get user function called")
 
@@ -125,7 +125,7 @@ func (ctrl *UserController) Get(c *gin.Context) {
 // @Success	   200		{object}	nil
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/users/{name} [PUT]
+// @Router    /v1/users/{name} [PUT].
 func (ctrl *UserController) Update(c *gin.Context) {
 	log.C(c).Infow("Update user function called")
 
@@ -162,7 +162,7 @@ func (ctrl *UserController) Update(c *gin.Context) {
 // @Success	   200		{object}	nil
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /v1/users/{name} [DELETE]
+// @Router    /v1/users/{name} [DELETE].
 func (ctrl *UserController) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete user function called")
 

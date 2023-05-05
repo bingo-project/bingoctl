@@ -4,7 +4,6 @@ package log
 import (
 	"context"
 	"sync"
-	"time"
 
 	"github.com/goer-project/goer-core/logger"
 	"go.uber.org/zap"

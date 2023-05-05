@@ -24,14 +24,13 @@ func NewCommonController(ds store.IStore, a *auth.Authz) *CommonController {
 
 // Healthz
 // @Summary    Heath check
-// @Security   Bearer
 // @Tags       Common
 // @Accept     application/json
 // @Produce    json
 // @Success	   200		{object}	v1.HealthzResponse
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
-// @Router    /healthz  [GET]
+// @Router    /healthz  [GET].
 func (ctrl *CommonController) Healthz(c *gin.Context) {
 	log.C(c).Infow("Healthz function called")
 
