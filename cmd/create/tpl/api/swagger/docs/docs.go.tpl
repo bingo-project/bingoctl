@@ -16,6 +16,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/healthz": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Heath check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.HealthzResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/core.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/core.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/login": {
             "post": {
                 "security": [
@@ -165,7 +199,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/posts/{name}": {
+        "/v1/posts/{postID}": {
             "get": {
                 "security": [
                     {
@@ -714,6 +748,14 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.HealthzResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "v1.ListPostResponse": {
             "type": "object",
             "properties": {
@@ -731,14 +773,14 @@ const docTemplate = `{
         "v1.ListUserResponse": {
             "type": "object",
             "properties": {
-                "totalCount": {
-                    "type": "integer"
-                },
-                "users": {
+                "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.UserInfo"
                     }
+                },
+                "totalCount": {
+                    "type": "integer"
                 }
             }
         },

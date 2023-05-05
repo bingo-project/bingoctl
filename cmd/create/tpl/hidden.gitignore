@@ -83,5 +83,6 @@ Temporary Items
 # Output files
 _output
 
-# Air - Hot reload
-hidden.air.toml
+# Tools
+.air.toml
+hidden.bingoctl.yaml
