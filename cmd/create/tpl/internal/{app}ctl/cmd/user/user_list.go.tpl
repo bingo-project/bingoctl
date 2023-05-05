@@ -94,7 +94,7 @@ func (o *ListOptions) Run(args []string) error {
 	}
 
 	data := make([][]string, 0, 1)
-	for _, user := range resp.Users {
+	for _, user := range resp.Data {
 		data = append(data, []string{
 			user.Username,
 			user.Nickname,

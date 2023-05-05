@@ -86,7 +86,7 @@ func (b *postBiz) List(ctx context.Context, username string, offset, limit int) 
 		posts = append(posts, &post)
 	}
 
-	return &v1.ListPostResponse{TotalCount: count, Posts: posts}, nil
+	return &v1.ListPostResponse{TotalCount: count, Data: posts}, nil
 }
 
 // Update is the implementation of the `Update` method in PostBiz interface.

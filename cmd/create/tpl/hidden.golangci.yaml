@@ -50,12 +50,12 @@ run:
 
   # If set we pass it to "go list -mod={option}". From "go help modules":
   # If invoked with -mod=readonly, the go command is disallowed from the implicit
-  # automatic updating of go.mod.tpl described above. Instead, it fails when any changes
-  # to go.mod.tpl are needed. This setting is most useful to check that go.mod.tpl does
+  # automatic updating of go.mod described above. Instead, it fails when any changes
+  # to go.mod are needed. This setting is most useful to check that go.mod does
   # not need updates, such as in a continuous integration and testing system.
   # If invoked with -mod=vendor, the go command assumes that the vendor
   # directory holds the correct copies of dependencies and ignores
-  # the dependency descriptions in go.mod.tpl.
+  # the dependency descriptions in go.mod.
   #
   # Allowed values: readonly|vendor|mod
   # By default, it isn't set.
@@ -67,7 +67,7 @@ run:
 
   # Define the Go version limit.
   # Mainly related to generics support since go1.18.
-  # Default: use Go version from the go.mod.tpl file, fallback on the env var `GOVERSION`, fallback on 1.18
+  # Default: use Go version from the go.mod file, fallback on the env var `GOVERSION`, fallback on 1.18
   # go: '1.19'
 
 

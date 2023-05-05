@@ -35,7 +35,7 @@ type ListPostRequest struct {
 // ListPostResponse 指定了 `GET /v1/posts` 接口的返回参数.
 type ListPostResponse struct {
 	TotalCount int64       `json:"totalCount"`
-	Posts      []*PostInfo `json:"posts"`
+	Data       []*PostInfo `json:"data"`
 }
 
 // UpdatePostRequest 指定了 `PUT /v1/posts` 接口的请求参数.

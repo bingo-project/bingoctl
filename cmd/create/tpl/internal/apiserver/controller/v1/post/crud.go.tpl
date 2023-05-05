@@ -12,6 +12,17 @@ import (
 )
 
 // List 返回博客列表.
+//
+// @Summary    List posts
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      request	 query	    v1.ListPostRequest	 true  "Param"
+// @Success	   200		{object}	v1.ListPostResponse
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts [GET]
 func (ctrl *PostController) List(c *gin.Context) {
 	log.C(c).Infow("List post function called")
 
@@ -33,6 +44,17 @@ func (ctrl *PostController) List(c *gin.Context) {
 }
 
 // Create 创建一条博客.
+//
+// @Summary    Create a post
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      request	 body	    v1.CreatePostRequest	 true  "Param"
+// @Success	   200		{object}	v1.GetPostResponse
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts [POST]
 func (ctrl *PostController) Create(c *gin.Context) {
 	log.C(c).Infow("Create post function called")
 
@@ -60,6 +82,17 @@ func (ctrl *PostController) Create(c *gin.Context) {
 }
 
 // Get 获取指定的博客.
+//
+// @Summary    Get post info
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      postID	  path	    string          	 true  "postID"
+// @Success	   200		{object}	v1.ListPostResponse
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts/{postID} [GET]
 func (ctrl *PostController) Get(c *gin.Context) {
 	log.C(c).Infow("Get post function called")
 
@@ -74,6 +107,18 @@ func (ctrl *PostController) Get(c *gin.Context) {
 }
 
 // Update 更新博客.
+//
+// @Summary    Update post info
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      postID	  path	    string          	  true  "postID"
+// @Param      request	 query	    v1.UpdatePostRequest  true  "Param"
+// @Success	   200		{object}	nil
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts/{postID} [PUT]
 func (ctrl *PostController) Update(c *gin.Context) {
 	log.C(c).Infow("Update post function called")
 
@@ -101,6 +146,17 @@ func (ctrl *PostController) Update(c *gin.Context) {
 }
 
 // Delete 删除指定的博客.
+//
+// @Summary    Delete a post
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      postID	  path	    string          	  true  "postID"
+// @Success	   200		{object}	nil
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts/{postID} [DELETE]
 func (ctrl *PostController) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete post function called")
 
@@ -114,6 +170,17 @@ func (ctrl *PostController) Delete(c *gin.Context) {
 }
 
 // DeleteCollection 批量删除博客.
+//
+// @Summary    Batch delete posts
+// @Security   Bearer
+// @Tags       Post
+// @Accept     application/json
+// @Produce    json
+// @Param      postID	  path	    array          	  true  "postID"
+// @Success	   200		{object}	nil
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/posts/{postID} [DELETE]
 func (ctrl *PostController) DeleteCollection(c *gin.Context) {
 	log.C(c).Infow("Batch delete post function called")
 

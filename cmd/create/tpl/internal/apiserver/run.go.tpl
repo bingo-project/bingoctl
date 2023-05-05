@@ -28,10 +28,10 @@ func run() error {
 	gin.SetMode(config.Cfg.Server.Mode)
 
 	// 创建 Gin 引擎
-	g := gin.New()
+	g := gin.Default()
 
 	// gin.Recovery() 中间件，用来捕获任何 panic，并恢复
-	mws := []gin.HandlerFunc{gin.Recovery(), middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
+	mws := []gin.HandlerFunc{middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
 
 	g.Use(mws...)
 

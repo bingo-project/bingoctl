@@ -40,10 +40,11 @@ jwt:
 
 log:
   level: debug # 日志级别，优先级从低到高依次为：debug, info, warn, error, dpanic, panic, fatal。
+  days: 7 # 日志文件保留天数
   format: console # 支持的日志输出格式，目前支持console和json两种。console其实就是text格式。
-  output-paths: [ stdout ] # 支持输出到多个输出，逗号分开。支持输出到标准输出（stdout）和文件。
-  disable-caller: false # 是否开启 caller，如果开启会在日志中显示调用日志所在的文件、函数和行号
-  disable-stacktrace: false # 是否再panic及以上级别禁止打印堆栈信息
+  max-size: 100 # 日志文件大小限制（M）
+  compress: true # 是否使用 gz 压缩历史日志文件
+  path: _output/logs/apiserver.log # 日志文件位置
 
 feature:
   api-doc: true # 是否开启 swagger api docs
