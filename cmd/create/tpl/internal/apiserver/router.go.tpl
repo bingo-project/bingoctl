@@ -20,11 +20,8 @@ func installRouters(g *gin.Engine) error {
 	})
 
 	// 注册 /healthz handler.
-	g.GET("/healthz", func(c *gin.Context) {
-		log.C(c).Infow("Healthz function called")
-
-		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
-	})
+	commonController := common.NewCommonController()
+	g.GET("/healthz", commonController.Healthz)
 
 	// Authz
 	authz, err := auth.NewAuthz(store.S.DB())
