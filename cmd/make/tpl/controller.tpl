@@ -25,6 +25,19 @@ func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName
 	return &{{.StructName}}Controller{a: a, b: biz.NewBiz(ds)}
 }
 
+
+// List
+//
+// @Summary    List {{.VariableNamePlural}}
+// @Security   Bearer
+// @Tags       {{.StructName}}
+// @Accept     application/json
+// @Produce    json
+// @Param      request	 query	    v1.List{{.StructName}}Request	 true  "Param"
+// @Success	   200		{object}	v1.List{{.StructName}}Response
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/{{.VariableNamePlural}} [GET]
 func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 	log.C(c).Infow("List {{.VariableName}} function called")
 
@@ -45,6 +58,19 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 	core.WriteResponse(c, nil, resp)
 }
 
+
+// Create
+//
+// @Summary    Create a {{.VariableName}}
+// @Security   Bearer
+// @Tags       {{.StructName}}
+// @Accept     application/json
+// @Produce    json
+// @Param      request	 body	    v1.Create{{.StructName}}Request	 true  "Param"
+// @Success	   200		{object}	v1.Get{{.StructName}}Response
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/{{.VariableNamePlural}} [POST]
 func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 	log.C(c).Infow("Create {{.VariableName}} function called")
 
@@ -72,6 +98,18 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
+// Get 获取一个用户的详细信息.
+//
+// @Summary    Get {{.VariableName}} info
+// @Security   Bearer
+// @Tags       {{.StructName}}
+// @Accept     application/json
+// @Produce    json
+// @Param      id	     path	    string            		 true  "ID"
+// @Success	   200		{object}	v1.List{{.StructName}}Response
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/{{.VariableNamePlural}}/{id} [GET]
 func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 	log.C(c).Infow("Get {{.VariableName}} function called")
 
@@ -86,6 +124,19 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 	core.WriteResponse(c, nil, {{.VariableName}})
 }
 
+// Update 更新用户信息.
+//
+// @Summary    Update {{.VariableName}} info
+// @Security   Bearer
+// @Tags       {{.StructName}}
+// @Accept     application/json
+// @Produce    json
+// @Param      id	     path	    string            		 true  "ID"
+// @Param      request	 query	    v1.Update{{.StructName}}Request	 true  "Param"
+// @Success	   200		{object}	nil
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/{{.VariableNamePlural}}/{id} [PUT]
 func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	log.C(c).Infow("Update {{.VariableName}} function called")
 
@@ -112,6 +163,18 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
+// Delete 删除一个用户.
+//
+// @Summary    Delete a {{.VariableName}}
+// @Security   Bearer
+// @Tags       {{.StructName}}
+// @Accept     application/json
+// @Produce    json
+// @Param      id	    path	    string            true  "ID"
+// @Success	   200		{object}	nil
+// @Failure	   400		{object}	core.ErrResponse
+// @Failure	   500		{object}	core.ErrResponse
+// @Router    /v1/{{.VariableNamePlural}}/{id} [DELETE]
 func (ctrl *{{.StructName}}Controller) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete {{.VariableName}} function called")
 
