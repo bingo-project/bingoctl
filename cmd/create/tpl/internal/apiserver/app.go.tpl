@@ -4,7 +4,7 @@ package apiserver
 import (
 	"fmt"
 
-	"github.com/bingo-project/component-base/version"
+	"github.com/bingo-project/component-base/version/verflag"
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/config"

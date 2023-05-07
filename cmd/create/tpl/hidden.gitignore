@@ -85,4 +85,4 @@ _output
 
 # Tools
 .air.toml
-hidden.bingoctl.yaml
+.bingoctl.yaml

@@ -3,12 +3,9 @@ package common
 import (
 	"github.com/gin-gonic/gin"
 
-	"{[.RootPackage]}/internal/apiserver/biz"
-	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/core"
 	"{[.RootPackage]}/internal/pkg/log"
 	v1 "{[.RootPackage]}/pkg/api/{[.AppName]}/v1"
-	"{[.RootPackage]}/pkg/auth"
 )
 
 // CommonController 是 common 模块在 Controller 层的实现，用来处理用户模块的请求.

@@ -3,12 +3,12 @@ package apiserver
 import (
 	"github.com/gin-gonic/gin"
 
+	"{[.RootPackage]}/internal/apiserver/controller/v1/common"
 	"{[.RootPackage]}/internal/apiserver/controller/v1/post"
 	"{[.RootPackage]}/internal/apiserver/controller/v1/user"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/core"
 	"{[.RootPackage]}/internal/pkg/errno"
-	"{[.RootPackage]}/internal/pkg/log"
 	"{[.RootPackage]}/internal/pkg/middleware"
 	"{[.RootPackage]}/pkg/auth"
 )
