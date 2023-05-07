@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"{[.RootPackage]}/pkg/version"
-
+	"github.com/bingo-project/component-base/cli/genericclioptions"
+	cmdutil "github.com/bingo-project/component-base/cli/util"
+	"github.com/bingo-project/component-base/version"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-
-	cmdutil "{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/util"
-	"{[.RootPackage]}/pkg/cli/genericclioptions"
 )
 
 type Version struct {

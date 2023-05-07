@@ -7,7 +7,7 @@ import (
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/core"
 	"{[.RootPackage]}/internal/pkg/log"
-	v1 "{[.RootPackage]}/pkg/api/goer/v1"
+	v1 "{[.RootPackage]}/pkg/api/{[.AppName]}/v1"
 	"{[.RootPackage]}/pkg/auth"
 )
 

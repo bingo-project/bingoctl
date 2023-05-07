@@ -4,11 +4,11 @@ package apiserver
 import (
 	"fmt"
 
+	"github.com/bingo-project/component-base/version"
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/config"
 	"{[.RootPackage]}/internal/pkg/log"
-	"{[.RootPackage]}/pkg/version/verflag"
 )
 
 // NewAppCommand creates an App object with default parameters.

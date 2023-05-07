@@ -4,14 +4,14 @@ import (
 	"io"
 	"os"
 
+	"github.com/bingo-project/component-base/cli/genericclioptions"
+	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/user"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/version"
-	"{[.RootPackage]}/internal/{[.AppName]}ctl/util/templates"
 	"{[.RootPackage]}/internal/pkg/log"
-	"{[.RootPackage]}/pkg/cli/genericclioptions"
 )
 
 func NewDefault{[.AppNameCamel]}CtlCommand() *cobra.Command {

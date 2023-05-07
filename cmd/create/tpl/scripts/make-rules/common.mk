@@ -24,17 +24,11 @@ TMP_DIR := $(OUTPUT_DIR)/tmp
 $(shell mkdir -p $(TMP_DIR))
 endif
 
-# 定义包名
-ROOT_PACKAGE={[.RootPackage]}
-
 # Protobuf 文件存放路径
 APIROOT=$(ROOT_DIR)/pkg/proto
 
 # ==============================================================================
 # 定义版本相关变量
-
-## 指定应用使用的 version 包，会通过 `-ldflags -X` 向该包中指定的变量注入值
-VERSION_PACKAGE=$(ROOT_PACKAGE)/pkg/version
 
 # set the version number. you should not need to do this
 # for the majority of scenarios.

@@ -7,6 +7,16 @@
 all: format lint build
 
 # ==============================================================================
+# Build options
+
+# 定义包名
+ROOT_PACKAGE={[.RootPackage]}
+
+# 指定应用使用的 version 包，会通过 `-ldflags -X` 向该包中指定的变量注入值
+VERSION_PACKAGE=github.com/bingo-project/component-base/version
+
+
+# ==============================================================================
 # Includes
 
 # make sure include common.mk at the first include line
@@ -54,7 +64,7 @@ deps: ## 安装依赖，例如：生成需要的代码、安装需要的工具�
 
 ## build: Build source code for host platform.
 .PHONY: build
-build: go.tidy
+build:
 	@$(MAKE) go.build
 
 ## --------------------------------------

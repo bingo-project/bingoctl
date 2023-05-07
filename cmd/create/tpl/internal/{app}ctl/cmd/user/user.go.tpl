@@ -1,13 +1,11 @@
 package user
 
 import (
+	"github.com/bingo-project/component-base/cli/genericclioptions"
+	"github.com/bingo-project/component-base/cli/templates"
+	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-
-	"{[.RootPackage]}/internal/{[.AppName]}ctl/util/templates"
-	"{[.RootPackage]}/pkg/cli/genericclioptions"
-
-	cmdutil "{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/util"
 )
 
 var (
