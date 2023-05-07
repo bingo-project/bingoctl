@@ -96,8 +96,8 @@ Temporary Items
 # Editors
 .idea
 
-# Output
-bingoctl
+# Output files
+_output
 
 # Config file
 .bingoctl.yaml
