@@ -18,9 +18,8 @@ type Version struct {
 
 // Options is a struct to support version command.
 type Options struct {
-	ClientOnly bool
-	Short      bool
-	Output     string
+	Short  bool
+	Output string
 
 	genericclioptions.IOStreams
 }
@@ -46,12 +45,6 @@ func NewCmdVersion(ioStreams genericclioptions.IOStreams) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(
-		&o.ClientOnly,
-		"client",
-		o.ClientOnly,
-		"If true, shows client version only (no server required).",
-	)
 	cmd.Flags().BoolVar(&o.Short, "short", o.Short, "If true, print just the version number.")
 	cmd.Flags().StringVarP(&o.Output, "output", "o", o.Output, "One of 'yaml' or 'json'.")
 
@@ -59,10 +52,6 @@ func NewCmdVersion(ioStreams genericclioptions.IOStreams) *cobra.Command {
 }
 
 func (o *Options) Complete(cmd *cobra.Command, args []string) (err error) {
-	if o.ClientOnly {
-		return nil
-	}
-
 	return
 }
 

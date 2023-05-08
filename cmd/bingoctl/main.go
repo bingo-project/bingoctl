@@ -1,14 +1,12 @@
 package main
 
 import (
-	"os"
+	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd"
 )
 
 func main() {
 	command := cmd.NewDefaultBingoCtlCommand()
-	if err := command.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(command.Execute())
 }
