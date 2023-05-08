@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	// "github.com/bingo-project/component-base/cli/genericclioptions"
+	"github.com/bingo-project/component-base/cli/genericclioptions"
 	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
@@ -12,6 +12,7 @@ import (
 	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/create"
 	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/gen"
 	makecmd "github.com/bingo-project/bingoctl/internal/bingoctl/cmd/make"
+	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/version"
 )
 
 var (
@@ -33,7 +34,7 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	// Load config
 	cobra.OnInitialize(initConfig)
 
-	// ioStreams := genericclioptions.IOStreams{In: in, Out: out, ErrOut: err}
+	ioStreams := genericclioptions.IOStreams{In: in, Out: out, ErrOut: err}
 
 	groups := templates.CommandGroups{
 		{
@@ -58,7 +59,7 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	cmds.PersistentFlags().StringVarP(&CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
 
 	// Add commands
-	// cmds.AddCommand(version.NewCmdVersion(ioStreams))
+	cmds.AddCommand(version.NewCmdVersion(ioStreams))
 
 	return cmds
 }
