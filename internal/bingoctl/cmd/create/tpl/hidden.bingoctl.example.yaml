@@ -3,7 +3,7 @@ version: v1
 root-package: {[.RootPackage]}
 
 directory:
-  cmd: internal/bingoctl/cmd
+  cmd: internal/{[.AppName]}ctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
   request: pkg/api/{[.AppName]}/v1
