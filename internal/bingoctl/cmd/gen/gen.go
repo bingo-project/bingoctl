@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -14,13 +13,6 @@ import (
 
 const (
 	genUsageStr = "gen"
-)
-
-var (
-	genUsageErrStr = fmt.Sprintf(
-		"expected '%s'.\nNAME is a required argument for the gen command",
-		genUsageStr,
-	)
 )
 
 // GenOptions is an option struct to support 'gen' sub command.
@@ -50,7 +42,7 @@ func NewCmdGen() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&o.TableStr, "tables", "t", "", "data tables, seperated by ',', example:'user,post'.")
+	cmd.Flags().StringVarP(&o.TableStr, "tables", "t", "", "data tables, separated by ',', example:'user,post'.")
 
 	return cmd
 }

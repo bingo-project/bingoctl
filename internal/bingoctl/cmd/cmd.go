@@ -67,7 +67,6 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	config.LoadConfig(CfgFile, &config.Cfg)
-
 }
 
 func runHelp(cmd *cobra.Command, args []string) {

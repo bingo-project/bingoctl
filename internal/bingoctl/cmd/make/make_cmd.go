@@ -18,13 +18,11 @@ var (
 	//go:embed tpl
 	tplFS embed.FS
 
-	cmdExample = "make cmd test"
-
 	cmdUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nNAME is a required argument for the cmd command",
 		cmdUsageStr,
 	)
-	// tpl
+	// tpl.
 	cmdTemplate string
 )
 
@@ -53,7 +51,6 @@ func NewCmdCMD() *cobra.Command {
 		DisableFlagsInUseLine: true,
 		Short:                 "Generate cmd code",
 		Long:                  "Used to generate demo command source code.",
-		Example:               cmdExample,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Validate(cmd, args))
 			cmdutil.CheckErr(o.Complete(cmd, args))
