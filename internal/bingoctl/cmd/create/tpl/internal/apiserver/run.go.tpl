@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"{[.RootPackage]}/internal/apiserver/config"
+	"{[.RootPackage]}/internal/apiserver/router"
 	"{[.RootPackage]}/internal/pkg/known"
 	"{[.RootPackage]}/internal/pkg/middleware"
 	"{[.RootPackage]}/pkg/token"
@@ -37,12 +38,14 @@ func run() error {
 
 	// Swagger
 	if config.Cfg.Feature.ApiDoc {
-		MapSwagRoutes(g)
+		router.MapSwagRouters(g)
 	}
 
-	if err := installRouters(g); err != nil {
-		return err
-	}
+	// Common router
+	router.MapCommonRouters(g)
+
+	// Api
+	router.MapApiRouters(g)
 
 	// 创建并运行 HTTP 服务器
 	return startInsecureServer(g)

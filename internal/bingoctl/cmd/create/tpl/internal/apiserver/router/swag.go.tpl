@@ -1,4 +1,4 @@
-package apiserver
+package router
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,7 +8,7 @@ import (
 	"{[.RootPackage]}/api/swagger/docs"
 )
 
-// MapSwagRoutes
+// MapSwagRouters
 //
 //	@title						API Docs
 //	@version					1.0
@@ -16,7 +16,7 @@ import (
 //	@securityDefinitions.apikey	Bearer
 //	@in							header
 //	@name						Authorization
-func MapSwagRoutes(r *gin.Engine) {
+func MapSwagRouters(r *gin.Engine) {
 	// swagger info
 	docs.SwaggerInfo.Title = "API Docs"
 	docs.SwaggerInfo.Version = "1.0"

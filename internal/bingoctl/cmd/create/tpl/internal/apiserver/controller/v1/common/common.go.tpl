@@ -8,8 +8,7 @@ import (
 	v1 "{[.RootPackage]}/pkg/api/{[.AppName]}/v1"
 )
 
-// CommonController 是 common 模块在 Controller 层的实现，用来处理用户模块的请求.
-type CommonController struct {}
+type CommonController struct{}
 
 // NewCommonController 创建一个 common controller.
 func NewCommonController() *CommonController {
