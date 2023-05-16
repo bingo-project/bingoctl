@@ -1,14 +1,12 @@
 package main
 
 import (
-	"os"
+	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd"
 )
 
 func main() {
 	command := cmd.NewDefault{[.AppNameCamel]}CtlCommand()
-	if err := command.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(command.Execute())
 }

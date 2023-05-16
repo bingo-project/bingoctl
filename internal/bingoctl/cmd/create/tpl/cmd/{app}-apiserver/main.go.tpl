@@ -1,14 +1,12 @@
 package main
 
 import (
-	"os"
+	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver"
 )
 
 func main() {
 	command := apiserver.NewAppCommand()
-	if err := command.Execute(); err != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(command.Execute())
 }
