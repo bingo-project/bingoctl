@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"{{.RootPackage}}/{{.ModelPath}}"
+	"{{.RootPackage}}/internal/pkg/util/helper"
 )
 
 type {{.StructName}}Store interface {
@@ -24,7 +25,7 @@ type {{.VariableNamePlural}} struct {
 // 确保 {{.VariableNamePlural}} 实现了 {{.StructName}}Store 接口.
 var _ {{.StructName}}Store = (*{{.VariableNamePlural}})(nil)
 
-func new{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
+func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 	return &{{.VariableNamePlural}}{db: db}
 }
 
@@ -43,7 +44,7 @@ func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} 
 }
 
 func (u *{{.VariableNamePlural}}) List(ctx context.Context, offset, limit int) (count int64, ret []*model.{{.StructName}}M, err error) {
-	err = u.db.Offset(offset).Limit(limit).Order("id desc").Find(&ret).
+	err = u.db.Offset(offset).Limit(helper.DefaultLimit(limit)).Order("id desc").Find(&ret).
 		Offset(-1).
 		Limit(-1).
 		Count(&count).

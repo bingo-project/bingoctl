@@ -160,7 +160,7 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 		return
 	}
 
-	core.WriteResponse(c, nil, nil)
+	core.WriteResponse(c, nil, resp)
 }
 
 // Delete

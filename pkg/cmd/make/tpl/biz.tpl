@@ -55,15 +55,15 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, offset, limit int) (*v1
 	return &v1.List{{.StructName}}Response{TotalCount: count, Data: {{.VariableNamePlural}}}, nil
 }
 
-func (b *{{.VariableName}}Biz) Create(ctx context.Context, r *v1.Create{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
+func (b *{{.VariableName}}Biz) Create(ctx context.Context, request *v1.Create{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
 	var {{.VariableName}}M model.{{.StructName}}M
-	_ = copier.Copy(&{{.VariableName}}M, r)
+	_ = copier.Copy(&{{.VariableName}}M, request)
 
 	err := b.ds.{{.StructNamePlural}}().Create(ctx, &{{.VariableName}}M)
 	if err != nil {
 		// Check exists
 		if match, _ := regexp.MatchString("Duplicate entry '.*' for key", err.Error()); match {
-			return errno.Err{{.StructName}}AlreadyExist
+			return nil, errno.Err{{.StructName}}AlreadyExist
 		}
 
 		return nil, err
@@ -78,11 +78,7 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, r *v1.Create{{.Struct
 func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errno.Err{{.StructName}}NotFound
-		}
-
-		return nil, err
+		return nil, errno.Err{{.StructName}}NotFound
 	}
 
 	var resp v1.Get{{.StructName}}Response
@@ -91,14 +87,14 @@ func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.Stru
 	return &resp, nil
 }
 
-func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, {{.VariableName}} *v1.Update{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
+func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, request *v1.Update{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}M, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
-		return err
+		return nil, errno.Err{{.StructName}}NotFound
 	}
 
-	if {{.VariableName}}.Name != nil {
-		{{.VariableName}}M.Name = *{{.VariableName}}.Name
+	if request.Name != nil {
+		{{.VariableName}}M.Name = *request.Name
 	}
 
 	if err := b.ds.{{.StructNamePlural}}().Update(ctx, {{.VariableName}}M); err != nil {
@@ -106,7 +102,7 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, {{.VariableN
 	}
 
 	var resp v1.Get{{.StructName}}Response
-	_ = copier.Copy(&resp, {{.VariableName}})
+	_ = copier.Copy(&resp, request)
 
 	return &resp, nil
 }
