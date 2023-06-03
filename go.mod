@@ -1,9 +1,9 @@
 module github.com/bingo-project/bingoctl
 
-go 1.19
+go 1.20
 
 require (
-	github.com/bingo-project/component-base v0.1.1
+	github.com/bingo-project/component-base v0.1.2
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/goer-project/goer-utils v0.6.4

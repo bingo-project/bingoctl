@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gen"
 
-	"github.com/bingo-project/bingoctl/config"
+	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/db"
-	cmdutil "github.com/bingo-project/bingoctl/util"
+	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/util"
+	"github.com/bingo-project/bingoctl/pkg/util"
 )
 
 var (

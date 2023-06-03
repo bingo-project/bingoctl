@@ -11,7 +11,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/bingo-project/bingoctl/util"
+	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 const (

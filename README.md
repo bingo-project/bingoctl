@@ -4,12 +4,11 @@ Go CLI 工具
 
 功能规划
 
-| 进度   | 命令         | 说明                           |
-|------|------------|------------------------------|
-| -[x] | make 命令    | 生成 cmd, crud, middleware 等代码 |
-| -[ ] | create 命令  | 从零创建项目脚手架代                   |
-| -[ ] | migrate 命令 | 通过 struct 生成表                |
-| -[ ] | create 命令  | 通过 sql 生成 struct             |
+| 进度   | 命令        | 说明                           |
+|------|-----------|------------------------------|
+| -[x] | make 命令   | 生成 cmd, crud, middleware 等代码 |
+| -[x] | create 命令 | 从零创建项目脚手架代                   |
+| -[x] | gen 命令    | 通过 sql 生成 struct             |
 
 # Usage
 
@@ -17,6 +16,7 @@ Install
 
 ```bash
 go install github.com/bingo-project/bingoctl@latest
+
 ```
 
 在项目根目录下创建配置文件，`touch .bingoctl.yaml`, 并写入以下内容
@@ -32,16 +32,25 @@ directory:
   store: internal/apiserver/store
   request: pkg/api/v1
   biz: internal/apiserver/biz
-  controller: internal/apiserver/controller
+  controller: internal/apiserver/controller/v1
   middleware: internal/pkg/middleware
 ```
 
-查看命令
+## 查看命令
 
 ```bash
+bingoctl create -h
 bingoctl make -h
 bingoctl make [COMMAND] -h
 ```
+
+## Create
+
+```bash
+bingoctl create NAME
+```
+
+## Make
 
 生成 cmd 代码
 

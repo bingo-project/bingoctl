@@ -8,11 +8,11 @@ import (
 	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/config"
-	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/create"
-	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/gen"
-	makecmd "github.com/bingo-project/bingoctl/internal/bingoctl/cmd/make"
-	"github.com/bingo-project/bingoctl/internal/bingoctl/cmd/version"
+	"github.com/bingo-project/bingoctl/pkg/cmd/create"
+	"github.com/bingo-project/bingoctl/pkg/cmd/gen"
+	makecmd "github.com/bingo-project/bingoctl/pkg/cmd/make"
+	"github.com/bingo-project/bingoctl/pkg/cmd/version"
+	"github.com/bingo-project/bingoctl/pkg/config"
 )
 
 var (

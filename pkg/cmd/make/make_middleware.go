@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/config"
-	cmdutil "github.com/bingo-project/bingoctl/util"
+	"github.com/bingo-project/bingoctl/pkg/config"
+	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 const (
