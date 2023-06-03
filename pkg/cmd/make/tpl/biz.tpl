@@ -3,7 +3,7 @@ package {{.PackageName}}
 import (
 	"context"
 	"errors"
-	"regexp"`
+	"regexp"
 
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
