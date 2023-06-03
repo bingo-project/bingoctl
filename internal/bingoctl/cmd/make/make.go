@@ -1,6 +1,7 @@
 package make
 
 import (
+	"embed"
 	"path/filepath"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 )
 
 var (
+	//go:embed tpl
+	tplFS       embed.FS
 	makeExample = "make cmd"
 	opt         = NewOptions()
 )

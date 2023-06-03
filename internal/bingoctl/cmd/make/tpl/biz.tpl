@@ -3,6 +3,7 @@ package {{.PackageName}}
 import (
 	"context"
 	"errors"
+	"regexp"`
 
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
@@ -16,9 +17,9 @@ import (
 
 type {{.StructName}}Biz interface {
 	List(ctx context.Context, offset, limit int) (*v1.List{{.StructName}}Response, error)
-	Create(ctx context.Context, r *v1.Create{{.StructName}}Request) error
+	Create(ctx context.Context, r *v1.Create{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error)
 	Get(ctx context.Context, ID uint) (*v1.Get{{.StructName}}Response, error)
-	Update(ctx context.Context, ID uint, r *v1.Update{{.StructName}}Request) error
+	Update(ctx context.Context, ID uint, r *v1.Update{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error)
 	Delete(ctx context.Context, ID uint) error
 }
 
@@ -29,7 +30,7 @@ type {{.VariableName}}Biz struct {
 // 确保 {{.VariableName}}Biz 实现了 {{.StructName}}Biz 接口.
 var _ {{.StructName}}Biz = (*{{.VariableName}}Biz)(nil)
 
-func New(ds store.IStore) *{{.VariableName}}Biz {
+func New{{.StructName}}(ds store.IStore) *{{.VariableName}}Biz {
 	return &{{.VariableName}}Biz{ds: ds}
 }
 
@@ -54,23 +55,31 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, offset, limit int) (*v1
 	return &v1.List{{.StructName}}Response{TotalCount: count, Data: {{.VariableNamePlural}}}, nil
 }
 
-func (b *{{.VariableName}}Biz) Create(ctx context.Context, r *v1.Create{{.StructName}}Request) (err error) {
+func (b *{{.VariableName}}Biz) Create(ctx context.Context, r *v1.Create{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
 	var {{.VariableName}}M model.{{.StructName}}M
 	_ = copier.Copy(&{{.VariableName}}M, r)
 
-	err = b.ds.{{.StructNamePlural}}().Create(ctx, &{{.VariableName}}M)
-	if err == nil {
-		return
+	err := b.ds.{{.StructNamePlural}}().Create(ctx, &{{.VariableName}}M)
+	if err != nil {
+		// Check exists
+		if match, _ := regexp.MatchString("Duplicate entry '.*' for key", err.Error()); match {
+			return errno.Err{{.StructName}}AlreadyExist
+		}
+
+		return nil, err
 	}
 
-	return
+	var resp v1.Get{{.StructName}}Response
+	_ = copier.Copy(&resp, {{.VariableName}}M)
+
+	return &resp, nil
 }
 
 func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errno.ErrNotFound
+			return nil, errno.Err{{.StructName}}NotFound
 		}
 
 		return nil, err
@@ -82,7 +91,7 @@ func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.Stru
 	return &resp, nil
 }
 
-func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, {{.VariableName}} *v1.Update{{.StructName}}Request) error {
+func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, {{.VariableName}} *v1.Update{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}M, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
 		return err
@@ -93,10 +102,13 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, {{.VariableN
 	}
 
 	if err := b.ds.{{.StructNamePlural}}().Update(ctx, {{.VariableName}}M); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	var resp v1.Get{{.StructName}}Response
+	_ = copier.Copy(&resp, {{.VariableName}})
+
+	return &resp, nil
 }
 
 func (b *{{.VariableName}}Biz) Delete(ctx context.Context, ID uint) error {

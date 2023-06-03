@@ -5,9 +5,8 @@ import (
 	"errors"
 	"regexp"
 
-	"gorm.io/gorm"
-
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"

@@ -1,7 +1,6 @@
 package make
 
 import (
-	"embed"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -15,9 +14,6 @@ const (
 )
 
 var (
-	//go:embed tpl
-	tplFS embed.FS
-
 	cmdUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nNAME is a required argument for the cmd command",
 		cmdUsageStr,

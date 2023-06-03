@@ -25,7 +25,6 @@ func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName
 	return &{{.StructName}}Controller{a: a, b: biz.NewBiz(ds)}
 }
 
-
 // List
 //
 // @Summary    List {{.VariableNamePlural}}
@@ -58,7 +57,6 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 	core.WriteResponse(c, nil, resp)
 }
 
-
 // Create
 //
 // @Summary    Create a {{.VariableName}}
@@ -89,16 +87,17 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 	}
 
 	// Create {{.VariableName}}
-	if err := ctrl.b.{{.StructNamePlural}}().Create(c, &r); err != nil {
+	resp, err := ctrl.b.{{.StructNamePlural}}().Create(c, &r)
+	if err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, nil)
+	core.WriteResponse(c, nil, resp)
 }
 
-// Get 获取一个用户的详细信息.
+// Get
 //
 // @Summary    Get {{.VariableName}} info
 // @Security   Bearer
@@ -106,7 +105,7 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 // @Accept     application/json
 // @Produce    json
 // @Param      id	     path	    string            		 true  "ID"
-// @Success	   200		{object}	v1.List{{.StructName}}Response
+// @Success	   200		{object}	v1.Get{{.StructName}}Response
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [GET]
@@ -124,7 +123,7 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 	core.WriteResponse(c, nil, {{.VariableName}})
 }
 
-// Update 更新用户信息.
+// Update
 //
 // @Summary    Update {{.VariableName}} info
 // @Security   Bearer
@@ -132,8 +131,8 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 // @Accept     application/json
 // @Produce    json
 // @Param      id	     path	    string            		 true  "ID"
-// @Param      request	 query	    v1.Update{{.StructName}}Request	 true  "Param"
-// @Success	   200		{object}	nil
+// @Param      request	 body	    v1.Update{{.StructName}}Request	 true  "Param"
+// @Success	   200		{object}	v1.Get{{.StructName}}Response
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [PUT]
@@ -154,7 +153,8 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	}
 
 	ID := cast.ToUint(c.Param("id"))
-	if err := ctrl.b.{{.StructNamePlural}}().Update(c, ID, &r); err != nil {
+	resp, err := ctrl.b.{{.StructNamePlural}}().Update(c, ID, &r)
+	if err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return
@@ -163,7 +163,7 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
-// Delete 删除一个用户.
+// Delete
 //
 // @Summary    Delete a {{.VariableName}}
 // @Security   Bearer

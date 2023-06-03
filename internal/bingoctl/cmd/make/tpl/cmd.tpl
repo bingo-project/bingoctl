@@ -3,6 +3,7 @@ package {{.PackageName}}
 import (
     "fmt"
 
+    cmdutil "github.com/bingo-project/component-base/cli/util"
     "github.com/spf13/cobra"
 )
 

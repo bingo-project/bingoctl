@@ -10,7 +10,7 @@ import (
 	v1 "{[.RootPackage]}/pkg/api/{[.AppName]}/v1"
 )
 
-// List 返回用户列表，只有 root 用户才能获取用户列表.
+// List
 //
 // @Summary    List users
 // @Security   Bearer
@@ -42,7 +42,7 @@ func (ctrl *UserController) List(c *gin.Context) {
 	core.WriteResponse(c, nil, resp)
 }
 
-// Create 创建一个新的用户.
+// Create
 //
 // @Summary    Create a user
 // @Security   Bearer
@@ -88,7 +88,7 @@ func (ctrl *UserController) Create(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
-// Get 获取一个用户的详细信息.
+// Get
 //
 // @Summary    Get user info
 // @Security   Bearer
@@ -113,7 +113,7 @@ func (ctrl *UserController) Get(c *gin.Context) {
 	core.WriteResponse(c, nil, user)
 }
 
-// Update 更新用户信息.
+// Update
 //
 // @Summary    Update user info
 // @Security   Bearer
@@ -151,7 +151,7 @@ func (ctrl *UserController) Update(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
-// Delete 删除一个用户.
+// Delete
 //
 // @Summary    Delete a user
 // @Security   Bearer
