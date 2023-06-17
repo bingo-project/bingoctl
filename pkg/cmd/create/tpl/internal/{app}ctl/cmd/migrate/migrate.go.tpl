@@ -14,13 +14,6 @@ const (
 	migrateUsageStr = "migrate"
 )
 
-var (
-	migrateUsageErrStr = fmt.Sprintf(
-		"expected '%s'.\nNAME is a required argument for the migrate command",
-		migrateUsageStr,
-	)
-)
-
 // MigrateOptions is an option struct to support 'migrate' sub command.
 type MigrateOptions struct {
 	// Options
