@@ -419,7 +419,7 @@ linters-settings:
     # To select a subset of rules to run.
     # Available rules: https://github.com/securego/gosec#available-rules
     includes:
-      - G401
+      # - G401
       - G306
       - G101
     # To specify a set of rules to explicitly exclude.

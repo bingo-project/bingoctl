@@ -42,6 +42,7 @@ func LimitWrite(limit string) gin.HandlerFunc {
 		method := c.Request.Method
 		if method == http.MethodGet {
 			c.Next()
+
 			return
 		}
 
