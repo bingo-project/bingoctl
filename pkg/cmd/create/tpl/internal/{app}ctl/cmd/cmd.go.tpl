@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/bootstrap"
+	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/db"
+	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/key"
+	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/migrate"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/user"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/version"
 )
@@ -32,8 +35,17 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 
 	groups := templates.CommandGroups{
 		{
-			Message:  "Basic Commands:",
-			Commands: []*cobra.Command{},
+			Message: "Tool Commands:",
+			Commands: []*cobra.Command{
+				key.NewCmdKey(),
+			},
+		},
+		{
+			Message: "Database Commands:",
+			Commands: []*cobra.Command{
+				db.NewCmdDb(),
+				migrate.NewCmdMigrate(),
+			},
 		},
 		{
 			Message: "Advanced Commands:",
