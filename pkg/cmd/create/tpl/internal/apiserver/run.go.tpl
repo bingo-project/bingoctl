@@ -3,41 +3,31 @@ package apiserver
 import (
 	"github.com/gin-gonic/gin"
 
-	"{[.RootPackage]}/internal/apiserver/config"
+	"{[.RootPackage]}/internal/apiserver/bootstrap"
+	"{[.RootPackage]}/internal/apiserver/facade"
 	"{[.RootPackage]}/internal/apiserver/router"
-	"{[.RootPackage]}/internal/pkg/known"
 	"{[.RootPackage]}/internal/pkg/middleware"
-	"{[.RootPackage]}/pkg/token"
 )
 
-// run 函数是实际的业务代码入口函数.
 func run() error {
-	// 初始化 store 层
-	if err := InitStore(); err != nil {
-		return err
-	}
+	bootstrap.Boot()
 
-	// 初始化 cache
-	if err := InitCache(); err != nil {
-		return err
-	}
+	g := initRouter()
 
-	// 设置 token 包的签发密钥，用于 token 包 token 的签发和解析
-	token.Init(config.Cfg.JWT.Key, known.XUsernameKey)
+	// 创建并运行 HTTP 服务器
+	return startInsecureServer(g)
+}
 
-	// 设置 Gin 模式
-	gin.SetMode(config.Cfg.Server.Mode)
+func initRouter() *gin.Engine {
+	gin.SetMode(facade.Config.Server.Mode)
 
-	// 创建 Gin 引擎
 	g := gin.New()
 
-	// gin.Recovery() 中间件，用来捕获任何 panic，并恢复
-	mws := []gin.HandlerFunc{gin.Recovery(), middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
-
-	g.Use(mws...)
+	// Register global middlewares
+	registerGlobalMiddleWare(g)
 
 	// Swagger
-	if config.Cfg.Feature.ApiDoc {
+	if facade.Config.Feature.ApiDoc {
 		router.MapSwagRouters(g)
 	}
 
@@ -47,6 +37,19 @@ func run() error {
 	// Api
 	router.MapApiRouters(g)
 
-	// 创建并运行 HTTP 服务器
-	return startInsecureServer(g)
+	return g
+}
+
+// Register global middlewares
+func registerGlobalMiddleWare(g *gin.Engine) {
+	g.Use(
+		gin.Recovery(),
+		middleware.NoCache,
+		middleware.Cors,
+		middleware.Secure,
+		middleware.ForceUserAgent,
+		middleware.RequestID(),
+		middleware.LimitWrite("1-S"), // 限制写操作，每秒 1 次
+		middleware.LimitIP("20-S"),   // 限制 IP 请求，每秒 20 次
+	)
 }

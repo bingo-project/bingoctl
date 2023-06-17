@@ -86,3 +86,6 @@ _output
 # Tools
 .air.toml
 .bingoctl.yaml
+
+# Config file
+{[.AppName]}-apiserver.yaml

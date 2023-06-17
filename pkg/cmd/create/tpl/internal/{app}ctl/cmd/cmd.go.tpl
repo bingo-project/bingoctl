@@ -8,10 +8,9 @@ import (
 	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
-	"{[.RootPackage]}/internal/apiserver"
+	"{[.RootPackage]}/internal/apiserver/bootstrap"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/user"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/version"
-	"{[.RootPackage]}/internal/pkg/log"
 )
 
 func NewDefault{[.AppNameCamel]}CtlCommand() *cobra.Command {
@@ -49,7 +48,7 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 	templates.ActsAsRootCommand(cmds, filters, groups...)
 
 	// Config file
-	cmds.PersistentFlags().StringVarP(&apiserver.CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
+	cmds.PersistentFlags().StringVarP(&bootstrap.CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
 
 	// Add commands
 	cmds.AddCommand(version.NewCmdVersion(ioStreams))
@@ -59,12 +58,8 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	apiserver.InitConfig()
-
-	// Init store
-	if err := apiserver.InitStore(); err != nil {
-		log.Fatalw(err.Error())
-	}
+	bootstrap.InitConfig()
+	bootstrap.Boot()
 }
 
 func runHelp(cmd *cobra.Command, args []string) {

@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	goredislib "github.com/go-redis/redis/v8"
+	"github.com/bingo-project/component-base/log"
 	"github.com/go-redsync/redsync/v4"
-	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v9"
+	goredislib "github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 
-	"{[.RootPackage]}/internal/apiserver/config"
-	"{[.RootPackage]}/internal/pkg/log"
+	"{[.RootPackage]}/internal/apiserver/facade"
 	"{[.RootPackage]}/internal/watcher/watcher"
 
 	// trigger init functions in `internal/watcher/watcher/`.
@@ -23,17 +23,20 @@ type watchJob struct {
 }
 
 func newWatchJob() *watchJob {
-	client := goredislib.NewClient(&goredislib.Options{
-		Addr:     config.Cfg.Redis.Host,
-		Password: config.Cfg.Redis.Password,
-	})
-
-	rs := redsync.New(goredis.NewPool(client))
+	location, _ := time.LoadLocation(facade.Config.Server.Timezone)
 
 	cronjob := cron.New(
 		cron.WithSeconds(),
-		cron.WithChain(cron.SkipIfStillRunning(nil), cron.Recover(nil)),
+		cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)),
+		cron.WithLocation(location),
 	)
+
+	// Go redis
+	client := goredislib.NewClient(&goredislib.Options{
+		Addr:     facade.Config.Redis.Host,
+		Password: facade.Config.Redis.Password,
+	})
+	rs := redsync.New(goredis.NewPool(client))
 
 	return &watchJob{
 		Cron: cronjob,

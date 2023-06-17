@@ -1,10 +1,10 @@
 package common
 
 import (
+	"github.com/bingo-project/component-base/log"
 	"github.com/gin-gonic/gin"
 
 	"{[.RootPackage]}/internal/pkg/core"
-	"{[.RootPackage]}/internal/pkg/log"
 	v1 "{[.RootPackage]}/pkg/api/{[.AppName]}/v1"
 )
 

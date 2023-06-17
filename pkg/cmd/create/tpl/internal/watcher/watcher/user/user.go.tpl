@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 
+	"github.com/bingo-project/component-base/log"
 	"github.com/go-redsync/redsync/v4"
 
 	"{[.RootPackage]}/internal/apiserver/store"
-	"{[.RootPackage]}/internal/pkg/log"
 )
 
 type UserWatcher struct {

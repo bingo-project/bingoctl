@@ -1,12 +1,12 @@
 package middleware
 
 import (
+	"github.com/bingo-project/component-base/log"
 	"github.com/gin-gonic/gin"
 
 	"{[.RootPackage]}/internal/pkg/core"
 	"{[.RootPackage]}/internal/pkg/errno"
 	"{[.RootPackage]}/internal/pkg/known"
-	"{[.RootPackage]}/internal/pkg/log"
 )
 
 // Author 用来定义授权接口实现.

@@ -4,23 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"{[.RootPackage]}/internal/apiserver/controller/v1/common"
+	"{[.RootPackage]}/internal/pkg/core"
+	"{[.RootPackage]}/internal/pkg/errno"
 )
 
-func MapCommonRouters(r *gin.Engine) {
-	/**
-	|--------------------------------------------------------------------------
-	| Common
-	|--------------------------------------------------------------------------
-	|
-	| Here is where you can register API routes for your application. These
-	| routes are loaded by the RouteServiceProvider within a group which
-	| is assigned the "api" middleware group. Enjoy building your API!
-	|
-	*/
-
-	// controllers
-	commonController := common.NewCommonController()
+func MapCommonRouters(g *gin.Engine) {
+	// 注册 404 Handler.
+	g.NoRoute(func(c *gin.Context) {
+		core.WriteResponse(c, errno.ErrPageNotFound, nil)
+	})
 
 	// 注册 /healthz handler.
-	r.GET("/healthz", commonController.Healthz)
+	commonController := common.NewCommonController()
+	g.GET("/healthz", commonController.Healthz)
 }
