@@ -33,7 +33,7 @@ func NewDefaultConfig() *Config {
 		Version:     "v1",
 		RootPackage: "bingoctl",
 		Directory: Directory{
-			CMD:        "internal/goerctl/cmd",
+			CMD:        "internal/bingoctl/cmd",
 			Model:      "internal/pkg/model",
 			Store:      "internal/apiserver/store",
 			Request:    "pkg/api/v1",

@@ -52,8 +52,8 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	}
 	groups.Add(cmds)
 
-	filters := []string{""}
-	templates.ActsAsRootCommand(cmds, filters, groups...)
+	// filters := []string{""}
+	// templates.ActsAsRootCommand(cmds, filters, groups...)
 
 	// Config file
 	cmds.PersistentFlags().StringVarP(&CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
