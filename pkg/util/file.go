@@ -8,6 +8,7 @@ import (
 
 	"github.com/goer-project/goer-utils/console"
 	"github.com/manifoldco/promptui"
+	"github.com/mgutz/ansi"
 )
 
 var Overwrite bool
@@ -15,10 +16,8 @@ var Overwrite bool
 // GenerateGoCode generate go source file.
 func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 	if Exists(filePath) && !Overwrite {
-		console.Warn(filePath + " already exists!")
-
 		prompt := promptui.Prompt{
-			Label:     "Overwrite",
+			Label:     "Overwrite " + ansi.Color(filePath, "yellow"),
 			IsConfirm: true,
 		}
 
@@ -26,11 +25,10 @@ func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 		if err != nil {
 			return nil
 		}
+	} else {
+		fmt.Printf(" - Generating: ")
+		console.Info(filePath)
 	}
-
-	// Log
-	fmt.Printf(" - Generating: ")
-	console.Info(filePath)
 
 	directory := GetDirectoryFromPath(filePath)
 	err := os.MkdirAll(directory, 0755)
