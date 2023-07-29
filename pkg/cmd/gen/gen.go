@@ -66,6 +66,13 @@ func (o *GenOptions) Complete(cmd *cobra.Command, args []string) error {
 func (o *GenOptions) Run(args []string) error {
 	g := gen.NewGenerator(gen.Config{
 		ModelPkgPath: config.Cfg.Directory.Model,
+
+		// generate model global configuration
+		FieldNullable:     true,
+		FieldCoverable:    true,
+		FieldSignable:     true,
+		FieldWithIndexTag: true,
+		FieldWithTypeTag:  true,
 	})
 
 	g.UseDB(config.DB)

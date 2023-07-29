@@ -94,12 +94,21 @@ func (o *ModelOptions) Run(args []string) error {
 
 	// Generate model from table.
 	g := gen.NewGenerator(gen.Config{
-		ModelPkgPath: config.Cfg.Directory.Model,
+		ModelPkgPath: o.Directory,
+
+		// generate model global configuration
+		FieldNullable:     true,
+		FieldCoverable:    true,
+		FieldSignable:     true,
+		FieldWithIndexTag: true,
+		FieldWithTypeTag:  true,
 	})
 
 	g.UseDB(config.DB)
 
-	g.GenerateModel(o.Table)
+	// Generate struct `StructName` based on table `Table`
+	g.GenerateModelAs(o.Table, o.StructName)
+
 	g.Execute()
 
 	return nil
