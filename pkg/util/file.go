@@ -26,8 +26,6 @@ func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 		if err != nil {
 			return nil
 		}
-
-		Overwrite = true
 	}
 
 	// Log
