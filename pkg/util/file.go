@@ -7,14 +7,27 @@ import (
 	"text/template"
 
 	"github.com/goer-project/goer-utils/console"
+	"github.com/manifoldco/promptui"
 )
+
+var Overwrite bool
 
 // GenerateGoCode generate go source file.
 func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
-	if Exists(filePath) {
+	if Exists(filePath) && !Overwrite {
 		console.Warn(filePath + " already exists!")
 
-		return nil
+		prompt := promptui.Prompt{
+			Label:     "Overwrite",
+			IsConfirm: true,
+		}
+
+		_, err := prompt.Run()
+		if err != nil {
+			return nil
+		}
+
+		Overwrite = true
 	}
 
 	// Log

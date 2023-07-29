@@ -9,6 +9,7 @@ import (
 
 	"github.com/goer-project/goer-utils/console"
 	"github.com/iancoleman/strcase"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
@@ -82,9 +83,23 @@ func (o *CreateOptions) Validate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if exists {
-		console.Exit("project directory is exists!")
+	if !exists {
+		return nil
 	}
+
+	// Project exists
+	console.Warn("project directory already exists!")
+	prompt := promptui.Prompt{
+		Label:     "Overwrite",
+		IsConfirm: true,
+	}
+
+	_, err = prompt.Run()
+	if err != nil {
+		console.Exit("skipped.")
+	}
+
+	cmdutil.Overwrite = true
 
 	return nil
 }
