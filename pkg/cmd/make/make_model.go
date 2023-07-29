@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"gorm.io/gen"
 
 	"github.com/bingo-project/bingoctl/pkg/config"
+	"github.com/bingo-project/bingoctl/pkg/db"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -16,19 +18,21 @@ const (
 var (
 	modelUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nNAME is a required argument for the model command",
-		bizUsageStr,
+		modelUsageStr,
 	)
 )
 
 // ModelOptions is an option struct to support 'model' sub command.
 type ModelOptions struct {
 	*Options
+
+	Table string
 }
 
 // NewModelOptions returns an initialized ModelOptions instance.
 func NewModelOptions() *ModelOptions {
 	return &ModelOptions{
-		opt,
+		Options: opt,
 	}
 }
 
@@ -48,6 +52,8 @@ func NewCmdModel() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVarP(&o.Table, "table", "t", "", "generate model by table, example:'post'.")
+
 	return cmd
 }
 
@@ -66,6 +72,13 @@ func (o *ModelOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
+	// Init store if generating model by tables.
+	if o.Table != "" {
+		config.DB, _ = db.NewMySQL(config.Cfg.MysqlOptions)
+
+		return nil
+	}
+
 	// Read template
 	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	cmdTemplate = string(cmdTemplateBytes)
@@ -75,5 +88,19 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ModelOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	if o.Table == "" {
+		return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	}
+
+	// Generate model from table.
+	g := gen.NewGenerator(gen.Config{
+		ModelPkgPath: config.Cfg.Directory.Model,
+	})
+
+	g.UseDB(config.DB)
+
+	g.GenerateModel(o.Table)
+	g.Execute()
+
+	return nil
 }
