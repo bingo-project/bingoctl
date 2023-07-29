@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -11,7 +13,14 @@ func LoadConfig(cfg string, data interface{}) {
 	if cfg != "" {
 		viper.SetConfigFile(cfg)
 	} else {
+		// Get User home dir
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+
+		// Add `$HOME` & `.`
+		viper.AddConfigPath(home)
 		viper.AddConfigPath(".")
+
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".bingoctl")
 	}
