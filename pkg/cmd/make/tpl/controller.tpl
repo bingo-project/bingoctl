@@ -14,19 +14,16 @@ import (
 	"{{.RootPackage}}/pkg/auth"
 )
 
-// {{.StructName}}Controller 是 {{.VariableName}} 模块在 Controller 层的实现，用来处理用户模块的请求.
 type {{.StructName}}Controller struct {
 	a *auth.Authz
 	b biz.IBiz
 }
 
-// New{{.StructName}}Controller 创建一个 {{.VariableName}} controller.
 func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName}}Controller {
 	return &{{.StructName}}Controller{a: a, b: biz.NewBiz(ds)}
 }
 
 // List
-//
 // @Summary    List {{.VariableNamePlural}}
 // @Security   Bearer
 // @Tags       {{.StructName}}
@@ -58,7 +55,6 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 }
 
 // Create
-//
 // @Summary    Create a {{.VariableName}}
 // @Security   Bearer
 // @Tags       {{.StructName}}
@@ -98,7 +94,6 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 }
 
 // Get
-//
 // @Summary    Get {{.VariableName}} info
 // @Security   Bearer
 // @Tags       {{.StructName}}
@@ -124,7 +119,6 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 }
 
 // Update
-//
 // @Summary    Update {{.VariableName}} info
 // @Security   Bearer
 // @Tags       {{.StructName}}
@@ -164,7 +158,6 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 }
 
 // Delete
-//
 // @Summary    Delete a {{.VariableName}}
 // @Security   Bearer
 // @Tags       {{.StructName}}

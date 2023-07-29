@@ -37,7 +37,7 @@ func New{{.StructName}}(ds store.IStore) *{{.VariableName}}Biz {
 func (b *{{.VariableName}}Biz) List(ctx context.Context, offset, limit int) (*v1.List{{.StructName}}Response, error) {
 	count, list, err := b.ds.{{.StructNamePlural}}().List(ctx, offset, limit)
 	if err != nil {
-		log.C(ctx).Errorw("Failed to list {{.VariableNamePlural}} from storage", "err", err)
+		log.C(ctx).Errorw("Failed to list {{.VariableNamePlural}}", "err", err)
 
 		return nil, err
 	}
@@ -49,8 +49,6 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, offset, limit int) (*v1
 
 		{{.VariableNamePlural}} = append({{.VariableNamePlural}}, &{{.VariableName}})
 	}
-
-	log.C(ctx).Debugw("Get {{.VariableNamePlural}} from backend storage", "count", len({{.VariableNamePlural}}))
 
 	return &v1.List{{.StructName}}Response{TotalCount: count, Data: {{.VariableNamePlural}}}, nil
 }
@@ -93,9 +91,9 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, request *v1.
 		return nil, errno.Err{{.StructName}}NotFound
 	}
 
-	if request.Name != nil {
-		{{.VariableName}}M.Name = *request.Name
-	}
+	// if request.Name != nil {
+	// 	{{.VariableName}}M.Name = *request.Name
+	// }
 
 	if err := b.ds.{{.StructNamePlural}}().Update(ctx, {{.VariableName}}M); err != nil {
 		return nil, err
