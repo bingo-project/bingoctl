@@ -29,6 +29,16 @@ func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 	return &{{.VariableNamePlural}}{db: db}
 }
 
+func (u *{{.VariableNamePlural}}) List(ctx context.Context, offset, limit int) (count int64, ret []*model.{{.StructName}}M, err error) {
+	err = u.db.Offset(offset).Limit(helper.DefaultLimit(limit)).Order("id desc").Find(&ret).
+		Offset(-1).
+		Limit(-1).
+		Count(&count).
+		Error
+
+	return
+}
+
 func (u *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
 	return u.db.Create(&{{.VariableName}}).Error
 }
@@ -41,16 +51,6 @@ func (u *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.Variable
 
 func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
 	return u.db.Save(&{{.VariableName}}).Error
-}
-
-func (u *{{.VariableNamePlural}}) List(ctx context.Context, offset, limit int) (count int64, ret []*model.{{.StructName}}M, err error) {
-	err = u.db.Offset(offset).Limit(helper.DefaultLimit(limit)).Order("id desc").Find(&ret).
-		Offset(-1).
-		Limit(-1).
-		Count(&count).
-		Error
-
-	return
 }
 
 func (u *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
