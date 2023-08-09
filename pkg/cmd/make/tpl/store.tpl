@@ -14,7 +14,7 @@ type {{.StructName}}Store interface {
 	List(ctx context.Context, offset, limit int) (int64, []*model.{{.StructName}}M, error)
 	Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
 	Get(ctx context.Context, ID uint) (*model.{{.StructName}}M, error)
-	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
+	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error
 	Delete(ctx context.Context, ID uint) error
 }
 
@@ -49,8 +49,8 @@ func (u *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.Variable
 	return
 }
 
-func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
-	return u.db.Save(&{{.VariableName}}).Error
+func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error {
+	return u.db.Select(fields).Save(&user).Error
 }
 
 func (u *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
