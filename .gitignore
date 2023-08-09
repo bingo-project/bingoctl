@@ -95,3 +95,9 @@ Temporary Items
 
 # Editors
 .idea
+
+# Build
+bingoctl
+
+# Config
+.bingoctl.yaml

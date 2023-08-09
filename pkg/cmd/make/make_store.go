@@ -13,6 +13,11 @@ const (
 	storeUsageStr = "store NAME"
 )
 
+var (
+	storeInterfaceTemplate string
+	storeRegisterTemplate  string
+)
+
 // StoreOptions is an option struct to support 'store' sub command.
 type StoreOptions struct {
 	*Options
@@ -74,10 +79,25 @@ func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	cmdTemplate = string(cmdTemplateBytes)
 
+	storeInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
+	storeInterfaceTemplate = string(storeInterfaceTemplateBytes)
+
+	storeRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
+	storeRegisterTemplate = string(storeRegisterTemplateBytes)
+
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	err := cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	if err != nil {
+		return err
+	}
+
+	if config.Cfg.Registries.Store.Filepath == "" {
+		return nil
+	}
+
+	return o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
 }

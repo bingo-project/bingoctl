@@ -1,0 +1,29 @@
+version: v1
+
+root-package: bingo
+
+directory:
+  cmd: internal/bingoctl/cmd
+  model: internal/pkg/model
+  store: internal/apiserver/store
+  request: pkg/api/bingo/v1
+  biz: internal/apiserver/biz
+  controller: internal/apiserver/controller/v1
+  middleware: internal/pkg/middleware
+
+registries:
+  store:
+    filePath: internal/apiserver/store.go
+    seek: "type IStore interface {"
+  biz:
+    filePath: internal/apiserver/biz/biz.go
+    seek: "type IBiz interface {"
+  router:
+    filePath: internal/apiserver/router/api.go
+    seek: "func MapApiRouters(g *gin.Engine) {"
+
+mysql:
+  host: 127.0.0.1:3306
+  username: root
+  password:
+  database: bingo

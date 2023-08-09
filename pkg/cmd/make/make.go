@@ -2,13 +2,17 @@ package make
 
 import (
 	"embed"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/bingo-project/component-base/cli/console"
 	pluralize "github.com/gertd/go-pluralize"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -90,4 +94,43 @@ func (o *Options) MakeOptionsFromPath(directory string, path string) *Options {
 	o.FilePath = filepath.Join(o.Directory, o.VariableNameSnake+".go")
 
 	return o
+}
+
+func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemplate string) error {
+	// Package
+	pkg := ""
+	if o.PackageName != o.Name {
+		pkg = o.PackageName + "."
+	}
+
+	// Replace
+	replaces := make(map[string]string)
+	replaces["{{.Package}}"] = pkg
+	replaces["{{.StructName}}"] = o.StructName
+	replaces["{{.StructNamePlural}}"] = o.StructNamePlural
+	replaces["{{.VariableName}}"] = o.VariableName
+	replaces["{{.VariableNameSnake}}"] = o.VariableNameSnake
+
+	for search, replace := range replaces {
+		interfaceTemplate = strings.ReplaceAll(interfaceTemplate, search, replace)
+		codeTemplate = strings.ReplaceAll(codeTemplate, search, replace)
+	}
+
+	content, err := os.ReadFile(registry.Filepath)
+	if err != nil {
+		return err
+	}
+
+	newContent := strings.Replace(string(content), registry.Seek, registry.Seek+"\n\t"+interfaceTemplate, 1)
+	newContent = newContent + "\n" + codeTemplate
+
+	err = os.WriteFile(registry.Filepath, []byte(newContent), 0644)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf(" - Registered %s to ", o.Name)
+	console.Info(registry.Filepath)
+
+	return nil
 }
