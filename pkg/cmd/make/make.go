@@ -2,9 +2,11 @@ package make
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/bingo-project/component-base/cli/console"
@@ -121,9 +123,11 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemp
 		return err
 	}
 
-	seek := fmt.Sprintf("type %s interface {", registry.Interface)
-	newContent := strings.Replace(string(content), seek, seek+"\n\t"+interfaceTemplate, 1)
-	newContent = newContent + "\n" + codeTemplate
+	// 注册 interface
+	newContent, err := RegisterInterface(registry.Interface, string(content), interfaceTemplate, codeTemplate)
+	if err != nil {
+		return err
+	}
 
 	err = os.WriteFile(registry.Filepath, []byte(newContent), 0644)
 	if err != nil {
@@ -134,4 +138,27 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemp
 	console.Info(registry.Filepath)
 
 	return nil
+}
+
+func RegisterInterface(name, content, interfaceTemplate, codeTemplate string) (data string, err error) {
+	seek := fmt.Sprintf("type %s interface {", name)
+	rule := seek + `[a-zA-Z0-9().*\s]*}`
+	reg := regexp.MustCompile(rule)
+
+	// 根据规则提取关键信息
+	results := reg.FindAllString(content, -1)
+	if len(results) == 0 {
+		err = errors.New("not matched")
+
+		return
+	}
+
+	old := results[0]
+	str := strings.TrimRight(old, "}")
+	str = str + "\t" + interfaceTemplate + "\n}"
+
+	newContent := strings.Replace(content, old, str, 1)
+	newContent = newContent + "\n" + codeTemplate
+
+	return newContent, nil
 }
