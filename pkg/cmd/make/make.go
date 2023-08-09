@@ -121,7 +121,8 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemp
 		return err
 	}
 
-	newContent := strings.Replace(string(content), registry.Seek, registry.Seek+"\n\t"+interfaceTemplate, 1)
+	seek := fmt.Sprintf("type %s interface {", registry.Interface)
+	newContent := strings.Replace(string(content), seek, seek+"\n\t"+interfaceTemplate, 1)
 	newContent = newContent + "\n" + codeTemplate
 
 	err = os.WriteFile(registry.Filepath, []byte(newContent), 0644)

@@ -31,14 +31,14 @@ type Directory struct {
 }
 
 type Registries struct {
+	Router string   `mapstructure:"router" json:"router" yaml:"router"`
 	Store  Registry `mapstructure:"store" json:"store" yaml:"store"`
 	Biz    Registry `mapstructure:"biz" json:"biz" yaml:"biz"`
-	Router Registry `mapstructure:"router" json:"router" yaml:"router"`
 }
 
 type Registry struct {
-	Filepath string `mapstructure:"filepath" json:"filepath" yaml:"filepath"`
-	Seek     string `mapstructure:"seek" json:"seek" yaml:"seek"`
+	Filepath  string `mapstructure:"filepath" json:"filepath" yaml:"filepath"`
+	Interface string `mapstructure:"interface" json:"interface" yaml:"interface"`
 }
 
 func NewDefaultConfig() *Config {

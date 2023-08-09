@@ -12,15 +12,13 @@ directory:
   middleware: internal/pkg/middleware
 
 registries:
+  router: internal/apiserver/router/api.go
   store:
-    filePath: internal/apiserver/store.go
-    seek: "type IStore interface {"
+    filePath: internal/apiserver/store/store.go
+    interface: "IStore"
   biz:
     filePath: internal/apiserver/biz/biz.go
-    seek: "type IBiz interface {"
-  router:
-    filePath: internal/apiserver/router/api.go
-    seek: "func MapApiRouters(g *gin.Engine) {"
+    interface: "IBiz"
 
 mysql:
   host: 127.0.0.1:3306
