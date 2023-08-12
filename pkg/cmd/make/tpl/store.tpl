@@ -2,7 +2,6 @@ package {{.PackageName}}
 
 import (
 	"context"
-	"errors"
 
 	"gorm.io/gorm"
 
@@ -54,10 +53,5 @@ func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} 
 }
 
 func (u *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
-	err := u.db.Where("id = ?", ID).Delete(&model.{{.StructName}}M{}).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-
-	return nil
+	return u.db.Where("id = ?", ID).Delete(&model.{{.StructName}}M{}).Error
 }
