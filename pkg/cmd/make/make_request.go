@@ -75,5 +75,5 @@ func (o *RequestOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RequestOptions) Run(args []string) error {
-	return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
 }

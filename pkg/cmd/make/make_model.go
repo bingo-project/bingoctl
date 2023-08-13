@@ -89,7 +89,7 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 // Run executes a new sub command using the specified options.
 func (o *ModelOptions) Run(args []string) error {
 	if o.Table == "" {
-		return cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+		return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
 	}
 
 	// Generate model from table.

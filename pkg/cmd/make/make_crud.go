@@ -92,7 +92,7 @@ func (o *CrudOptions) Run(args []string) error {
 	// 1.Model
 	o.Name = "model"
 	o.MakeOptionsFromPath(config.Cfg.Directory.Model, args[0])
-	err := cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
 	if err != nil {
 		fmt.Println("Generating model failed, err:", err)
 	}
@@ -106,7 +106,7 @@ func (o *CrudOptions) Run(args []string) error {
 		o.ModelName = o.StructName
 	}
 	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating store failed, err:", err)
 	}
@@ -117,7 +117,7 @@ func (o *CrudOptions) Run(args []string) error {
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
 	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating request failed, err:", err)
 	}
@@ -128,7 +128,7 @@ func (o *CrudOptions) Run(args []string) error {
 	o.PackageName = ""
 	o.MakeOptionsFromPath(config.Cfg.Directory.Biz, args[0])
 	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating biz failed, err:", err)
 	}
@@ -142,7 +142,7 @@ func (o *CrudOptions) Run(args []string) error {
 		o.ModelName = o.StructName
 	}
 	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateGoCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating controller failed, err:", err)
 	}

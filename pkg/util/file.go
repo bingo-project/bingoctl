@@ -13,8 +13,8 @@ import (
 
 var Overwrite bool
 
-// GenerateGoCode generate go source file.
-func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
+// GenerateCode generate go source file.
+func GenerateCode(filePath, codeTemplate, name string, o any) error {
 	if Exists(filePath) && !Overwrite {
 		prompt := promptui.Prompt{
 			Label:     "Overwrite " + ansi.Color(filePath, "yellow"),
@@ -23,10 +23,10 @@ func GenerateGoCode(filePath, codeTemplate, name string, o any) error {
 
 		_, err := prompt.Run()
 		if err != nil {
-			return nil
+			return err
 		}
 	} else {
-		fmt.Printf(" - Generating: ")
+		fmt.Printf("Generating: ")
 		console.Info(filePath)
 	}
 

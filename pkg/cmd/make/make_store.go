@@ -90,7 +90,7 @@ func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
-	err := cmdutil.GenerateGoCode(o.FilePath, cmdTemplate, o.Name, o)
+	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
 	if err != nil {
 		return err
 	}

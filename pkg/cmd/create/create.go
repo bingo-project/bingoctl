@@ -138,7 +138,7 @@ func (o *CreateOptions) Run(args []string) error {
 		dest = strings.Replace(dest, "hidden", "", 1)
 
 		// Generate code
-		err = cmdutil.GenerateGoCode(dest, string(b), "init", o)
+		err = cmdutil.GenerateCode(dest, string(b), "init", o)
 		if err != nil {
 			return err
 		}

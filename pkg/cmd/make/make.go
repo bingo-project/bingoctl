@@ -134,7 +134,7 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemp
 		return err
 	}
 
-	fmt.Printf(" - Registered %s to ", o.Name)
+	fmt.Printf("Registered %s to ", o.Name)
 	console.Info(registry.Filepath)
 
 	return nil
