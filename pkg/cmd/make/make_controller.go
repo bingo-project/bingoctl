@@ -23,13 +23,6 @@ var (
 // ControllerOptions is an option struct to support 'controller' sub command.
 type ControllerOptions struct {
 	*Options
-
-	RootPackage string
-	BizPath     string
-	StorePath   string
-	RequestPath string
-	ModelPath   string
-	ModelName   string
 }
 
 // NewControllerOptions returns an initialized ControllerOptions instance.

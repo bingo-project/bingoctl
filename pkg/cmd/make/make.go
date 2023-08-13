@@ -36,6 +36,14 @@ type Options struct {
 	VariableNameSnake  string
 	VariableNamePlural string
 	TableName          string
+
+	// Path
+	RootPackage string
+	BizPath     string
+	StorePath   string
+	RequestPath string
+	ModelPath   string
+	ModelName   string
 }
 
 // NewOptions returns an initialized CmdOptions instance.

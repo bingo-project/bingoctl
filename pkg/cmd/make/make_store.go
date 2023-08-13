@@ -22,10 +22,6 @@ var (
 // StoreOptions is an option struct to support 'store' sub command.
 type StoreOptions struct {
 	*Options
-
-	RootPackage string
-	ModelPath   string
-	ModelName   string
 }
 
 // NewStoreOptions returns an initialized StoreOptions instance.

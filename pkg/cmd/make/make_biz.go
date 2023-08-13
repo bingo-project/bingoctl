@@ -27,12 +27,6 @@ var (
 // BizOptions is an option struct to support 'biz' sub command.
 type BizOptions struct {
 	*Options
-
-	RootPackage string
-	StorePath   string
-	RequestPath string
-	ModelPath   string
-	ModelName   string
 }
 
 // NewBizOptions returns an initialized BizOptions instance.

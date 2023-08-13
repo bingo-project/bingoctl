@@ -23,13 +23,6 @@ var (
 // CrudOptions is an option struct to support 'crud' sub command.
 type CrudOptions struct {
 	*Options
-
-	RootPackage string
-	BizPath     string
-	StorePath   string
-	RequestPath string
-	ModelPath   string
-	ModelName   string
 }
 
 // NewCrudOptions returns an initialized CrudOptions instance.
