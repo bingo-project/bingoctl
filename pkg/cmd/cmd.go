@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/bingo-project/component-base/cli/genericclioptions"
 	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
@@ -34,8 +33,6 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	// Load config
 	cobra.OnInitialize(initConfig)
 
-	ioStreams := genericclioptions.IOStreams{In: in, Out: out, ErrOut: err}
-
 	groups := templates.CommandGroups{
 		{
 			Message:  "Basic Commands:",
@@ -59,7 +56,7 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	cmds.PersistentFlags().StringVarP(&CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
 
 	// Add commands
-	cmds.AddCommand(version.NewCmdVersion(ioStreams))
+	cmds.AddCommand(version.NewCmdVersion())
 
 	return cmds
 }
