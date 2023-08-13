@@ -5,7 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -57,23 +56,15 @@ func (o *RequestOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, requestUsageErrStr)
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
-
-	o.Name = "request"
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *RequestOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *RequestOptions) Run(args []string) error {
-	return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
+	return o.GenerateCode("request", args[0])
 }

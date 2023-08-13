@@ -3,10 +3,8 @@ package make
 import (
 	"fmt"
 
-	"github.com/bingo-project/component-base/cli/console"
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -19,9 +17,6 @@ var (
 		"expected '%s'.\nNAME is a required argument for the biz command",
 		bizUsageStr,
 	)
-
-	bizInterfaceTemplate string
-	bizRegisterTemplate  string
 )
 
 // BizOptions is an option struct to support 'biz' sub command.
@@ -63,46 +58,15 @@ func (o *BizOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, bizUsageErrStr)
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.Biz, args[0])
-
-	o.Name = "biz"
-	o.RootPackage = config.Cfg.RootPackage
-	o.StorePath = config.Cfg.Directory.Store
-	o.RequestPath = config.Cfg.Directory.Request
-	o.ModelPath = config.Cfg.Directory.Model
-	if o.ModelName == "" {
-		o.ModelName = o.StructName
-	}
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *BizOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
-	bizInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
-	bizInterfaceTemplate = string(bizInterfaceTemplateBytes)
-
-	bizRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
-	bizRegisterTemplate = string(bizRegisterTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *BizOptions) Run(args []string) error {
-	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
-	console.ExitIf(err)
-
-	if config.Cfg.Registries.Biz.Filepath == "" {
-		return nil
-	}
-
-	err = o.Register(config.Cfg.Registries.Biz, bizInterfaceTemplate, bizRegisterTemplate)
-	console.ExitIf(err)
-
-	return nil
+	return o.GenerateCode("biz", args[0])
 }

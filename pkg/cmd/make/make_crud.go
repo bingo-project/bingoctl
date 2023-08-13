@@ -3,9 +3,9 @@ package make
 import (
 	"fmt"
 
+	"github.com/bingo-project/component-base/cli/console"
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -57,112 +57,48 @@ func (o *CrudOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, crudUsageErrStr)
 	}
 
-	o.RootPackage = config.Cfg.RootPackage
-	o.BizPath = config.Cfg.Directory.Biz
-	o.StorePath = config.Cfg.Directory.Store
-	o.RequestPath = config.Cfg.Directory.Request
-	o.ModelPath = config.Cfg.Directory.Model
-	if o.ModelName == "" {
-		o.ModelName = o.StructName
-	}
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *CrudOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile("tpl/model.tpl")
-	cmdTemplate = string(cmdTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *CrudOptions) Run(args []string) error {
-	fmt.Println("Generating files...")
-
 	// 1.Model
-	o.Name = "model"
-	o.MakeOptionsFromPath(config.Cfg.Directory.Model, args[0])
-	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
+	err := o.GenerateCode("model", args[0])
 	if err != nil {
-		fmt.Println("Generating model failed, err:", err)
+		console.Error(err.Error())
 	}
 
 	// 2.Store
-	o.Name = "store"
-	o.Directory = ""
-	o.PackageName = ""
-	o.MakeOptionsFromPath(config.Cfg.Directory.Store, args[0])
-	if o.ModelName == "" {
-		o.ModelName = o.StructName
-	}
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	o.ReSetDirectory()
+	err = o.GenerateCode("store", args[0])
 	if err != nil {
-		fmt.Println("Generating store failed, err:", err)
-	}
-
-	// Register store
-	if config.Cfg.Registries.Store.Filepath != "" {
-		storeInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
-		storeInterfaceTemplate = string(storeInterfaceTemplateBytes)
-		storeRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
-		storeRegisterTemplate = string(storeRegisterTemplateBytes)
-		err = o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
-		if err != nil {
-			fmt.Println("Register store failed, err:", err)
-		}
+		console.Error(err.Error())
 	}
 
 	// 3.Request
-	o.Name = "request"
-	o.Directory = ""
-	o.PackageName = ""
-	o.MakeOptionsFromPath(config.Cfg.Directory.Request, args[0])
-	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	o.ReSetDirectory()
+	err = o.GenerateCode("request", args[0])
 	if err != nil {
-		fmt.Println("Generating request failed, err:", err)
+		console.Error(err.Error())
 	}
 
 	// 4.Biz
-	o.Name = "biz"
-	o.Directory = ""
-	o.PackageName = ""
-	o.MakeOptionsFromPath(config.Cfg.Directory.Biz, args[0])
-	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	o.ReSetDirectory()
+	err = o.GenerateCode("biz", args[0])
 	if err != nil {
-		fmt.Println("Generating biz failed, err:", err)
-	}
-
-	// Register biz
-	if config.Cfg.Registries.Biz.Filepath != "" {
-		bizInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
-		bizInterfaceTemplate = string(bizInterfaceTemplateBytes)
-		bizRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
-		bizRegisterTemplate = string(bizRegisterTemplateBytes)
-
-		err = o.Register(config.Cfg.Registries.Biz, bizInterfaceTemplate, bizRegisterTemplate)
-		if err != nil {
-			fmt.Println("Register biz failed, err:", err)
-		}
+		console.Error(err.Error())
 	}
 
 	// 5.Controller
-	o.Name = "controller"
-	o.Directory = ""
-	o.PackageName = ""
-	o.MakeOptionsFromPath(config.Cfg.Directory.Controller, args[0])
-	if o.ModelName == "" {
-		o.ModelName = o.StructName
-	}
-	cmdTemplateBytes, _ = tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
+	o.ReSetDirectory()
+	err = o.GenerateCode("controller", args[0])
 	if err != nil {
-		fmt.Println("Generating controller failed, err:", err)
+		console.Error(err.Error())
 	}
 
 	fmt.Println("done.")

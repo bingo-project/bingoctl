@@ -63,10 +63,6 @@ func (o *ModelOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, modelUsageErrStr)
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.Model, args[0])
-
-	o.Name = "model"
-
 	return nil
 }
 
@@ -79,17 +75,13 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *ModelOptions) Run(args []string) error {
 	if o.Table == "" {
-		return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
+		return o.GenerateCode("model", args[0])
 	}
 
 	// Generate model from table.

@@ -5,7 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -57,22 +56,15 @@ func (o *MiddlewareOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, middlewareUsageErrStr)
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.Middleware, args[0])
-	o.Name = "middleware"
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *MiddlewareOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *MiddlewareOptions) Run(args []string) error {
-	return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
+	return o.GenerateCode("middleware", args[0])
 }

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/bingo-project/component-base/cli/console"
 	"github.com/manifoldco/promptui"
 	"github.com/mgutz/ansi"
 )
@@ -25,9 +24,6 @@ func GenerateCode(filePath, codeTemplate, name string, o any) error {
 		if err != nil {
 			return err
 		}
-	} else {
-		fmt.Printf("Generating: ")
-		console.Info(filePath)
 	}
 
 	directory := GetDirectoryFromPath(filePath)
@@ -55,6 +51,8 @@ func GenerateCode(filePath, codeTemplate, name string, o any) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("%s %s\n", ansi.Color("Generated:", "green"), filePath)
 
 	return nil
 }

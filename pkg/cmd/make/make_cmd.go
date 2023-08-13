@@ -5,7 +5,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -18,8 +17,6 @@ var (
 		"expected '%s'.\nNAME is a required argument for the cmd command",
 		cmdUsageStr,
 	)
-	// tpl.
-	cmdTemplate string
 )
 
 // CmdOptions is an option struct to support 'cmd' sub command.
@@ -67,23 +64,15 @@ func (o *CmdOptions) Validate(cmd *cobra.Command, args []string) error {
 		o.CommandDescription = args[1]
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.CMD, args[0])
-
-	o.Name = "cmd"
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *CmdOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *CmdOptions) Run(args []string) error {
-	return cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
+	return o.GenerateCode("cmd", args[0])
 }

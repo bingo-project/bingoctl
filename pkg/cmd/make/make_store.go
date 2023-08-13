@@ -1,22 +1,13 @@
 package make
 
 import (
-	"fmt"
-
-	"github.com/bingo-project/component-base/cli/console"
 	"github.com/spf13/cobra"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 const (
 	storeUsageStr = "store NAME"
-)
-
-var (
-	storeInterfaceTemplate string
-	storeRegisterTemplate  string
 )
 
 // StoreOptions is an option struct to support 'store' sub command.
@@ -58,44 +49,15 @@ func (o *StoreOptions) Validate(cmd *cobra.Command, args []string) error {
 		return cmdutil.UsageErrorf(cmd, cmdUsageErrStr)
 	}
 
-	o.MakeOptionsFromPath(config.Cfg.Directory.Store, args[0])
-
-	o.Name = "store"
-	o.RootPackage = config.Cfg.RootPackage
-	o.ModelPath = config.Cfg.Directory.Model
-	if o.ModelName == "" {
-		o.ModelName = o.StructName
-	}
-
 	return nil
 }
 
 // Complete completes all the required options.
 func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Read template
-	cmdTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
-	cmdTemplate = string(cmdTemplateBytes)
-
-	storeInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
-	storeInterfaceTemplate = string(storeInterfaceTemplateBytes)
-
-	storeRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
-	storeRegisterTemplate = string(storeRegisterTemplateBytes)
-
 	return nil
 }
 
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
-	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
-	console.ExitIf(err)
-
-	if config.Cfg.Registries.Store.Filepath == "" {
-		return nil
-	}
-
-	err = o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
-	console.ExitIf(err)
-
-	return nil
+	return o.GenerateCode("store", args[0])
 }
