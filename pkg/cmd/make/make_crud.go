@@ -6,6 +6,8 @@ import (
 	"github.com/bingo-project/component-base/cli/console"
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/config"
+	"github.com/bingo-project/bingoctl/pkg/db"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -48,6 +50,8 @@ func NewCmdCrud() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVarP(&o.Table, "table", "t", "", "generate model by table, example:'post'.")
+
 	return cmd
 }
 
@@ -62,6 +66,11 @@ func (o *CrudOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *CrudOptions) Complete(cmd *cobra.Command, args []string) error {
+	// Init store if generating model by tables.
+	if o.Table != "" {
+		config.DB, _ = db.NewMySQL(config.Cfg.MysqlOptions)
+	}
+
 	return nil
 }
 

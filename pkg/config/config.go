@@ -13,7 +13,7 @@ var (
 
 type Config struct {
 	Version      string           `mapstructure:"version" json:"version" yaml:"version"`
-	RootPackage  string           `mapstructure:"root-package" json:"root_package" yaml:"root-package"`
+	RootPackage  string           `mapstructure:"rootPackage" json:"rootPackage" yaml:"rootPackage"`
 	Directory    Directory        `mapstructure:"directory" json:"directory" yaml:"directory"`
 	MysqlOptions *db.MySQLOptions `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 

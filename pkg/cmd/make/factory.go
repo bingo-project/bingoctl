@@ -11,6 +11,7 @@ import (
 	"github.com/gertd/go-pluralize"
 	"github.com/iancoleman/strcase"
 	"github.com/mgutz/ansi"
+	"gorm.io/gen"
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
@@ -55,6 +56,9 @@ type Options struct {
 	StorePath   string
 	RequestPath string
 	ModelPath   string
+
+	// Generate model by gorm.gen
+	Table string
 }
 
 func (o *Options) GenerateCode(tmpl, path string) error {
@@ -63,6 +67,11 @@ func (o *Options) GenerateCode(tmpl, path string) error {
 	o.SetName(tmpl)
 	o.ReadCodeTemplates()
 	o.GenerateAttributes(dir, path)
+
+	// Generate model from table.
+	if o.Name == string(TmplModel) && o.Table != "" {
+		return o.GenerateModelFromTable()
+	}
 
 	err := cmdutil.GenerateCode(o.FilePath, o.CodeTemplate, o.Name, o)
 	if err != nil {
@@ -222,6 +231,29 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	}
 
 	fmt.Printf("%s %s\n", ansi.Color("Registered:", "green"), registry.Filepath)
+
+	return nil
+}
+
+func (o *Options) GenerateModelFromTable() error {
+	// Generate model from table.
+	g := gen.NewGenerator(gen.Config{
+		ModelPkgPath: o.Directory,
+
+		// generate model global configuration
+		FieldNullable:     true,
+		FieldCoverable:    true,
+		FieldSignable:     true,
+		FieldWithIndexTag: true,
+		FieldWithTypeTag:  true,
+	})
+
+	g.UseDB(config.DB)
+
+	// Generate struct `StructName` based on table `Table`
+	g.GenerateModelAs(o.Table, o.StructName)
+
+	g.Execute()
 
 	return nil
 }

@@ -16,7 +16,6 @@ Install
 
 ```bash
 go install github.com/bingo-project/bingoctl@latest
-
 ```
 
 在项目根目录下创建配置文件，`touch .bingoctl.yaml`, 并写入以下内容
@@ -24,7 +23,7 @@ go install github.com/bingo-project/bingoctl@latest
 ```yaml
 version: v1
 
-root-package: your-pkg-name
+rootPackage: bingo
 
 directory:
   cmd: internal/bingoctl/cmd
@@ -34,6 +33,23 @@ directory:
   biz: internal/apiserver/biz
   controller: internal/apiserver/controller/v1
   middleware: internal/pkg/middleware
+  job: internal/watcher/watcher
+
+registries:
+  router: internal/apiserver/router/api.go
+  store:
+    filePath: internal/apiserver/store/store.go
+    interface: "IStore"
+  biz:
+    filePath: internal/apiserver/biz/biz.go
+    interface: "IBiz"
+
+mysql:
+  host: 127.0.0.1:3306
+  username: root
+  password:
+  database: bingo
+
 ```
 
 ## 查看命令
@@ -74,4 +90,5 @@ bingoctl make request NAME [-d dir] [-p package]
 bingoctl make biz NAME [-d dir] [-p package]
 bingoctl make controller NAME [-d dir] [-p package]
 bingoctl make middleware NAME [-d dir] [-p package]
+bingoctl make job NAME [-d dir] [-p package]
 ```

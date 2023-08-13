@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gorm.io/gen"
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/db"
@@ -25,8 +24,6 @@ var (
 // ModelOptions is an option struct to support 'model' sub command.
 type ModelOptions struct {
 	*Options
-
-	Table string
 }
 
 // NewModelOptions returns an initialized ModelOptions instance.
@@ -71,8 +68,6 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Init store if generating model by tables.
 	if o.Table != "" {
 		config.DB, _ = db.NewMySQL(config.Cfg.MysqlOptions)
-
-		return nil
 	}
 
 	return nil
@@ -80,28 +75,5 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ModelOptions) Run(args []string) error {
-	if o.Table == "" {
-		return o.GenerateCode("model", args[0])
-	}
-
-	// Generate model from table.
-	g := gen.NewGenerator(gen.Config{
-		ModelPkgPath: o.Directory,
-
-		// generate model global configuration
-		FieldNullable:     true,
-		FieldCoverable:    true,
-		FieldSignable:     true,
-		FieldWithIndexTag: true,
-		FieldWithTypeTag:  true,
-	})
-
-	g.UseDB(config.DB)
-
-	// Generate struct `StructName` based on table `Table`
-	g.GenerateModelAs(o.Table, o.StructName)
-
-	g.Execute()
-
-	return nil
+	return o.GenerateCode("model", args[0])
 }

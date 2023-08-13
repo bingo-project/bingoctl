@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/bingo-project/component-base/cli/templates"
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/pkg/cmd/create"
@@ -33,30 +32,14 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	// Load config
 	cobra.OnInitialize(initConfig)
 
-	groups := templates.CommandGroups{
-		{
-			Message:  "Basic Commands:",
-			Commands: []*cobra.Command{},
-		},
-		{
-			Message: "Advanced Commands:",
-			Commands: []*cobra.Command{
-				makecmd.NewCmdMake(),
-				create.NewCmdCreate(),
-				gen.NewCmdGen(),
-			},
-		},
-	}
-	groups.Add(cmds)
-
-	// filters := []string{""}
-	// templates.ActsAsRootCommand(cmds, filters, groups...)
-
 	// Config file
 	cmds.PersistentFlags().StringVarP(&CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
 
 	// Add commands
 	cmds.AddCommand(version.NewCmdVersion())
+	cmds.AddCommand(makecmd.NewCmdMake())
+	cmds.AddCommand(create.NewCmdCreate())
+	cmds.AddCommand(gen.NewCmdGen())
 
 	return cmds
 }
