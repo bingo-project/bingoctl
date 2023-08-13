@@ -1,0 +1,1 @@
+{{.StructNamePlural}}() {{.Package}}{{.StructName}}Biz
