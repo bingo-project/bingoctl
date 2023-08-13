@@ -49,7 +49,7 @@ func (u *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.Variable
 }
 
 func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error {
-	return u.db.Select(fields).Save(&user).Error
+	return u.db.Select(fields).Save(&{{.VariableName}}).Error
 }
 
 func (u *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
