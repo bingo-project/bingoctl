@@ -10,6 +10,7 @@ directory:
   biz: internal/apiserver/biz
   controller: internal/apiserver/controller/v1
   middleware: internal/pkg/middleware
+  job: internal/watcher/watcher
 
 registries:
   router: internal/apiserver/router/api.go

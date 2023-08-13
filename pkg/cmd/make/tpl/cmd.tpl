@@ -35,7 +35,7 @@ func NewCmd{{.StructName}}() *cobra.Command {
     cmd := &cobra.Command{
         Use:                   {{.VariableName}}UsageStr,
         DisableFlagsInUseLine: true,
-        Short:                 "{{.CommandDescription}}",
+        Short:                 "{{.Description}}",
         TraverseChildren:      true,
         Run: func(cmd *cobra.Command, args []string) {
             cmdutil.CheckErr(o.Validate(cmd, args))

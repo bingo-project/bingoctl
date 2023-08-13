@@ -25,11 +25,14 @@ const (
 	TmplRequest    Tmpl = "request"
 	TmplBiz        Tmpl = "biz"
 	TmplController Tmpl = "controller"
+	TmplMiddleware Tmpl = "middleware"
+	TmplJob        Tmpl = "job"
 )
 
 type Options struct {
 	// Code template
 	Name              string
+	Description       string
 	FilePath          string
 	Directory         string
 	CodeTemplate      string
@@ -99,6 +102,12 @@ func GetMapDirectory(tmpl string) (dir string) {
 	}
 	if tmpl == string(TmplController) {
 		dir = config.Cfg.Directory.Controller
+	}
+	if tmpl == string(TmplMiddleware) {
+		dir = config.Cfg.Directory.Middleware
+	}
+	if tmpl == string(TmplJob) {
+		dir = config.Cfg.Directory.Job
 	}
 
 	return

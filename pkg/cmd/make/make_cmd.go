@@ -22,16 +22,12 @@ var (
 // CmdOptions is an option struct to support 'cmd' sub command.
 type CmdOptions struct {
 	*Options
-
-	// Command template options
-	CommandDescription string
 }
 
 // NewCmdOptions returns an initialized CmdOptions instance.
 func NewCmdOptions() *CmdOptions {
 	return &CmdOptions{
-		Options:            opt,
-		CommandDescription: "A brief description of your command",
+		Options: opt,
 	}
 }
 
@@ -61,7 +57,7 @@ func (o *CmdOptions) Validate(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) > 1 {
-		o.CommandDescription = args[1]
+		o.Description = args[1]
 	}
 
 	return nil

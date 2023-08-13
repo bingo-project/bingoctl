@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	crudUsageStr = "crud"
+	crudUsageStr = "crud NAME"
 )
 
 var (
