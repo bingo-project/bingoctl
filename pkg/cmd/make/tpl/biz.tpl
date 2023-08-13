@@ -2,12 +2,10 @@ package {{.PackageName}}
 
 import (
 	"context"
-	"errors"
 	"regexp"
 
     "github.com/bingo-project/component-base/log"
 	"github.com/jinzhu/copier"
-	"gorm.io/gorm"
 
 	"{{.RootPackage}}/{{.StorePath}}"
 	"{{.RootPackage}}/internal/pkg/errno"
@@ -61,7 +59,7 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, request *v1.Create{{.
 	if err != nil {
 		// Check exists
 		if match, _ := regexp.MatchString("Duplicate entry '.*' for key", err.Error()); match {
-			return nil, errno.Err{{.StructName}}AlreadyExist
+			return nil, errno.ErrResourceAlreadyExists
 		}
 
 		return nil, err
@@ -76,7 +74,7 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, request *v1.Create{{.
 func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
-		return nil, errno.Err{{.StructName}}NotFound
+		return nil, errno.ErrResourceNotFound
 	}
 
 	var resp v1.Get{{.StructName}}Response
@@ -88,7 +86,7 @@ func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.Get{{.Stru
 func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, request *v1.Update{{.StructName}}Request) (*v1.Get{{.StructName}}Response, error) {
 	{{.VariableName}}M, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
 	if err != nil {
-		return nil, errno.Err{{.StructName}}NotFound
+		return nil, errno.ErrResourceNotFound
 	}
 
 	// if request.Name != nil {
