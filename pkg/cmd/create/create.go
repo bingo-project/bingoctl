@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goer-project/goer-utils/console"
+	"github.com/bingo-project/component-base/cli/console"
 	"github.com/iancoleman/strcase"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"

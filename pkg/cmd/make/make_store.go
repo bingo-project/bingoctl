@@ -3,6 +3,7 @@ package make
 import (
 	"fmt"
 
+	"github.com/bingo-project/component-base/cli/console"
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/pkg/config"
@@ -91,13 +92,14 @@ func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
 	err := cmdutil.GenerateCode(o.FilePath, cmdTemplate, o.Name, o)
-	if err != nil {
-		return err
-	}
+	console.ExitIf(err)
 
 	if config.Cfg.Registries.Store.Filepath == "" {
 		return nil
 	}
 
-	return o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
+	err = o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
+	console.ExitIf(err)
+
+	return nil
 }

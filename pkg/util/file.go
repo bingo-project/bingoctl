@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/goer-project/goer-utils/console"
+	"github.com/bingo-project/component-base/cli/console"
 	"github.com/manifoldco/promptui"
 	"github.com/mgutz/ansi"
 )

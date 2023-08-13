@@ -141,6 +141,12 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, codeTemp
 }
 
 func RegisterInterface(name, content, interfaceTemplate, codeTemplate string) (data string, err error) {
+	// Check if already registered
+	if strings.Contains(content, interfaceTemplate) {
+		return "", errors.New("interface already registered: " + interfaceTemplate)
+	}
+
+	// Register
 	seek := fmt.Sprintf("type %s interface {", name)
 	rule := seek + `[a-zA-Z0-9().*\s]*}`
 	reg := regexp.MustCompile(rule)
