@@ -111,6 +111,18 @@ func (o *CrudOptions) Run(args []string) error {
 		fmt.Println("Generating store failed, err:", err)
 	}
 
+	// Register store
+	if config.Cfg.Registries.Store.Filepath != "" {
+		storeInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
+		storeInterfaceTemplate = string(storeInterfaceTemplateBytes)
+		storeRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
+		storeRegisterTemplate = string(storeRegisterTemplateBytes)
+		err = o.Register(config.Cfg.Registries.Store, storeInterfaceTemplate, storeRegisterTemplate)
+		if err != nil {
+			fmt.Println("Register store failed, err:", err)
+		}
+	}
+
 	// 3.Request
 	o.Name = "request"
 	o.Directory = ""
@@ -131,6 +143,19 @@ func (o *CrudOptions) Run(args []string) error {
 	err = cmdutil.GenerateCode(o.FilePath, string(cmdTemplateBytes), o.Name, o)
 	if err != nil {
 		fmt.Println("Generating biz failed, err:", err)
+	}
+
+	// Register biz
+	if config.Cfg.Registries.Biz.Filepath != "" {
+		bizInterfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
+		bizInterfaceTemplate = string(bizInterfaceTemplateBytes)
+		bizRegisterTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
+		bizRegisterTemplate = string(bizRegisterTemplateBytes)
+
+		err = o.Register(config.Cfg.Registries.Biz, bizInterfaceTemplate, bizRegisterTemplate)
+		if err != nil {
+			fmt.Println("Register biz failed, err:", err)
+		}
 	}
 
 	// 5.Controller

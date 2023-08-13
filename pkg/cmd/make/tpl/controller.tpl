@@ -2,6 +2,7 @@ package {{.PackageName}}
 
 import (
 	"github.com/asaskevich/govalidator"
+	"github.com/bingo-project/component-base/log"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 
@@ -9,7 +10,6 @@ import (
 	"{{.RootPackage}}/{{.StorePath}}"
 	"{{.RootPackage}}/internal/pkg/core"
 	"{{.RootPackage}}/internal/pkg/errno"
-	"{{.RootPackage}}/internal/pkg/log"
 	v1 "{{.RootPackage}}/{{.RequestPath}}"
 	"{{.RootPackage}}/pkg/auth"
 )

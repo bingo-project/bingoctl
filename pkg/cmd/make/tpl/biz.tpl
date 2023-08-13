@@ -5,12 +5,12 @@ import (
 	"errors"
 	"regexp"
 
+    "github.com/bingo-project/component-base/log"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 
 	"{{.RootPackage}}/{{.StorePath}}"
 	"{{.RootPackage}}/internal/pkg/errno"
-	"{{.RootPackage}}/internal/pkg/log"
 	"{{.RootPackage}}/{{.ModelPath}}"
 	v1 "{{.RootPackage}}/{{.RequestPath}}"
 )
