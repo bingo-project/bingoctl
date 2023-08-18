@@ -1,6 +1,8 @@
 package make
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
@@ -8,6 +10,13 @@ import (
 
 const (
 	storeUsageStr = "store NAME"
+)
+
+var (
+	storeUsageErrStr = fmt.Sprintf(
+		"expected '%s'.\nNAME is a required argument for the store command",
+		storeUsageStr,
+	)
 )
 
 // StoreOptions is an option struct to support 'store' sub command.
@@ -46,7 +55,7 @@ func NewCmdStore() *cobra.Command {
 // Validate makes sure there is no discrepancy in command options.
 func (o *StoreOptions) Validate(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return cmdutil.UsageErrorf(cmd, cmdUsageErrStr)
+		return cmdutil.UsageErrorf(cmd, storeUsageErrStr)
 	}
 
 	return nil

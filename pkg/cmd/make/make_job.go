@@ -1,12 +1,21 @@
 package make
 
 import (
+	"fmt"
+
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
 )
 
 const (
 	jobUsageStr = "job NAME"
+)
+
+var (
+	jobUsageErrStr = fmt.Sprintf(
+		"expected '%s'.\nNAME is a required argument for the job command",
+		jobUsageStr,
+	)
 )
 
 // JobOptions is an option struct to support 'job' sub command.
@@ -28,7 +37,7 @@ func NewCmdJob() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   jobUsageStr,
 		DisableFlagsInUseLine: true,
-		Short:                 "Generate cmd code",
+		Short:                 "Generate job code",
 		TraverseChildren:      true,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(o.Validate(cmd, args))
@@ -43,7 +52,7 @@ func NewCmdJob() *cobra.Command {
 // Validate makes sure there is no discrepancy in command options.
 func (o *JobOptions) Validate(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return cmdutil.UsageErrorf(cmd, bizUsageErrStr)
+		return cmdutil.UsageErrorf(cmd, jobUsageErrStr)
 	}
 
 	return nil
