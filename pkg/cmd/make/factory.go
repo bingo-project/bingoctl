@@ -266,7 +266,7 @@ func RegisterInterface(name, content, interfaceTemplate, registerTemplate string
 
 	// Register
 	seek := fmt.Sprintf("type %s interface {", name)
-	rule := seek + `[a-zA-Z0-9().*\s]*}`
+	rule := seek + `([^}]*)}`
 	reg := regexp.MustCompile(rule)
 
 	// 根据规则提取关键信息
