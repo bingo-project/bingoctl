@@ -7,10 +7,11 @@ import (
 
 	"{{.RootPackage}}/{{.ModelPath}}"
 	"{{.RootPackage}}/internal/pkg/util/helper"
+	v1 "{{.RootPackage}}/{{.RequestPath}}"
 )
 
 type {{.StructName}}Store interface {
-	List(ctx context.Context, offset, limit int) (int64, []*model.{{.StructName}}M, error)
+	List(ctx context.Context, req *v1.List{{.StructName}}Request) (int64, []*model.{{.StructName}}M, error)
 	Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
 	Get(ctx context.Context, ID uint) (*model.{{.StructName}}M, error)
 	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error
@@ -21,15 +22,27 @@ type {{.VariableNamePlural}} struct {
 	db *gorm.DB
 }
 
-// 确保 {{.VariableNamePlural}} 实现了 {{.StructName}}Store 接口.
 var _ {{.StructName}}Store = (*{{.VariableNamePlural}})(nil)
 
 func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 	return &{{.VariableNamePlural}}{db: db}
 }
 
-func (u *{{.VariableNamePlural}}) List(ctx context.Context, offset, limit int) (count int64, ret []*model.{{.StructName}}M, err error) {
-	err = u.db.Offset(offset).Limit(helper.DefaultLimit(limit)).Order("id desc").Find(&ret).
+func (u *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
+	// Order
+	if req.Order == "" {
+		req.Order = "id"
+	}
+
+	// Sort
+	if req.Sort == "" {
+		req.Sort = "desc"
+	}
+
+	err = u.db.Offset(req.Offset).
+		Limit(helper.DefaultLimit(req.Limit)).
+		Order(req.Order + " " + req.Sort).
+		Find(&ret).
 		Offset(-1).
 		Limit(-1).
 		Count(&count).

@@ -30,21 +30,21 @@ func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName
 // @Accept     application/json
 // @Produce    json
 // @Param      request	 query	    v1.List{{.StructName}}Request	 true  "Param"
-// @Success	   200		{object}	v1.List{{.StructName}}Response
+// @Success	   200		{object}	v1.ListResponse{data=[]v1.{{.StructName}}Info}
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}} [GET]
 func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 	log.C(c).Infow("List {{.VariableName}} function called")
 
-	var r v1.List{{.StructName}}Request
-	if err := c.ShouldBindQuery(&r); err != nil {
+	var req v1.List{{.StructName}}Request
+	if err := c.ShouldBindQuery(&req); err != nil {
 		core.WriteResponse(c, errno.ErrBind, nil)
 
 		return
 	}
 
-	resp, err := ctrl.b.{{.StructNamePlural}}().List(c, r.Offset, r.Limit)
+	resp, err := ctrl.b.{{.StructNamePlural}}().List(c, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -55,35 +55,35 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 }
 
 // Create
-// @Summary    Create a {{.VariableName}}
+// @Summary    Create {{.VariableName}}
 // @Security   Bearer
 // @Tags       {{.StructName}}
 // @Accept     application/json
 // @Produce    json
 // @Param      request	 body	    v1.Create{{.StructName}}Request	 true  "Param"
-// @Success	   200		{object}	v1.Get{{.StructName}}Response
+// @Success	   200		{object}	v1.{{.StructName}}Info
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}} [POST]
 func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 	log.C(c).Infow("Create {{.VariableName}} function called")
 
-	var r v1.Create{{.StructName}}Request
-	if err := c.ShouldBindJSON(&r); err != nil {
+	var req v1.Create{{.StructName}}Request
+	if err := c.ShouldBindJSON(&req); err != nil {
 		core.WriteResponse(c, errno.ErrBind, nil)
 
 		return
 	}
 
 	// Validator
-	if _, err := govalidator.ValidateStruct(r); err != nil {
+	if _, err := govalidator.ValidateStruct(req); err != nil {
 		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}
 
 	// Create {{.VariableName}}
-	resp, err := ctrl.b.{{.StructNamePlural}}().Create(c, &r)
+	resp, err := ctrl.b.{{.StructNamePlural}}().Create(c, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -100,7 +100,7 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 // @Accept     application/json
 // @Produce    json
 // @Param      id	     path	    string            		 true  "ID"
-// @Success	   200		{object}	v1.Get{{.StructName}}Response
+// @Success	   200		{object}	v1.{{.StructName}}Info
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [GET]
@@ -126,28 +126,28 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 // @Produce    json
 // @Param      id	     path	    string            		 true  "ID"
 // @Param      request	 body	    v1.Update{{.StructName}}Request	 true  "Param"
-// @Success	   200		{object}	v1.Get{{.StructName}}Response
+// @Success	   200		{object}	v1.{{.StructName}}Info
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [PUT]
 func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	log.C(c).Infow("Update {{.VariableName}} function called")
 
-	var r v1.Update{{.StructName}}Request
-	if err := c.ShouldBindJSON(&r); err != nil {
+	var req v1.Update{{.StructName}}Request
+	if err := c.ShouldBindJSON(&req); err != nil {
 		core.WriteResponse(c, errno.ErrBind, nil)
 
 		return
 	}
 
-	if _, err := govalidator.ValidateStruct(r); err != nil {
+	if _, err := govalidator.ValidateStruct(req); err != nil {
 		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}
 
 	ID := cast.ToUint(c.Param("id"))
-	resp, err := ctrl.b.{{.StructNamePlural}}().Update(c, ID, &r)
+	resp, err := ctrl.b.{{.StructNamePlural}}().Update(c, ID, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -158,7 +158,7 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 }
 
 // Delete
-// @Summary    Delete a {{.VariableName}}
+// @Summary    Delete {{.VariableName}}
 // @Security   Bearer
 // @Tags       {{.StructName}}
 // @Accept     application/json
