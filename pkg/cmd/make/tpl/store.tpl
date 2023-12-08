@@ -2,6 +2,7 @@ package {{.PackageName}}
 
 import (
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 
@@ -16,6 +17,10 @@ type {{.StructName}}Store interface {
 	Get(ctx context.Context, ID uint) (*model.{{.StructName}}M, error)
 	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error
 	Delete(ctx context.Context, ID uint) error
+
+	CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error
+	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
+	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
 }
 
 type {{.VariableNamePlural}} struct {
@@ -28,7 +33,7 @@ func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 	return &{{.VariableNamePlural}}{db: db}
 }
 
-func (u *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
+func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
 	// Order
 	if req.Order == "" {
 		req.Order = "id"
@@ -39,7 +44,7 @@ func (u *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.Struc
 		req.Sort = "desc"
 	}
 
-	err = u.db.Offset(req.Offset).
+	err = s.db.Offset(req.Offset).
 		Limit(helper.DefaultLimit(req.Limit)).
 		Order(req.Order + " " + req.Sort).
 		Find(&ret).
@@ -51,20 +56,48 @@ func (u *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.Struc
 	return
 }
 
-func (u *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
-	return u.db.Create(&{{.VariableName}}).Error
+func (s *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Create(&{{.VariableName}}).Error
 }
 
-func (u *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.VariableName}} *model.{{.StructName}}M, err error) {
-	err = u.db.Where("id = ?", ID).First(&{{.VariableName}}).Error
+func (s *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.VariableName}} *model.{{.StructName}}M, err error) {
+	err = s.db.Where("id = ?", ID).First(&{{.VariableName}}).Error
 
 	return
 }
 
-func (u *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error {
-	return u.db.Select(fields).Save(&{{.VariableName}}).Error
+func (s *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error {
+	return s.db.Select(fields).Save(&{{.VariableName}}).Error
 }
 
-func (u *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
-	return u.db.Where("id = ?", ID).Delete(&model.{{.StructName}}M{}).Error
+func (s *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
+	return s.db.Where("id = ?", ID).Delete(&model.{{.StructName}}M{}).Error
+}
+
+func (s *{{.VariableNamePlural}}) CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error {
+	return s.db.CreateInBatches(&{{.VariableNamePlural}}, global.CreateBatchSize).Error
+}
+
+func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Where(where).
+		Attrs(&{{.VariableName}}).
+		FirstOrCreate(&{{.VariableName}}).
+		Error
+}
+
+func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		var exist model.{{.StructName}}M
+		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where(where).
+			First(&exist).
+			Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		{{.VariableName}}.ID = exist.ID
+
+		return tx.Save(&{{.VariableName}}).Error
+	})
 }
