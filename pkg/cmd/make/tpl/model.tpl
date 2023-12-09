@@ -7,7 +7,7 @@ import (
 type {{.StructName}}M struct {
 	gorm.Model
 
-	Name string `gorm:"column:name;not null;default:''" json:"name"`
+	Name string `gorm:"type:varchar(255);not null;default:''"`
 }
 
 func (u *{{.StructName}}M) TableName() string {

@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
+	"{{.RootPackage}}/internal/apiserver/global"
 	"{{.RootPackage}}/{{.ModelPath}}"
 	"{{.RootPackage}}/internal/pkg/util/helper"
 	v1 "{{.RootPackage}}/{{.RequestPath}}"
