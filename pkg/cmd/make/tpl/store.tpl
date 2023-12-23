@@ -36,8 +36,19 @@ func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 	return &{{.VariableNamePlural}}{db: db}
 }
 
+func Search{{.StructName}}(req *v1.List{{.StructName}}Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		// if req.Name != "" {
+		// 	db.Where("name = ?", req.Name)
+		// }
+
+		return db
+	}
+}
+
 func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
-	count, err = gormutil.Paginate(u.db, &req.ListOptions, &ret)
+	db := u.db.Scopes(Search{{.StructName}}(req))
+	count, err = gormutil.Paginate(db, &req.ListOptions, &ret)
 
 	return
 }

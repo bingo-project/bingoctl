@@ -2,6 +2,8 @@ package v1
 
 import (
 	"time"
+
+	"github.com/bingo-project/component-base/util/gormutil"
 )
 
 type {{.StructName}}Info struct {
@@ -13,7 +15,7 @@ type {{.StructName}}Info struct {
 }
 
 type List{{.StructName}}Request struct {
-	ListRequest
+	gormutil.ListOptions
 }
 
 type Create{{.StructName}}Request struct {
