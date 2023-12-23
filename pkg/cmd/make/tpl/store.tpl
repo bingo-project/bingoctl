@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/bingo-project/component-base/util/gormutil"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -36,24 +37,7 @@ func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 }
 
 func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
-	// Order
-	if req.Order == "" {
-		req.Order = "id"
-	}
-
-	// Sort
-	if req.Sort == "" {
-		req.Sort = "desc"
-	}
-
-	err = s.db.Offset(req.Offset).
-		Limit(helper.DefaultLimit(req.Limit)).
-		Order(req.Order + " " + req.Sort).
-		Find(&ret).
-		Offset(-1).
-		Limit(-1).
-		Count(&count).
-		Error
+	count, err = gormutil.Paginate(u.db, &req.ListOptions, &ret)
 
 	return
 }
