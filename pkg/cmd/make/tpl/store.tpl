@@ -47,7 +47,7 @@ func Search{{.StructName}}(req *v1.List{{.StructName}}Request) func(db *gorm.DB)
 }
 
 func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
-	db := u.db.Scopes(Search{{.StructName}}(req))
+	db := s.db.Scopes(Search{{.StructName}}(req))
 	count, err = gormutil.Paginate(db, &req.ListOptions, &ret)
 
 	return
