@@ -22,9 +22,10 @@ type {{.StructName}}Store interface {
 	Delete(ctx context.Context, ID uint) error
 
 	CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error
-	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
 	CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
+	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
 	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
+	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
 }
 
 type {{.VariableNamePlural}} struct {
@@ -76,16 +77,16 @@ func (s *{{.VariableNamePlural}}) CreateInBatch(ctx context.Context, {{.Variable
 	return s.db.CreateInBatches(&{{.VariableNamePlural}}, global.CreateBatchSize).Error
 }
 
+func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Clauses(clause.OnConflict{DoNothing: true}).
+		Create(&{{.VariableName}}).
+		Error
+}
+
 func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
 	return s.db.Where(where).
 		Attrs(&{{.VariableName}}).
 		FirstOrCreate(&{{.VariableName}}).
-		Error
-}
-
-func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
-	return s.db.Clauses(clause.OnConflict{DoNothing: true}).
-		Create(&{{.VariableName}}).
 		Error
 }
 
@@ -104,4 +105,10 @@ func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any,
 
 		return tx.Omit("CreatedAt").Save(&{{.VariableName}}).Error
 	})
+}
+
+func (s *{{.VariableNamePlural}}) Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Clauses(clause.OnConflict{UpdateAll: true}).
+		Create(&{{.VariableName}}).
+		Error
 }
