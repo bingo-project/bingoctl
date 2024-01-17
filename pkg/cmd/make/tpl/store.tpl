@@ -23,6 +23,7 @@ type {{.StructName}}Store interface {
 
 	CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error
 	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
+	CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
 	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
 }
 
@@ -82,6 +83,12 @@ func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, 
 		Error
 }
 
+func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+	return s.db.Clauses(clause.OnConflict{DoNothing: true}).
+		Create(&{{.VariableName}}).
+		Error
+}
+
 func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		var exist model.{{.StructName}}M
@@ -95,6 +102,6 @@ func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any,
 
 		{{.VariableName}}.ID = exist.ID
 
-		return tx.Save(&{{.VariableName}}).Error
+		return tx.Omit("CreatedAt").Save(&{{.VariableName}}).Error
 	})
 }
