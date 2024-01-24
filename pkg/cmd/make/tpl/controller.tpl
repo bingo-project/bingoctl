@@ -30,7 +30,7 @@ func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName
 // @Accept     application/json
 // @Produce    json
 // @Param      request	 query	    v1.List{{.StructName}}Request	 true  "Param"
-// @Success	   200		{object}	v1.ListResponse{data=[]v1.{{.StructName}}Info}
+// @Success	   200		{object}	v1.List{{.StructName}}Response
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}} [GET]

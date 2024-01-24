@@ -18,6 +18,11 @@ type List{{.StructName}}Request struct {
 	gormutil.ListOptions
 }
 
+type List{{.StructName}}Response struct {
+	Total int64 `json:"total"`
+	Data  []{{.StructName}}Info   `json:"data"`
+}
+
 type Create{{.StructName}}Request struct {
 	Name string `json:"name" valid:"required,alphanum,stringlength(1|255)"`
 }

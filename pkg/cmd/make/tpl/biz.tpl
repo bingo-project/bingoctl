@@ -14,7 +14,7 @@ import (
 )
 
 type {{.StructName}}Biz interface {
-	List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.ListResponse, error)
+	List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.List{{.StructName}}Response, error)
 	Create(ctx context.Context, req *v1.Create{{.StructName}}Request) (*v1.{{.StructName}}Info, error)
 	Get(ctx context.Context, ID uint) (*v1.{{.StructName}}Info, error)
 	Update(ctx context.Context, ID uint, req *v1.Update{{.StructName}}Request) (*v1.{{.StructName}}Info, error)
@@ -31,7 +31,7 @@ func New{{.StructName}}(ds store.IStore) *{{.VariableName}}Biz {
 	return &{{.VariableName}}Biz{ds: ds}
 }
 
-func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.ListResponse, error) {
+func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.List{{.StructName}}Response, error) {
 	count, list, err := b.ds.{{.StructNamePlural}}().List(ctx, req)
 	if err != nil {
 		log.C(ctx).Errorw("Failed to list {{.VariableNamePlural}}", "err", err)
@@ -39,15 +39,15 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructNa
 		return nil, err
 	}
 
-	data := make([]*v1.{{.StructName}}Info, 0, len(list))
+	data := make([]v1.{{.StructName}}Info, 0)
 	for _, item := range list {
 		var {{.VariableName}} v1.{{.StructName}}Info
 		_ = copier.Copy(&{{.VariableName}}, item)
 
-		data = append(data, &{{.VariableName}})
+		data = append(data, {{.VariableName}})
 	}
 
-	return &v1.ListResponse{Total: count, Data: data}, nil
+	return &v1.List{{.StructName}}Response{Total: count, Data: data}, nil
 }
 
 func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.StructName}}Request) (*v1.{{.StructName}}Info, error) {
