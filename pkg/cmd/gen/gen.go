@@ -57,9 +57,10 @@ func (o *GenOptions) Validate(cmd *cobra.Command, args []string) error {
 // Complete completes all the required options.
 func (o *GenOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Init store
-	config.DB, _ = db.NewMySQL(config.Cfg.MysqlOptions)
+	var err error
+	config.DB, err = db.NewMySQL(config.Cfg.MysqlOptions)
 
-	return nil
+	return err
 }
 
 // Run executes a new sub command using the specified options.

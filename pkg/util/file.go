@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -70,4 +71,8 @@ func GetDirectoryFromPath(filePath string) string {
 	directorArr := arr[:len(arr)-1]
 
 	return strings.Join(directorArr, "/")
+}
+
+func GetFileNameWithoutExtension(fileName string) string {
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }

@@ -29,6 +29,7 @@ type Directory struct {
 	Controller string `mapstructure:"controller" json:"controller" yaml:"controller"`
 	Middleware string `mapstructure:"middleware" json:"middleware" yaml:"middleware"`
 	Job        string `mapstructure:"job" json:"job" yaml:"job"`
+	Migration  string `mapstructure:"migration" json:"migration" yaml:"migration"`
 }
 
 type Registries struct {
@@ -55,6 +56,7 @@ func NewDefaultConfig() *Config {
 			Controller: "internal/apiserver/controller",
 			Middleware: "internal/pkg/middleware",
 			Job:        "internal/watcher/watcher",
+			Migration:  "internal/apiserver/database/migration",
 		},
 	}
 }
