@@ -15,17 +15,17 @@ import (
 )
 
 type {{.StructName}}Store interface {
-	List(ctx context.Context, req *v1.List{{.StructName}}Request) (int64, []*model.{{.StructName}}M, error)
-	Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
-	Get(ctx context.Context, ID uint) (*model.{{.StructName}}M, error)
-	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error
+	List(ctx context.Context, req *v1.List{{.StructName}}Request) (int64, []*model.{{.StructName}}, error)
+	Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
+	Get(ctx context.Context, ID uint) (*model.{{.StructName}}, error)
+	Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}, fields ...string) error
 	Delete(ctx context.Context, ID uint) error
 
-	CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error
-	CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
-	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
-	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error
-	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error
+	CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}) error
+	CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
+	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
+	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
+	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
 }
 
 type {{.VariableNamePlural}} struct {
@@ -48,51 +48,51 @@ func Search{{.StructName}}(req *v1.List{{.StructName}}Request) func(db *gorm.DB)
 	}
 }
 
-func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}M, err error) {
+func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}, err error) {
 	db := s.db.Scopes(Search{{.StructName}}(req))
 	count, err = gormutil.Paginate(db, &req.ListOptions, &ret)
 
 	return
 }
 
-func (s *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+func (s *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error {
 	return s.db.Create(&{{.VariableName}}).Error
 }
 
-func (s *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.VariableName}} *model.{{.StructName}}M, err error) {
+func (s *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.VariableName}} *model.{{.StructName}}, err error) {
 	err = s.db.Where("id = ?", ID).First(&{{.VariableName}}).Error
 
 	return
 }
 
-func (s *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M, fields ...string) error {
+func (s *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}, fields ...string) error {
 	return s.db.Select(fields).Save(&{{.VariableName}}).Error
 }
 
 func (s *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
-	return s.db.Where("id = ?", ID).Delete(&model.{{.StructName}}M{}).Error
+	return s.db.Where("id = ?", ID).Delete(&model.{{.StructName}}{}).Error
 }
 
-func (s *{{.VariableNamePlural}}) CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}M) error {
+func (s *{{.VariableNamePlural}}) CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}) error {
 	return s.db.CreateInBatches(&{{.VariableNamePlural}}, global.CreateBatchSize).Error
 }
 
-func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
+func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error {
 	return s.db.Clauses(clause.OnConflict{DoNothing: true}).
 		Create(&{{.VariableName}}).
 		Error
 }
 
-func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
+func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error {
 	return s.db.Where(where).
 		Attrs(&{{.VariableName}}).
 		FirstOrCreate(&{{.VariableName}}).
 		Error
 }
 
-func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}M) error {
+func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		var exist model.{{.StructName}}M
+		var exist model.{{.StructName}}
 		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Where(where).
 			First(&exist).
@@ -107,8 +107,14 @@ func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any,
 	})
 }
 
-func (s *{{.VariableNamePlural}}) Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}M) error {
-	return s.db.Clauses(clause.OnConflict{UpdateAll: true}).
+func (s *{{.VariableNamePlural}}) Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}, fields ...string) error {
+	do := clause.OnConflict{UpdateAll: true}
+	if len(fields) > 0 {
+		do.UpdateAll = false
+		do.DoUpdates = clause.AssignmentColumns(fields)
+	}
+
+	return s.db.Clauses(do).
 		Create(&{{.VariableName}}).
 		Error
 }
