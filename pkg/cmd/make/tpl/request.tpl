@@ -7,11 +7,7 @@ import (
 )
 
 type {{.StructName}}Info struct {
-	ID uint `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-
-	Name  string    `json:"name"`
+	{{.Fields}}
 }
 
 type List{{.StructName}}Request struct {
@@ -24,9 +20,9 @@ type List{{.StructName}}Response struct {
 }
 
 type Create{{.StructName}}Request struct {
-	Name string `json:"name" valid:"required,alphanum,stringlength(1|255)"`
+	{{.MainFields}}
 }
 
 type Update{{.StructName}}Request struct {
-	Name *string `json:"name" valid:"required,stringlength(1|255)"`
+	{{.MainFields}}
 }

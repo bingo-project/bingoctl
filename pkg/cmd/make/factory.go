@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gertd/go-pluralize"
@@ -57,8 +59,11 @@ type Options struct {
 	RequestPath string
 	ModelPath   string
 
-	// Generate model by gorm.gen
-	Table string
+	// Generate by gorm.gen
+	Table         string
+	FieldTemplate string
+	Fields        string
+	MainFields    string
 }
 
 func (o *Options) GenerateCode(tmpl, path string) error {
@@ -68,9 +73,10 @@ func (o *Options) GenerateCode(tmpl, path string) error {
 	o.ReadCodeTemplates()
 	o.GenerateAttributes(dir, path)
 
-	// Generate model from table.
-	if o.Name == string(TmplModel) && o.Table != "" {
-		return o.GenerateModelFromTable()
+	// Generate from db table.
+	dbTemplates := []Tmpl{TmplModel, TmplRequest}
+	if slices.Contains(dbTemplates, Tmpl(o.Name)) && o.Table != "" {
+		_ = o.GetFieldsFromDB()
 	}
 
 	err := cmdutil.GenerateCode(o.FilePath, o.CodeTemplate, o.Name, o)
@@ -91,6 +97,10 @@ func (o *Options) GenerateCode(tmpl, path string) error {
 			return err
 		}
 	}
+
+	// Format code
+	cmd := exec.Command("gofmt", "-w", o.FilePath)
+	_ = cmd.Run()
 
 	return nil
 }
@@ -140,11 +150,17 @@ func (o *Options) ReadCodeTemplates() *Options {
 	codeTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))
 	o.CodeTemplate = string(codeTemplateBytes)
 
+	// Read interface template
 	interfaceTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_interface.tpl", o.Name))
 	o.InterfaceTemplate = string(interfaceTemplateBytes)
 
+	// Ream registry template
 	registerTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_registry.tpl", o.Name))
 	o.RegisterTemplate = string(registerTemplateBytes)
+
+	// Read field template
+	fieldTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s_field.tpl", o.Name))
+	o.FieldTemplate = string(fieldTemplateBytes)
 
 	return o
 }
@@ -235,7 +251,7 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	return nil
 }
 
-func (o *Options) GenerateModelFromTable() error {
+func (o *Options) GetFieldsFromDB() error {
 	// Generate model from table.
 	g := gen.NewGenerator(gen.Config{
 		ModelPkgPath: o.Directory,
@@ -251,9 +267,48 @@ func (o *Options) GenerateModelFromTable() error {
 	g.UseDB(config.DB)
 
 	// Generate struct `StructName` based on table `Table`
-	g.GenerateModelAs(o.Table, o.StructName)
+	meta := g.GenerateModelAs(o.Table, o.StructName)
+	if len(meta.Fields) == 0 {
+		return nil
+	}
 
-	g.Execute()
+	gormFields := []string{"ID", "CreatedAt", "UpdatedAt", "DeletedAt"}
+	for _, field := range meta.Fields {
+		// Comment
+		var comment string
+		if field.ColumnComment != "" {
+			comment = " // " + field.ColumnComment
+		}
+
+		// Type
+		if field.Type == "gorm.DeletedAt" && o.Name == string(TmplRequest) {
+			field.Type = "*time.Time"
+		}
+
+		// Replaces
+		replaces := make(map[string]string)
+		replaces["{{.Name}}"] = field.Name
+		replaces["{{.Type}}"] = field.Type
+		replaces["{{.GORMTag}}"] = field.GORMTag.Build()
+		replaces["{{.JsonTag}}"] = strcase.ToLowerCamel(field.Tag["json"])
+		replaces["{{.Comment}}"] = comment
+
+		// Replace
+		fieldTemplate := o.FieldTemplate
+		for search, replace := range replaces {
+			fieldTemplate = strings.ReplaceAll(fieldTemplate, search, replace)
+		}
+
+		// Fields
+		o.Fields += fieldTemplate + "\n"
+
+		// Skip gorm.Model fields.
+		if slices.Contains(gormFields, field.Name) {
+			continue
+		}
+
+		o.MainFields += fieldTemplate + "\n"
+	}
 
 	return nil
 }
