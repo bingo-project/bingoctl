@@ -7,6 +7,7 @@ import (
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/db"
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -23,7 +24,7 @@ var (
 
 // RequestOptions is an option struct to support 'request' sub command.
 type RequestOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewRequestOptions returns an initialized RequestOptions instance.

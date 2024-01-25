@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -21,7 +22,7 @@ var (
 
 // StoreOptions is an option struct to support 'store' sub command.
 type StoreOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewStoreOptions returns an initialized StoreOptions instance.

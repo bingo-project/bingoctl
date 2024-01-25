@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -21,7 +22,7 @@ var (
 
 // CmdOptions is an option struct to support 'cmd' sub command.
 type CmdOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewCmdOptions returns an initialized CmdOptions instance.

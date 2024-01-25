@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -21,7 +22,7 @@ var (
 
 // ControllerOptions is an option struct to support 'controller' sub command.
 type ControllerOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewControllerOptions returns an initialized ControllerOptions instance.

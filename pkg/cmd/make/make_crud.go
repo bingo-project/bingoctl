@@ -8,6 +8,7 @@ import (
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/db"
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -24,7 +25,7 @@ var (
 
 // CrudOptions is an option struct to support 'crud' sub command.
 type CrudOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewCrudOptions returns an initialized CrudOptions instance.

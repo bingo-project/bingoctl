@@ -5,6 +5,8 @@ import (
 
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
+
+	"github.com/bingo-project/bingoctl/pkg/generator"
 )
 
 const (
@@ -20,7 +22,7 @@ var (
 
 // JobOptions is an option struct to support 'job' sub command.
 type JobOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewJobOptions returns an initialized JobOptions instance.

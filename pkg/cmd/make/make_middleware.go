@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -21,7 +22,7 @@ var (
 
 // MiddlewareOptions is an option struct to support 'middleware' sub command.
 type MiddlewareOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewMiddlewareOptions returns an initialized MiddlewareOptions instance.

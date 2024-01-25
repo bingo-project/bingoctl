@@ -1,6 +1,7 @@
-package make
+package generator
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -20,6 +21,11 @@ import (
 )
 
 type Tmpl string
+
+var (
+	//go:embed tpl
+	tplFS embed.FS
+)
 
 const (
 	TmplCmd        Tmpl = "cmd"

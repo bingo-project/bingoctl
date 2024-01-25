@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -21,7 +22,7 @@ var (
 
 // BizOptions is an option struct to support 'biz' sub command.
 type BizOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewBizOptions returns an initialized BizOptions instance.

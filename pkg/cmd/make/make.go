@@ -1,23 +1,20 @@
 package make
 
 import (
-	"embed"
-
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 var (
-	//go:embed tpl
-	tplFS       embed.FS
 	makeExample = "make cmd"
 	opt         = NewOptions()
 )
 
 // NewOptions returns an initialized CmdOptions instance.
-func NewOptions() *Options {
-	return &Options{}
+func NewOptions() *generator.Options {
+	return &generator.Options{}
 }
 
 // NewCmdMake returns new initialized instance of 'new' sub command.

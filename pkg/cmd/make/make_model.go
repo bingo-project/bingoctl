@@ -7,6 +7,7 @@ import (
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/db"
+	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -23,7 +24,7 @@ var (
 
 // ModelOptions is an option struct to support 'model' sub command.
 type ModelOptions struct {
-	*Options
+	*generator.Options
 }
 
 // NewModelOptions returns an initialized ModelOptions instance.
