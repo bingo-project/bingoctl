@@ -2,13 +2,10 @@ package migrate
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/bingo-project/component-base/cli/console"
 	"github.com/mgutz/ansi"
 	"gorm.io/gorm"
-
-	"github.com/bingo-project/bingoctl/pkg/util"
 )
 
 type Migrator struct {
@@ -44,9 +41,6 @@ func (migrator *Migrator) createMigrationsTable() {
 }
 
 func (migrator *Migrator) Up() {
-	// Read migration files
-	migrateFiles := migrator.readAllMigrationFiles()
-
 	// Get batch
 	batch := migrator.getBatch()
 
@@ -54,7 +48,7 @@ func (migrator *Migrator) Up() {
 	migrator.DB.Find(&migrations)
 
 	ran := false
-	for _, migrationFile := range migrateFiles {
+	for _, migrationFile := range migrationFiles {
 		if isNotMigrated(migrations, migrationFile) {
 			migrator.runUpMigration(migrationFile, batch)
 			ran = true
@@ -110,25 +104,6 @@ func (migrator *Migrator) getBatch() int {
 	}
 
 	return batch
-}
-
-func (migrator *Migrator) readAllMigrationFiles() []MigrationFile {
-	files, err := os.ReadDir(migrator.Folder)
-	console.ExitIf(err)
-
-	var migrateFiles []MigrationFile
-	for _, f := range files {
-		// Get filename
-		fileName := util.GetFileNameWithoutExtension(f.Name())
-
-		migrationFile := GetMigrationFile(fileName)
-
-		if len(migrationFile.FileName) > 0 {
-			migrateFiles = append(migrateFiles, migrationFile)
-		}
-	}
-
-	return migrateFiles
 }
 
 func (migrator *Migrator) runUpMigration(migrationFile MigrationFile, batch int) {
