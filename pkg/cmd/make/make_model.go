@@ -77,5 +77,5 @@ func (o *ModelOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ModelOptions) Run(args []string) error {
-	return o.GenerateCode("model", args[0])
+	return o.GenerateCode(string(generator.TmplModel), args[0])
 }

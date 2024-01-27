@@ -77,5 +77,5 @@ func (o *RequestOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RequestOptions) Run(args []string) error {
-	return o.GenerateCode("request", args[0])
+	return o.GenerateCode(string(generator.TmplRequest), args[0])
 }

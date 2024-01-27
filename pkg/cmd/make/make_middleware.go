@@ -67,5 +67,5 @@ func (o *MiddlewareOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *MiddlewareOptions) Run(args []string) error {
-	return o.GenerateCode("middleware", args[0])
+	return o.GenerateCode(string(generator.TmplMiddleware), args[0])
 }

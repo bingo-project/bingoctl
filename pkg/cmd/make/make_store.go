@@ -69,5 +69,5 @@ func (o *StoreOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *StoreOptions) Run(args []string) error {
-	return o.GenerateCode("store", args[0])
+	return o.GenerateCode(string(generator.TmplStore), args[0])
 }

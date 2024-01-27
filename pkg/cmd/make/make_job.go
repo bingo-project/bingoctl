@@ -67,5 +67,5 @@ func (o *JobOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *JobOptions) Run(args []string) error {
-	return o.GenerateCode("job", args[0])
+	return o.GenerateCode(string(generator.TmplJob), args[0])
 }

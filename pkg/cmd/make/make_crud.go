@@ -78,35 +78,35 @@ func (o *CrudOptions) Complete(cmd *cobra.Command, args []string) error {
 // Run executes a new sub command using the specified options.
 func (o *CrudOptions) Run(args []string) error {
 	// 1.Model
-	err := o.GenerateCode("model", args[0])
+	err := o.GenerateCode(string(generator.TmplModel), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}
 
 	// 2.Store
 	o.ReSetDirectory()
-	err = o.GenerateCode("store", args[0])
+	err = o.GenerateCode(string(generator.TmplStore), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}
 
 	// 3.Request
 	o.ReSetDirectory()
-	err = o.GenerateCode("request", args[0])
+	err = o.GenerateCode(string(generator.TmplRequest), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}
 
 	// 4.Biz
 	o.ReSetDirectory()
-	err = o.GenerateCode("biz", args[0])
+	err = o.GenerateCode(string(generator.TmplBiz), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}
 
 	// 5.Controller
 	o.ReSetDirectory()
-	err = o.GenerateCode("controller", args[0])
+	err = o.GenerateCode(string(generator.TmplController), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}

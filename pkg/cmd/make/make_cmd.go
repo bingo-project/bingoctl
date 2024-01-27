@@ -71,5 +71,5 @@ func (o *CmdOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *CmdOptions) Run(args []string) error {
-	return o.GenerateCode("cmd", args[0])
+	return o.GenerateCode(string(generator.TmplCmd), args[0])
 }
