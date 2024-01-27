@@ -24,11 +24,14 @@ var (
 // ResetOptions is an option struct to support 'reset' sub command.
 type ResetOptions struct {
 	// Options
+	*Options
 }
 
 // NewResetOptions returns an initialized ResetOptions instance.
 func NewResetOptions() *ResetOptions {
-	return &ResetOptions{}
+	return &ResetOptions{
+		Options: opt,
+	}
 }
 
 // NewCmdReset returns new initialized instance of 'reset' sub command.
@@ -65,7 +68,7 @@ func (o *ResetOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ResetOptions) Run(args []string) error {
-	migrator().Reset()
+	o.Migrator().Reset()
 
 	return nil
 }

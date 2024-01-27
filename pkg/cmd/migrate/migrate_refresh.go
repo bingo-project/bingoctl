@@ -24,11 +24,14 @@ var (
 // RefreshOptions is an option struct to support 'refresh' sub command.
 type RefreshOptions struct {
 	// Options
+	*Options
 }
 
 // NewRefreshOptions returns an initialized RefreshOptions instance.
 func NewRefreshOptions() *RefreshOptions {
-	return &RefreshOptions{}
+	return &RefreshOptions{
+		Options: opt,
+	}
 }
 
 // NewCmdRefresh returns new initialized instance of 'refresh' sub command.
@@ -65,7 +68,7 @@ func (o *RefreshOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RefreshOptions) Run(args []string) error {
-	migrator().Refresh()
+	o.Migrator().Refresh()
 
 	return nil
 }

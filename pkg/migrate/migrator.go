@@ -8,7 +8,6 @@ import (
 	"github.com/mgutz/ansi"
 	"gorm.io/gorm"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/util"
 )
 
@@ -24,11 +23,11 @@ type Migration struct {
 	Batch     int
 }
 
-func NewMigrator(folder string) *Migrator {
+func NewMigrator(db *gorm.DB, folder string) *Migrator {
 	migrator := &Migrator{
 		Folder:   folder,
-		DB:       config.DB,
-		Migrator: config.DB.Migrator(),
+		DB:       db,
+		Migrator: db.Migrator(),
 	}
 
 	migrator.createMigrationsTable()
@@ -37,7 +36,6 @@ func NewMigrator(folder string) *Migrator {
 }
 
 func (migrator *Migrator) createMigrationsTable() {
-
 	migration := Migration{}
 
 	if !migrator.Migrator.HasTable(&migration) {
@@ -164,8 +162,7 @@ func (migrator *Migrator) Refresh() {
 
 func (migrator *Migrator) Fresh() {
 	// Delete all tables
-	config.DB = migrator.DB
-	err := DeleteAllTables()
+	err := migrator.DeleteAllTables()
 	console.ExitIf(err)
 	console.Info("Dropped all tables successfully.")
 
@@ -186,12 +183,14 @@ func isNotMigrated(migrations []Migration, migrationFile MigrationFile) bool {
 	return true
 }
 
-func DeleteAllTables() error {
-	var tables []string
+func (migrator *Migrator) DeleteAllTables() error {
+	tables, err := migrator.DB.Migrator().GetTables()
+	if err != nil {
+		return err
+	}
 
-	config.DB.Select(&tables, "SHOW TABLES")
 	for _, table := range tables {
-		err := config.DB.Migrator().DropTable(table)
+		err := migrator.DB.Migrator().DropTable(table)
 		if err != nil {
 			continue
 		}

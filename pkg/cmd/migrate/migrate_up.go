@@ -5,9 +5,6 @@ import (
 
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
-
-	"github.com/bingo-project/bingoctl/pkg/config"
-	"github.com/bingo-project/bingoctl/pkg/db"
 )
 
 const (
@@ -24,11 +21,14 @@ var (
 // UpOptions is an option struct to support 'up' sub command.
 type UpOptions struct {
 	// Options
+	*Options
 }
 
 // NewUpOptions returns an initialized UpOptions instance.
 func NewUpOptions() *UpOptions {
-	return &UpOptions{}
+	return &UpOptions{
+		Options: opt,
+	}
 }
 
 // NewCmdUp returns new initialized instance of 'up' sub command.
@@ -57,16 +57,12 @@ func (o *UpOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *UpOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Init store
-	config.DB, err = db.NewMySQL(config.Cfg.MysqlOptions)
-
 	return err
 }
 
 // Run executes a new sub command using the specified options.
 func (o *UpOptions) Run(args []string) error {
-
-	migrator().Up()
+	o.Migrator().Up()
 
 	return nil
 }

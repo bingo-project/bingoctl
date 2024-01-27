@@ -5,9 +5,6 @@ import (
 
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
-
-	"github.com/bingo-project/bingoctl/pkg/config"
-	"github.com/bingo-project/bingoctl/pkg/db"
 )
 
 const (
@@ -24,11 +21,14 @@ var (
 // FreshOptions is an option struct to support 'fresh' sub command.
 type FreshOptions struct {
 	// Options
+	*Options
 }
 
 // NewFreshOptions returns an initialized FreshOptions instance.
 func NewFreshOptions() *FreshOptions {
-	return &FreshOptions{}
+	return &FreshOptions{
+		Options: opt,
+	}
 }
 
 // NewCmdFresh returns new initialized instance of 'fresh' sub command.
@@ -57,15 +57,12 @@ func (o *FreshOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *FreshOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Init store
-	config.DB, err = db.NewMySQL(config.Cfg.MysqlOptions)
-
 	return err
 }
 
 // Run executes a new sub command using the specified options.
 func (o *FreshOptions) Run(args []string) error {
-	migrator().Fresh()
+	o.Migrator().Fresh()
 
 	return nil
 }

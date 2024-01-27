@@ -24,11 +24,14 @@ var (
 // RollbackOptions is an option struct to support 'rollback' sub command.
 type RollbackOptions struct {
 	// Options
+	*Options
 }
 
 // NewRollbackOptions returns an initialized RollbackOptions instance.
 func NewRollbackOptions() *RollbackOptions {
-	return &RollbackOptions{}
+	return &RollbackOptions{
+		Options: opt,
+	}
 }
 
 // NewCmdRollback returns new initialized instance of 'rollback' sub command.
@@ -65,7 +68,7 @@ func (o *RollbackOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RollbackOptions) Run(args []string) error {
-	migrator().Rollback()
+	o.Migrator().Rollback()
 
 	return nil
 }

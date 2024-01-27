@@ -9,7 +9,6 @@ import (
 	"github.com/bingo-project/bingoctl/pkg/cmd/create"
 	"github.com/bingo-project/bingoctl/pkg/cmd/gen"
 	makecmd "github.com/bingo-project/bingoctl/pkg/cmd/make"
-	"github.com/bingo-project/bingoctl/pkg/cmd/migrate"
 	"github.com/bingo-project/bingoctl/pkg/cmd/version"
 	"github.com/bingo-project/bingoctl/pkg/config"
 )
@@ -41,7 +40,6 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	cmds.AddCommand(makecmd.NewCmdMake())
 	cmds.AddCommand(create.NewCmdCreate())
 	cmds.AddCommand(gen.NewCmdGen())
-	cmds.AddCommand(migrate.NewCmdMigrate())
 
 	return cmds
 }
