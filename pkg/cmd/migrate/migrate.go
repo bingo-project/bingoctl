@@ -1,8 +1,6 @@
 package migrate
 
 import (
-	"strings"
-
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
@@ -16,8 +14,7 @@ var (
 
 // Options is an option struct to support 'migrate' sub command.
 type Options struct {
-	Folder string
-	DB     *gorm.DB
+	DB *gorm.DB
 }
 
 // NewOptions returns an initialized Options instance.
@@ -26,7 +23,7 @@ func NewOptions() *Options {
 }
 
 // NewCmdMigrate returns new initialized instance of 'migrate' sub command.
-func NewCmdMigrate(db *gorm.DB, folder string) *cobra.Command {
+func NewCmdMigrate(db *gorm.DB) *cobra.Command {
 	opt.DB = db
 
 	cmd := &cobra.Command{
@@ -46,5 +43,5 @@ func NewCmdMigrate(db *gorm.DB, folder string) *cobra.Command {
 }
 
 func (o *Options) Migrator() *migrate.Migrator {
-	return migrate.NewMigrator(o.DB, strings.TrimRight(o.Folder, "/")+"/")
+	return migrate.NewMigrator(o.DB)
 }

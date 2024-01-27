@@ -9,7 +9,6 @@ import (
 )
 
 type Migrator struct {
-	Folder   string
 	DB       *gorm.DB
 	Migrator gorm.Migrator
 }
@@ -20,9 +19,8 @@ type Migration struct {
 	Batch     int
 }
 
-func NewMigrator(db *gorm.DB, folder string) *Migrator {
+func NewMigrator(db *gorm.DB) *Migrator {
 	migrator := &Migrator{
-		Folder:   folder,
 		DB:       db,
 		Migrator: db.Migrator(),
 	}
