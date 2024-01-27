@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
-	"github.com/bingo-project/bingoctl/pkg/config"
 	"github.com/bingo-project/bingoctl/pkg/migrate"
 )
 
@@ -17,8 +16,8 @@ var (
 
 // Options is an option struct to support 'migrate' sub command.
 type Options struct {
-	// Options
-	DB *gorm.DB
+	Folder string
+	DB     *gorm.DB
 }
 
 // NewOptions returns an initialized Options instance.
@@ -27,7 +26,7 @@ func NewOptions() *Options {
 }
 
 // NewCmdMigrate returns new initialized instance of 'migrate' sub command.
-func NewCmdMigrate(db *gorm.DB) *cobra.Command {
+func NewCmdMigrate(db *gorm.DB, folder string) *cobra.Command {
 	opt.DB = db
 
 	cmd := &cobra.Command{
@@ -47,5 +46,5 @@ func NewCmdMigrate(db *gorm.DB) *cobra.Command {
 }
 
 func (o *Options) Migrator() *migrate.Migrator {
-	return migrate.NewMigrator(o.DB, strings.TrimRight(config.Cfg.Directory.Migration, "/")+"/")
+	return migrate.NewMigrator(o.DB, strings.TrimRight(o.Folder, "/")+"/")
 }
