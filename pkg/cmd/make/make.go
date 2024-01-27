@@ -40,6 +40,7 @@ func NewCmdMake() *cobra.Command {
 	cmd.AddCommand(NewCmdCrud())
 	cmd.AddCommand(NewCmdMiddleware())
 	cmd.AddCommand(NewCmdJob())
+	cmd.AddCommand(NewCmdMigration())
 
 	return cmd
 }

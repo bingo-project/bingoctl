@@ -21,6 +21,7 @@ const (
 	TmplController Tmpl = "controller"
 	TmplMiddleware Tmpl = "middleware"
 	TmplJob        Tmpl = "job"
+	TmplMigration  Tmpl = "migration"
 )
 
 func (o *Options) ReadCodeTemplates() *Options {

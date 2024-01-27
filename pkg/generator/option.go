@@ -32,6 +32,9 @@ type Options struct {
 	FieldTemplate string
 	Fields        string
 	MainFields    string
+
+	// Migration
+	TimeStr string
 }
 
 func (o *Options) SetName(name string) *Options {

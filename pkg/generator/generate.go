@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/gertd/go-pluralize"
 	"github.com/iancoleman/strcase"
@@ -75,6 +76,9 @@ func GetMapDirectory(tmpl string) (dir string) {
 	if tmpl == string(TmplJob) {
 		dir = config.Cfg.Directory.Job
 	}
+	if tmpl == string(TmplMigration) {
+		dir = config.Cfg.Directory.Migration
+	}
 
 	return
 }
@@ -116,6 +120,12 @@ func (o *Options) GenerateAttributes(directory string, path string) *Options {
 
 	// File path
 	o.FilePath = filepath.Join(o.Directory, o.VariableNameSnake+".go")
+
+	// Migration
+	o.TimeStr = time.Now().Format("2006_01_02_150405")
+	if o.Name == string(TmplMigration) {
+		o.FilePath = filepath.Join(o.Directory, o.TimeStr+"_"+o.VariableNameSnake+".go")
+	}
 
 	return o
 }
