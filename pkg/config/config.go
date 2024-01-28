@@ -50,14 +50,15 @@ func NewDefaultConfig() *Config {
 		RootPackage: "bingoctl",
 		Directory: Directory{
 			CMD:        "internal/bingoctl/cmd",
-			Model:      "internal/pkg/model",
+			Model:      "internal/apiserver/model",
 			Store:      "internal/apiserver/store",
-			Request:    "pkg/api/v1",
 			Biz:        "internal/apiserver/biz",
-			Controller: "internal/apiserver/controller",
-			Middleware: "internal/pkg/middleware",
+			Controller: "internal/apiserver/http/controller/v1",
+			Middleware: "internal/apiserver/http/middleware",
+			Request:    "internal/apiserver/http/request/v1",
 			Job:        "internal/watcher/watcher",
 			Migration:  "internal/apiserver/database/migration",
+			Seeder:     "internal/apiserver/database/seeder",
 		},
 	}
 }
