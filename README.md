@@ -34,6 +34,8 @@ directory:
   controller: internal/apiserver/controller/v1
   middleware: internal/pkg/middleware
   job: internal/watcher/watcher
+  migration: internal/apiserver/database/migration
+  seeder: internal/apiserver/database/seed
 
 registries:
   router: internal/apiserver/router/api.go

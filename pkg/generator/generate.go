@@ -79,6 +79,9 @@ func GetMapDirectory(tmpl string) (dir string) {
 	if tmpl == string(TmplMigration) {
 		dir = config.Cfg.Directory.Migration
 	}
+	if tmpl == string(TmplSeeder) {
+		dir = config.Cfg.Directory.Seeder
+	}
 
 	return
 }

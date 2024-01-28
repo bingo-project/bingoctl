@@ -22,6 +22,7 @@ const (
 	TmplMiddleware Tmpl = "middleware"
 	TmplJob        Tmpl = "job"
 	TmplMigration  Tmpl = "migration"
+	TmplSeeder     Tmpl = "seeder"
 )
 
 func (o *Options) ReadCodeTemplates() *Options {

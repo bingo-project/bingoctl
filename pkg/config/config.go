@@ -30,6 +30,7 @@ type Directory struct {
 	Middleware string `mapstructure:"middleware" json:"middleware" yaml:"middleware"`
 	Job        string `mapstructure:"job" json:"job" yaml:"job"`
 	Migration  string `mapstructure:"migration" json:"migration" yaml:"migration"`
+	Seeder     string `mapstructure:"seeder" json:"seeder" yaml:"seeder"`
 }
 
 type Registries struct {
