@@ -26,6 +26,7 @@ type {{.StructName}}Store interface {
 	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
 	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
 	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
+	DeleteInBatch(ctx context.Context, ids []uint) error
 }
 
 type {{.VariableNamePlural}} struct {
@@ -116,5 +117,11 @@ func (s *{{.VariableNamePlural}}) Upsert(ctx context.Context, {{.VariableName}} 
 
 	return s.db.Clauses(do).
 		Create(&{{.VariableName}}).
+		Error
+}
+
+func (s *{{.VariableNamePlural}}) DeleteInBatch(ctx context.Context, ids []uint) error {
+	return s.db.Where("id IN (?)", ids).
+		Delete(&model.{{.StructName}}{}).
 		Error
 }
