@@ -25,7 +25,7 @@ type {{.StructName}}Store interface {
 	CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
 	FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
 	UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error
-	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error
+	Upsert(ctx context.Context, {{.VariableName}} *model.{{.StructName}}, fields ...string) error
 	DeleteInBatch(ctx context.Context, ids []uint) error
 }
 
