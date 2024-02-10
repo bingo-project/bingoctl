@@ -33,14 +33,14 @@ func (o *Options) GenerateCode(tmpl, path string) error {
 	}
 
 	if o.Name == string(TmplStore) {
-		err = o.Register(config.Cfg.Registries.Store, o.InterfaceTemplate, o.RegisterTemplate)
+		err = o.Register(config.Cfg.Registries.Store, o.InterfaceTemplate, o.RegisterTemplate, o.RootPackage+"/"+o.StorePath+o.RelativePath)
 		if err != nil {
 			return err
 		}
 	}
 
 	if o.Name == string(TmplBiz) {
-		err = o.Register(config.Cfg.Registries.Biz, o.InterfaceTemplate, o.RegisterTemplate)
+		err = o.Register(config.Cfg.Registries.Biz, o.InterfaceTemplate, o.RegisterTemplate, o.RootPackage+"/"+o.BizPath+o.RelativePath)
 		if err != nil {
 			return err
 		}

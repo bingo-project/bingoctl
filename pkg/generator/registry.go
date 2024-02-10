@@ -12,7 +12,7 @@ import (
 	"github.com/bingo-project/bingoctl/pkg/config"
 )
 
-func (o *Options) Register(registry config.Registry, interfaceTemplate, registerTemplate string) error {
+func (o *Options) Register(registry config.Registry, interfaceTemplate, registerTemplate, importPath string) error {
 	if registry.Filepath == "" {
 		return nil
 	}
@@ -42,7 +42,7 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	}
 
 	// 注册 interface
-	newContent, err := RegisterInterface(registry.Interface, string(content), interfaceTemplate, registerTemplate)
+	newContent, err := RegisterInterface(registry.Interface, string(content), interfaceTemplate, registerTemplate, importPath)
 	if err != nil {
 		return err
 	}
@@ -57,31 +57,50 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	return nil
 }
 
-func RegisterInterface(name, content, interfaceTemplate, registerTemplate string) (data string, err error) {
+func RegisterInterface(name, content, interfaceTemplate, registerTemplate, importPath string) (data string, err error) {
 	// Check if already registered
 	if strings.Contains(content, interfaceTemplate) {
 		return "", errors.New("interface already registered: " + interfaceTemplate)
 	}
 
 	// Register
-	seek := fmt.Sprintf("type %s interface {", name)
-	rule := seek + `([^}]*)}`
-	reg := regexp.MustCompile(rule)
+	pattern := fmt.Sprintf("type %s interface {([^}]*)}", name)
+	match, err := Match(pattern, content)
+	if err != nil {
+		return "", err
+	}
+
+	str := strings.TrimRight(match, "}")
+	str = str + "\t" + interfaceTemplate + "\n}"
+
+	newContent := strings.Replace(content, match, str, 1)
+	newContent = newContent + "\n" + registerTemplate
+
+	// Import path
+	pattern = `import\s?\(([^}]*?)\)`
+	match, err = Match(pattern, content)
+	if err != nil {
+		return "", err
+	}
+
+	str = strings.TrimRight(match, ")")
+	str = fmt.Sprintf("%s\t\"%s\"\n)", str, importPath)
+
+	newContent = strings.Replace(newContent, match, str, 1)
+
+	return newContent, nil
+}
+
+func Match(pattern, content string) (string, error) {
+	reg := regexp.MustCompile(pattern)
 
 	// 根据规则提取关键信息
 	results := reg.FindAllString(content, -1)
 	if len(results) == 0 {
-		err = errors.New("not matched")
-
-		return
+		return "", errors.New("not matched")
 	}
 
-	old := results[0]
-	str := strings.TrimRight(old, "}")
-	str = str + "\t" + interfaceTemplate + "\n}"
+	match := results[0]
 
-	newContent := strings.Replace(content, old, str, 1)
-	newContent = newContent + "\n" + registerTemplate
-
-	return newContent, nil
+	return match, nil
 }
