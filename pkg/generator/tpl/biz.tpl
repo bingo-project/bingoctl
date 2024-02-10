@@ -9,8 +9,8 @@ import (
 
 	"{{.RootPackage}}/{{.StorePath}}"
 	"{{.RootPackage}}/internal/pkg/errno"
-	"{{.RootPackage}}/{{.ModelPath}}"
-	v1 "{{.RootPackage}}/{{.RequestPath}}"
+	model "{{.RootPackage}}/{{.ModelPath}}{{.RelativePath}}"
+	v1 "{{.RootPackage}}/{{.RequestPath}}{{.RelativePath}}"
 )
 
 type {{.StructName}}Biz interface {
@@ -51,7 +51,7 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructNa
 }
 
 func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.StructName}}Request) (*v1.{{.StructName}}Info, error) {
-	var {{.VariableName}}M model.{{.StructName}}M
+	var {{.VariableName}}M model.{{.StructName}}
 	_ = copier.Copy(&{{.VariableName}}M, req)
 
 	err := b.ds.{{.StructNamePlural}}().Create(ctx, &{{.VariableName}}M)

@@ -21,11 +21,12 @@ type Options struct {
 	ModelName          string
 
 	// Code attributes - import path
-	RootPackage string
-	BizPath     string
-	StorePath   string
-	RequestPath string
-	ModelPath   string
+	RootPackage  string
+	BizPath      string
+	StorePath    string
+	RequestPath  string
+	ModelPath    string
+	RelativePath string
 
 	// Generate by gorm.gen
 	Table         string

@@ -31,6 +31,8 @@ func (o *Options) GetFieldsFromDB() error {
 		return nil
 	}
 
+	o.Fields = ""
+	o.MainFields = ""
 	gormFields := []string{"ID", "CreatedAt", "UpdatedAt", "DeletedAt"}
 	for _, field := range meta.Fields {
 		// Comment

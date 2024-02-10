@@ -1,7 +1,6 @@
 package {{.PackageName}}
 
 import (
-	"github.com/asaskevich/govalidator"
 	"github.com/bingo-project/component-base/log"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
@@ -10,7 +9,7 @@ import (
 	"{{.RootPackage}}/{{.StorePath}}"
 	"{{.RootPackage}}/internal/pkg/core"
 	"{{.RootPackage}}/internal/pkg/errno"
-	v1 "{{.RootPackage}}/{{.RequestPath}}"
+	v1 "{{.RootPackage}}/{{.RequestPath}}{{.RelativePath}}"
 	"{{.RootPackage}}/pkg/auth"
 )
 
@@ -75,13 +74,6 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 		return
 	}
 
-	// Validator
-	if _, err := govalidator.ValidateStruct(req); err != nil {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
-
-		return
-	}
-
 	// Create {{.VariableName}}
 	resp, err := ctrl.b.{{.StructNamePlural}}().Create(c, &req)
 	if err != nil {
@@ -136,12 +128,6 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	var req v1.Update{{.StructName}}Request
 	if err := c.ShouldBindJSON(&req); err != nil {
 		core.WriteResponse(c, errno.ErrBind, nil)
-
-		return
-	}
-
-	if _, err := govalidator.ValidateStruct(req); err != nil {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}

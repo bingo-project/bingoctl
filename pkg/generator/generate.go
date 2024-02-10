@@ -93,6 +93,9 @@ func (o *Options) GenerateAttributes(directory string, path string) *Options {
 	o.StorePath = config.Cfg.Directory.Store
 	o.RequestPath = config.Cfg.Directory.Request
 	o.ModelPath = config.Cfg.Directory.Model
+	if filepath.Dir(path) != "." {
+		o.RelativePath = "/" + filepath.Dir(path)
+	}
 
 	if o.Directory == "" {
 		o.Directory = directory
@@ -118,7 +121,7 @@ func (o *Options) GenerateAttributes(directory string, path string) *Options {
 	o.Directory = strings.Join(directoryArr, "/")
 	o.Directory = o.Directory + "/"
 	if o.PackageName == "" && len(directoryArr) > 0 {
-		o.PackageName = strcase.ToSnake(directoryArr[len(directoryArr)-1])
+		o.PackageName = strings.ToLower(directoryArr[len(directoryArr)-1])
 	}
 
 	// File path

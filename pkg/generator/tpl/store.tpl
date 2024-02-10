@@ -9,9 +9,8 @@ import (
 	"gorm.io/gorm/clause"
 
 	"{{.RootPackage}}/internal/apiserver/global"
-	"{{.RootPackage}}/{{.ModelPath}}"
-	"{{.RootPackage}}/internal/pkg/util/helper"
-	v1 "{{.RootPackage}}/{{.RequestPath}}"
+	v1 "{{.RootPackage}}/{{.RequestPath}}{{.RelativePath}}"
+	model "{{.RootPackage}}/{{.ModelPath}}{{.RelativePath}}"
 )
 
 type {{.StructName}}Store interface {
