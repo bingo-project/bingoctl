@@ -5,12 +5,31 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"github.com/jinzhu/copier"
 	"gorm.io/gen"
+	genField "gorm.io/gen/field"
 
 	"github.com/bingo-project/bingoctl/pkg/config"
 )
 
-func (o *Options) GetFieldsFromDB() error {
+// Field user input structures
+type Field struct {
+	Name             string
+	Type             string
+	ColumnName       string
+	ColumnComment    string
+	MultilineComment bool
+	Tag              genField.Tag
+	GORMTag          genField.GormTag
+	CustomGenType    string
+	Relation         *genField.Relation
+}
+
+func (o *Options) ReadMetaFields() error {
+	if len(o.MetaFields) > 0 {
+		return nil
+	}
+
 	// Generate model from table.
 	g := gen.NewGenerator(gen.Config{
 		ModelPkgPath: o.Directory,
@@ -30,11 +49,27 @@ func (o *Options) GetFieldsFromDB() error {
 		return nil
 	}
 
+	for _, item := range meta.Fields {
+		var field Field
+		_ = copier.Copy(&field, item)
+
+		o.MetaFields = append(o.MetaFields, &field)
+	}
+
+	return nil
+}
+
+func (o *Options) GetFieldsFromDB() error {
+	err := o.ReadMetaFields()
+	if err != nil {
+		return err
+	}
+
 	o.Fields = ""
 	o.MainFields = ""
 	o.UpdatableFields = ""
 	gormFields := []string{"ID", "CreatedAt", "UpdatedAt", "DeletedAt"}
-	for _, field := range meta.Fields {
+	for _, field := range o.MetaFields {
 		// Comment
 		var comment string
 		if field.ColumnComment != "" {

@@ -34,6 +34,7 @@ type Options struct {
 	Fields          string
 	MainFields      string
 	UpdatableFields string
+	MetaFields      []*Field
 
 	// Migration
 	TimeStr string

@@ -110,6 +110,9 @@ func (o *Options) GenerateAttributes(directory string, path string) *Options {
 	o.VariableNameSnake = strcase.ToSnake(o.StructName)
 	o.VariableNamePlural = pluralize.NewClient().Plural(o.VariableName)
 	o.TableName = strcase.ToSnake(o.StructName)
+	if o.Table != "" {
+		o.TableName = o.Table
+	}
 
 	// Flags: Model name
 	if o.ModelName == "" {
