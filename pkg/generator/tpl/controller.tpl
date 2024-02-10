@@ -38,7 +38,7 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 
 	var req v1.List{{.StructName}}Request
 	if err := c.ShouldBindQuery(&req); err != nil {
-		core.WriteResponse(c, errno.ErrBind, nil)
+		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}
@@ -69,7 +69,7 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 
 	var req v1.Create{{.StructName}}Request
 	if err := c.ShouldBindJSON(&req); err != nil {
-		core.WriteResponse(c, errno.ErrBind, nil)
+		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}
@@ -127,7 +127,7 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 
 	var req v1.Update{{.StructName}}Request
 	if err := c.ShouldBindJSON(&req); err != nil {
-		core.WriteResponse(c, errno.ErrBind, nil)
+		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
 
 		return
 	}
