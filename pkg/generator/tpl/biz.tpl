@@ -88,9 +88,7 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Upda
 		return nil, errno.ErrResourceNotFound
 	}
 
-	// if req.Name != nil {
-	// 	{{.VariableName}}M.Name = *req.Name
-	// }
+    {{.UpdatableFields}}
 
 	if err := b.ds.{{.StructNamePlural}}().Update(ctx, {{.VariableName}}M); err != nil {
 		return nil, err

@@ -40,9 +40,7 @@ func New{{.StructNamePlural}}(db *gorm.DB) *{{.VariableNamePlural}} {
 
 func Search{{.StructName}}(req *v1.List{{.StructName}}Request) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		// if req.Name != "" {
-		// 	db.Where("name = ?", req.Name)
-		// }
+        {{.UpdatableFields}}
 
 		return db
 	}

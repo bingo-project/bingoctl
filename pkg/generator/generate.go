@@ -22,7 +22,7 @@ func (o *Options) GenerateCode(tmpl, path string) error {
 	o.GenerateAttributes(dir, path)
 
 	// Generate from db table.
-	dbTemplates := []Tmpl{TmplModel, TmplRequest}
+	dbTemplates := []Tmpl{TmplModel, TmplRequest, TmplStore, TmplBiz}
 	if slices.Contains(dbTemplates, Tmpl(o.Name)) && o.Table != "" {
 		_ = o.GetFieldsFromDB()
 	}

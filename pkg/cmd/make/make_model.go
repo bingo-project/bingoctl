@@ -50,8 +50,6 @@ func NewCmdModel() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&o.Table, "table", "t", "", "generate model by table, example:'post'.")
-
 	return cmd
 }
 

@@ -29,10 +29,11 @@ type Options struct {
 	RelativePath string
 
 	// Generate by gorm.gen
-	Table         string
-	FieldTemplate string
-	Fields        string
-	MainFields    string
+	Table           string
+	FieldTemplate   string
+	Fields          string
+	MainFields      string
+	UpdatableFields string
 
 	// Migration
 	TimeStr string

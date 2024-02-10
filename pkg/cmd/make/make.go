@@ -29,6 +29,7 @@ func NewCmdMake() *cobra.Command {
 
 	cmd.PersistentFlags().StringVarP(&opt.Directory, "directory", "d", "", "Where to create the file.")
 	cmd.PersistentFlags().StringVarP(&opt.PackageName, "package", "p", "", "Name of the package.")
+	cmd.PersistentFlags().StringVarP(&opt.Table, "table", "t", "", "Read fields from db table.")
 
 	// Add subcommands
 	cmd.AddCommand(NewCmdCMD())

@@ -16,7 +16,6 @@ func (o *Options) GetFieldsFromDB() error {
 		ModelPkgPath: o.Directory,
 
 		// generate model global configuration
-		FieldNullable:     true,
 		FieldCoverable:    true,
 		FieldSignable:     true,
 		FieldWithIndexTag: true,
@@ -33,6 +32,7 @@ func (o *Options) GetFieldsFromDB() error {
 
 	o.Fields = ""
 	o.MainFields = ""
+	o.UpdatableFields = ""
 	gormFields := []string{"ID", "CreatedAt", "UpdatedAt", "DeletedAt"}
 	for _, field := range meta.Fields {
 		// Comment
@@ -69,7 +69,26 @@ func (o *Options) GetFieldsFromDB() error {
 		}
 
 		o.MainFields += fieldTemplate + "\n"
+
+		// Updatable
+		fieldTemplateUpdatable := o.FieldTemplate
+		replaces["{{.NameSnake}}"] = strcase.ToSnake(field.Name)
+		replaces["{{.VariableName}}"] = o.VariableName
+		for search, replace := range replaces {
+			if search == "{{.Type}}" {
+				replace = "*" + replace
+			}
+
+			fieldTemplateUpdatable = strings.ReplaceAll(fieldTemplateUpdatable, search, replace)
+		}
+
+		o.UpdatableFields += fieldTemplateUpdatable + "\n"
 	}
+
+	// Trim space
+	o.Fields = strings.TrimSpace(o.Fields)
+	o.MainFields = strings.TrimSpace(o.MainFields)
+	o.UpdatableFields = strings.TrimSpace(o.UpdatableFields)
 
 	return nil
 }

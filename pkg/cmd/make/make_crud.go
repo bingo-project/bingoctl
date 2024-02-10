@@ -68,11 +68,12 @@ func (o *CrudOptions) Validate(cmd *cobra.Command, args []string) error {
 // Complete completes all the required options.
 func (o *CrudOptions) Complete(cmd *cobra.Command, args []string) error {
 	// Init store if generating model by tables.
+	var err error
 	if o.Table != "" {
-		config.DB, _ = db.NewMySQL(config.Cfg.MysqlOptions)
+		config.DB, err = db.NewMySQL(config.Cfg.MysqlOptions)
 	}
 
-	return nil
+	return err
 }
 
 // Run executes a new sub command using the specified options.

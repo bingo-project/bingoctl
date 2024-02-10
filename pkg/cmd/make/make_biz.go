@@ -5,6 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/bingo-project/bingoctl/pkg/config"
+	"github.com/bingo-project/bingoctl/pkg/db"
 	"github.com/bingo-project/bingoctl/pkg/generator"
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
@@ -64,7 +66,13 @@ func (o *BizOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *BizOptions) Complete(cmd *cobra.Command, args []string) error {
-	return nil
+	// Init store if generating model by tables.
+	var err error
+	if o.Table != "" {
+		config.DB, err = db.NewMySQL(config.Cfg.MysqlOptions)
+	}
+
+	return err
 }
 
 // Run executes a new sub command using the specified options.

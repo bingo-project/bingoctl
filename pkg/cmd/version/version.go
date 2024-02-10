@@ -43,7 +43,7 @@ func (o *Options) Validate(cmd *cobra.Command, args []string) (err error) {
 
 // Run executes a creat subcommand using the specified options.
 func (o *Options) Run(args []string) (err error) {
-	fmt.Println("version: v1.2.7")
+	fmt.Println("version: v1.2.8")
 
 	return nil
 }

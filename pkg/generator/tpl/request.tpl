@@ -12,6 +12,8 @@ type {{.StructName}}Info struct {
 
 type List{{.StructName}}Request struct {
 	gormutil.ListOptions
+
+	{{.UpdatableFields}}
 }
 
 type List{{.StructName}}Response struct {
@@ -24,5 +26,5 @@ type Create{{.StructName}}Request struct {
 }
 
 type Update{{.StructName}}Request struct {
-	{{.MainFields}}
+	{{.UpdatableFields}}
 }
