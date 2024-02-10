@@ -77,6 +77,10 @@ func RegisterInterface(name, content, interfaceTemplate, registerTemplate, impor
 	newContent = newContent + "\n" + registerTemplate
 
 	// Import path
+	if strings.Contains(newContent, importPath) {
+		return newContent, nil
+	}
+
 	pattern = `import\s?\(([^}]*?)\)`
 	match, err = Match(pattern, content)
 	if err != nil {
