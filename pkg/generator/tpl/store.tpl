@@ -47,49 +47,51 @@ func Search{{.StructName}}(req *v1.List{{.StructName}}Request) func(db *gorm.DB)
 }
 
 func (s *{{.VariableNamePlural}}) List(ctx context.Context, req *v1.List{{.StructName}}Request) (count int64, ret []*model.{{.StructName}}, err error) {
-	db := s.db.Scopes(Search{{.StructName}}(req))
+	db := s.db.WithContext(ctx).Scopes(Search{{.StructName}}(req))
 	count, err = gormutil.Paginate(db, &req.ListOptions, &ret)
 
 	return
 }
 
 func (s *{{.VariableNamePlural}}) Create(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error {
-	return s.db.Create(&{{.VariableName}}).Error
+	return s.db.WithContext(ctx).Create(&{{.VariableName}}).Error
 }
 
 func (s *{{.VariableNamePlural}}) Get(ctx context.Context, ID uint) ({{.VariableName}} *model.{{.StructName}}, err error) {
-	err = s.db.Where("id = ?", ID).First(&{{.VariableName}}).Error
+	err = s.db.WithContext(ctx).Where("id = ?", ID).First(&{{.VariableName}}).Error
 
 	return
 }
 
 func (s *{{.VariableNamePlural}}) Update(ctx context.Context, {{.VariableName}} *model.{{.StructName}}, fields ...string) error {
-	return s.db.Select(fields).Save(&{{.VariableName}}).Error
+	return s.db.WithContext(ctx).Select(fields).Save(&{{.VariableName}}).Error
 }
 
 func (s *{{.VariableNamePlural}}) Delete(ctx context.Context, ID uint) error {
-	return s.db.Where("id = ?", ID).Delete(&model.{{.StructName}}{}).Error
+	return s.db.WithContext(ctx).Where("id = ?", ID).Delete(&model.{{.StructName}}{}).Error
 }
 
 func (s *{{.VariableNamePlural}}) CreateInBatch(ctx context.Context, {{.VariableNamePlural}} []*model.{{.StructName}}) error {
-	return s.db.CreateInBatches(&{{.VariableNamePlural}}, global.CreateBatchSize).Error
+	return s.db.WithContext(ctx).CreateInBatches(&{{.VariableNamePlural}}, global.CreateBatchSize).Error
 }
 
 func (s *{{.VariableNamePlural}}) CreateIfNotExist(ctx context.Context, {{.VariableName}} *model.{{.StructName}}) error {
-	return s.db.Clauses(clause.OnConflict{DoNothing: true}).
+	return s.db.WithContext(ctx).
+		Clauses(clause.OnConflict{DoNothing: true}).
 		Create(&{{.VariableName}}).
 		Error
 }
 
 func (s *{{.VariableNamePlural}}) FirstOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error {
-	return s.db.Where(where).
+	return s.db.WithContext(ctx).
+		Where(where).
 		Attrs(&{{.VariableName}}).
 		FirstOrCreate(&{{.VariableName}}).
 		Error
 }
 
 func (s *{{.VariableNamePlural}}) UpdateOrCreate(ctx context.Context, where any, {{.VariableName}} *model.{{.StructName}}) error {
-	return s.db.Transaction(func(tx *gorm.DB) error {
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var exist model.{{.StructName}}
 		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Where(where).
@@ -112,13 +114,15 @@ func (s *{{.VariableNamePlural}}) Upsert(ctx context.Context, {{.VariableName}} 
 		do.DoUpdates = clause.AssignmentColumns(fields)
 	}
 
-	return s.db.Clauses(do).
+	return s.db.WithContext(ctx).
+		Clauses(do).
 		Create(&{{.VariableName}}).
 		Error
 }
 
 func (s *{{.VariableNamePlural}}) DeleteInBatch(ctx context.Context, ids []uint) error {
-	return s.db.Where("id IN (?)", ids).
+	return s.db.WithContext(ctx).
+		Where("id IN (?)", ids).
 		Delete(&model.{{.StructName}}{}).
 		Error
 }
