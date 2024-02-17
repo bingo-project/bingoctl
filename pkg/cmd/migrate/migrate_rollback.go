@@ -3,6 +3,7 @@ package migrate
 import (
 	"fmt"
 
+	"github.com/bingo-project/component-base/cli/console"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
 )
@@ -52,6 +53,10 @@ func NewCmdRollback() *cobra.Command {
 
 // Validate makes sure there is no discrepancy in command options.
 func (o *RollbackOptions) Validate(cmd *cobra.Command, args []string) error {
+	if o.Production && !o.Force {
+		console.Exit(ErrInProduction.Error())
+	}
+
 	return nil
 }
 

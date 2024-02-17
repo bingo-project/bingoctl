@@ -1,6 +1,8 @@
 package migrate
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 
@@ -10,11 +12,15 @@ import (
 var (
 	opt = NewOptions()
 	err error
+
+	ErrInProduction = errors.New("application in production, use --force or -f to confirm")
 )
 
 // Options is an option struct to support 'migrate' sub command.
 type Options struct {
-	DB *gorm.DB
+	DB         *gorm.DB
+	Production bool
+	Force      bool
 }
 
 // NewOptions returns an initialized Options instance.
@@ -23,14 +29,17 @@ func NewOptions() *Options {
 }
 
 // NewCmdMigrate returns new initialized instance of 'migrate' sub command.
-func NewCmdMigrate(db *gorm.DB) *cobra.Command {
+func NewCmdMigrate(db *gorm.DB, production bool) *cobra.Command {
 	opt.DB = db
+	opt.Production = production
 
 	cmd := &cobra.Command{
 		Use:                   "migrate COMMAND",
 		DisableFlagsInUseLine: true,
 		Short:                 "Run the database migrations",
 	}
+
+	cmd.PersistentFlags().BoolVarP(&opt.Force, "force", "f", false, "Force run migration command in production")
 
 	// Add sub commands.
 	cmd.AddCommand(NewCmdUp())
