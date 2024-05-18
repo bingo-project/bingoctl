@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bingo-project/component-base/log"
 	"github.com/go-redsync/redsync/v4"
+	"gorm.io/gorm"
 
 	"{[.RootPackage]}/internal/apiserver/store"
 )
@@ -30,13 +32,17 @@ func (w *UserWatcher) Run() {
 	}()
 
 	user, err := store.S.Users().Get(w.ctx, "test")
-	if err != nil {
-		log.Errorw(err.Error())
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.C(w.ctx).Errorw(err.Error())
 
 		return
 	}
 
-	log.Infow(user.Email)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.C(w.ctx).Debug("not found")
+	}
+
+	log.C(w.ctx).Infow(user.Email)
 }
 
 // Spec is parsed using the time zone of clean Cron instance as the default.

@@ -1,0 +1,99 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: {[.AppNameCamel]}
+
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      # - develop
+      - feature/ci
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Unit tests.
+        run: make cover
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ./_output/coverage.out
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate pb files
+        run: make protoc
+
+      - name: Build by Docker Compose
+        run: bash ./scripts/docker/build.sh -a amd64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: download-files
+          path: |
+            _output/*.tar.gz
+
+  publish:
+    name: Deploy Staging
+    needs:
+      - test
+      - build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        id: download-files
+        with:
+          name: download-files
+          path: ./_output
+
+      - name: Display structure of downloaded files
+        run: |
+          ls -l
+
+      - name: Setup ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.REMOTE_KEY }}
+
+      - name: Deploy
+        run: bash ./scripts/docker/deploy.sh ${{ secrets.REMOTE_USER }} ${{ secrets.REMOTE_HOST }}

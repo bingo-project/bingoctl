@@ -15,19 +15,19 @@ var (
 	XUserInfoKey  = "X-UserInfo"
 )
 
-// Encrypt 使用 bcrypt 加密纯文本.
+// Encrypt string by bcrypt.
 func Encrypt(source string) (string, error) {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(source), bcrypt.DefaultCost)
 
 	return string(hashedBytes), err
 }
 
-// Compare 比较密文和明文是否相同.
+// Compare password.
 func Compare(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func ID(c *gin.Context) interface{} {
+func ID(c *gin.Context) any {
 	info, exists := c.Get(XUsernameKey)
 	if !exists {
 		return nil
@@ -36,7 +36,7 @@ func ID(c *gin.Context) interface{} {
 	return info
 }
 
-func User(c *gin.Context, user interface{}) error {
+func User(c *gin.Context, user any) error {
 	info, exists := c.Get(XUserInfoKey)
 	if !exists {
 		return errors.New("not exists")

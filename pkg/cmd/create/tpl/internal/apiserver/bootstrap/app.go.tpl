@@ -5,6 +5,9 @@ func Boot() {
 	InitJwt()
 	InitStore()
 	InitCache()
+	InitQueue()
 	InitTimezone()
 	InitAES()
+	InitSnowflake()
+	InitMail()
 }

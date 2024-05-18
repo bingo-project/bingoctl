@@ -4,6 +4,10 @@ import (
 	"sync"
 
 	"gorm.io/gorm"
+
+	"{[.RootPackage]}/internal/apiserver/store/bot"
+	"{[.RootPackage]}/internal/apiserver/store/syscfg"
+	"{[.RootPackage]}/internal/apiserver/store/system"
 )
 
 //go:generate mockgen -destination mock_store.go -package store {[.RootPackage]}/internal/apiserver/store IStore
@@ -16,7 +20,23 @@ var (
 // IStore 定义了 Store 层需要实现的方法.
 type IStore interface {
 	DB() *gorm.DB
+
 	Users() UserStore
+	UserAccounts() UserAccountStore
+	AuthProviders() AuthProviderStore
+
+	Admins() system.AdminStore
+	Roles() system.RoleStore
+	Apis() system.ApiStore
+	Menus() system.MenuStore
+	RoleMenus() system.RoleMenuStore
+
+	Apps() syscfg.AppStore
+	Configs() syscfg.ConfigStore
+
+	Bots() bot.BotStore
+	BotChannels() bot.ChannelStore
+	BotAdmins() bot.AdminStore
 }
 
 // datastore 是 IStore 的一个具体实现.
@@ -45,4 +65,52 @@ func (ds *datastore) DB() *gorm.DB {
 // Users 返回一个实现了 UserStore 接口的实例.
 func (ds *datastore) Users() UserStore {
 	return newUsers(ds.db)
+}
+
+func (ds *datastore) AuthProviders() AuthProviderStore {
+	return NewAuthProviders(ds.db)
+}
+
+func (ds *datastore) UserAccounts() UserAccountStore {
+	return NewUserAccounts(ds.db)
+}
+
+func (ds *datastore) Admins() system.AdminStore {
+	return system.NewAdmins(ds.db)
+}
+
+func (ds *datastore) Roles() system.RoleStore {
+	return system.NewRoles(ds.db)
+}
+
+func (ds *datastore) Apis() system.ApiStore {
+	return system.NewApis(ds.db)
+}
+
+func (ds *datastore) Menus() system.MenuStore {
+	return system.NewMenus(ds.db)
+}
+
+func (ds *datastore) RoleMenus() system.RoleMenuStore {
+	return system.NewRoleMenus(ds.db)
+}
+
+func (ds *datastore) Apps() syscfg.AppStore {
+	return syscfg.NewApps(ds.db)
+}
+
+func (ds *datastore) Configs() syscfg.ConfigStore {
+	return syscfg.NewConfigs(ds.db)
+}
+
+func (ds *datastore) Bots() bot.BotStore {
+	return bot.NewBots(ds.db)
+}
+
+func (ds *datastore) BotChannels() bot.ChannelStore {
+	return bot.NewChannels(ds.db)
+}
+
+func (ds *datastore) BotAdmins() bot.AdminStore {
+	return bot.NewAdmins(ds.db)
 }

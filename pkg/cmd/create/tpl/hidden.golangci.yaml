@@ -196,7 +196,7 @@ linters-settings:
     sections:
       - standard # Standard section: captures all standard packages.
       - default # Default section: contains all imports that could not be matched to another section type.
-      - prefix({[.RootPackage]}) # Custom section: groups all imports with the specified Prefix.
+      - prefix(bingo) # Custom section: groups all imports with the specified Prefix.
       - blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
       - dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
     # Skip generated files.
@@ -363,7 +363,7 @@ linters-settings:
     # Put imports beginning with prefix after 3rd-party packages.
     # It's a comma-separated list of prefixes.
     # Default: ""
-    local-prefixes: ""
+    local-prefixes: "{[.AppName]}"
   gomnd:
     settings:
       mnd:
@@ -419,7 +419,7 @@ linters-settings:
     # To select a subset of rules to run.
     # Available rules: https://github.com/securego/gosec#available-rules
     includes:
-      # - G401
+      - G401
       - G306
       - G101
     # To specify a set of rules to explicitly exclude.
@@ -472,13 +472,24 @@ linters-settings:
       - shadow
     disable-all: false
   depguard:
-    list-type: blacklist
-    include-go-root: false
-    packages:
-      - github.com/Sirupsen/logrus
-    packages-with-error-message:
-      # specify an error message to output when a blacklisted package is used
-      - github.com/Sirupsen/logrus: "logging is allowed only by logutils.Log"
+    rules:
+      # Name of a rule.
+      main:
+        # Used to determine the package matching priority.
+        # There are three different modes: `original`, `strict`, and `lax`.
+        # Default: "original"
+        list-mode: lax
+        # List of file globs that will match this list of settings to compare against.
+        # Default: $all
+        files:
+          - "!**/*_a _file.go"
+        # List of allowed packages.
+        # allow:
+        #   - github.com/OpenPeeDeeP
+        # Packages that are not allowed where the value is a suggestion.
+        deny:
+          - pkg: "github.com/pkg/errors"
+            desc: Should be replaced by standard lib errors package
 
   importas:
     # if set to `true`, force to use alias.
@@ -540,7 +551,7 @@ linters-settings:
       - someword
   nakedret:
     # make an issue if func has more lines of code than this setting and it has naked returns; default is 30
-    max-func-lines: 30
+    max-func-lines: 50
 
   nestif:
     # minimal complexity of if statements to report, 5 by default
@@ -613,7 +624,7 @@ linters-settings:
         severity: warning
   staticcheck:
     # Select the Go version to target. The default is '1.13'.
-    go: "1.16"
+    go: "1.19"
     # https://staticcheck.io/docs/options#checks
     checks: [ "all" ]
 

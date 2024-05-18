@@ -4,7 +4,7 @@
 # ==============================================================================
 # 定义 Makefile all 伪目标，执行 `make` 时，会默认会执行 all 伪目标
 .PHONY: all
-all: tidy format lint build
+all: lint format build
 
 # ==============================================================================
 # Build options
@@ -22,6 +22,7 @@ VERSION_PACKAGE=github.com/bingo-project/component-base/version
 # make sure include common.mk at the first include line
 include scripts/make-rules/common.mk
 include scripts/make-rules/golang.mk
+include scripts/make-rules/image.mk
 include scripts/make-rules/tools.mk
 include scripts/make-rules/generate.mk
 include scripts/make-rules/swagger.mk
@@ -64,8 +65,12 @@ deps: ## 安装依赖，例如：生成需要的代码、安装需要的工具�
 
 ## build: Build source code for host platform.
 .PHONY: build
-build:
+build: tidy protoc
 	@$(MAKE) go.build
+
+.PHONY: image
+image: ## Build docker images for host arch.
+	@$(MAKE) image.build
 
 ## --------------------------------------
 ## Cleanup
@@ -97,11 +102,11 @@ lint:
 ##@ test:
 
 .PHONY: test
-test: ## 执行单元测试.
+test: protoc ## 执行单元测试.
 	@$(MAKE) go.test
 
 .PHONY: cover
-cover: ## 执行单元测试，并校验覆盖率阈值.
+cover: protoc ## 执行单元测试，并校验覆盖率阈值.
 	@$(MAKE) go.cover
 
 

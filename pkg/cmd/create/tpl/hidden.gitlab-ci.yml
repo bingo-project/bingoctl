@@ -1,0 +1,67 @@
+image: ubuntu:latest
+
+variables:
+  APP_NAME: {[.AppName]}
+  GIT_DEPTH: 200
+  DOCKER_HOST: tcp://docker:2375
+  FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: true
+
+before_script:
+  - apt-get update -qq && apt-get install -y -qq git make protobuf-compiler
+
+stages:
+  - Test
+  - Build
+  - Deploy
+
+test:
+  stage: Build
+  image: golang:latest
+  script:
+    - echo "Run Unit tests."
+    - make cover
+  only:
+    - tags
+    # - develop
+
+build:
+  stage: Build
+  image: golang:latest
+  services:
+    - docker:stable-dind
+  script:
+    - echo "Start building..."
+    - make protoc
+    - ./scripts/docker/build.sh -n ${APP_NAME}
+  artifacts:
+    paths:
+      - _output/*.tar.gz
+  only:
+    - tags
+    - develop
+    - feature/ci
+
+deploy_staging:
+  stage: Deploy
+  dependencies:
+    - build
+  script:
+    - echo "Start deploying staging..."
+    - ls -hl _output
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - touch ~/.ssh/config
+    - touch ~/.ssh/known_hosts
+    - chmod -R 400 ~/.ssh
+    - cat ${REMOTE_KEY} | ssh-add -
+    - ssh-add -l
+    - ssh-keyscan ${REMOTE_HOST} >>~/.ssh/known_hosts
+    - echo "StrictHostKeyChecking no" >>~/.ssh/config
+    - ./scripts/docker/deploy.sh ${REMOTE_USER} ${REMOTE_HOST}
+  only:
+    - tags
+    - develop
+    - feature/ci
+  environment:
+    name: staging
+    url: https://staging.{[.AppName]}.com

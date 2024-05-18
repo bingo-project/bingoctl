@@ -34,6 +34,7 @@ func LoadConfig(cfg string, defaultName string, data interface{}, onChange func(
 		cobra.CheckErr(err)
 
 		// Add `$HOME/<RecommendedHomeDir>` & `.`
+		viper.AddConfigPath(filepath.Join("/etc", RecommendedName))
 		viper.AddConfigPath(filepath.Join(home, RecommendedHomeDir))
 		viper.AddConfigPath(".")
 
@@ -49,10 +50,12 @@ func LoadConfig(cfg string, defaultName string, data interface{}, onChange func(
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		log.Errorw("Failed to read viper configuration file", "err", err)
+		os.Exit(1)
 	}
 
 	if err := viper.Unmarshal(data); err != nil {
 		log.Errorw("config unmarshal err", "err", err)
+		os.Exit(1)
 	}
 
 	// Print using config file.

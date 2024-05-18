@@ -3,13 +3,36 @@ package biz
 //go:generate mockgen -destination mock_biz.go -package biz {[.RootPackage]}/internal/apiserver/biz IBiz
 
 import (
+	"{[.RootPackage]}/internal/apiserver/biz/auth"
+	"{[.RootPackage]}/internal/apiserver/biz/bot"
+	"{[.RootPackage]}/internal/apiserver/biz/common"
+	"{[.RootPackage]}/internal/apiserver/biz/file"
+	"{[.RootPackage]}/internal/apiserver/biz/syscfg"
+	"{[.RootPackage]}/internal/apiserver/biz/system"
 	"{[.RootPackage]}/internal/apiserver/biz/user"
 	"{[.RootPackage]}/internal/apiserver/store"
 )
 
 // IBiz 定义了 Biz 层需要实现的方法.
 type IBiz interface {
+	Auth() auth.AuthBiz
+	AuthProviders() auth.AuthProviderBiz
 	Users() user.UserBiz
+
+	Servers() syscfg.ServerBiz
+	Email() common.EmailBiz
+	Files() file.FileBiz
+
+	Admins() system.AdminBiz
+	Roles() system.RoleBiz
+	Apis() system.ApiBiz
+	Menus() system.MenuBiz
+
+	Apps() syscfg.AppBiz
+	Configs() syscfg.ConfigBiz
+
+	Bots() bot.BotBiz
+	Channels() bot.ChannelBiz
 }
 
 // biz 是 IBiz 的一个具体实现.
@@ -25,7 +48,61 @@ func NewBiz(ds store.IStore) *biz {
 	return &biz{ds: ds}
 }
 
+func (b *biz) Auth() auth.AuthBiz {
+	return auth.NewAuth(b.ds)
+}
+
+func (b *biz) AuthProviders() auth.AuthProviderBiz {
+	return auth.NewAuthProvider(b.ds)
+}
+
 // Users 返回一个实现了 UserBiz 接口的实例.
 func (b *biz) Users() user.UserBiz {
 	return user.New(b.ds)
+}
+
+func (b *biz) Servers() syscfg.ServerBiz {
+	return syscfg.NewServer(b.ds)
+}
+
+func (b *biz) Email() common.EmailBiz {
+	return common.NewEmail(b.ds)
+}
+
+func (b *biz) Files() file.FileBiz {
+	return file.NewFile(b.ds)
+}
+
+// Admins 管理员.
+func (b *biz) Admins() system.AdminBiz {
+	return system.NewAdmin(b.ds)
+}
+
+// Roles 角色管理.
+func (b *biz) Roles() system.RoleBiz {
+	return system.NewRole(b.ds)
+}
+
+func (b *biz) Apis() system.ApiBiz {
+	return system.NewApi(b.ds)
+}
+
+func (b *biz) Menus() system.MenuBiz {
+	return system.NewMenu(b.ds)
+}
+
+func (b *biz) Apps() syscfg.AppBiz {
+	return syscfg.NewApp(b.ds)
+}
+
+func (b *biz) Configs() syscfg.ConfigBiz {
+	return syscfg.NewConfig(b.ds)
+}
+
+func (b *biz) Bots() bot.BotBiz {
+	return bot.NewBot(b.ds)
+}
+
+func (b *biz) Channels() bot.ChannelBiz {
+	return bot.NewChannel(b.ds)
 }

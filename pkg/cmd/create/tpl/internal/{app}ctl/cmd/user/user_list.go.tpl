@@ -2,14 +2,17 @@ package user
 
 import (
 	"context"
+	"time"
 
 	"github.com/bingo-project/component-base/cli/genericclioptions"
 	"github.com/bingo-project/component-base/cli/templates"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
+	"github.com/bingo-project/component-base/util/gormutil"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/biz"
+	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
 	"{[.RootPackage]}/internal/apiserver/store"
 )
 
@@ -87,7 +90,8 @@ func (o *ListOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Run executes a list sub command using the specified options.
 func (o *ListOptions) Run(args []string) error {
-	resp, err := o.b.Users().List(context.Background(), o.Offset, o.Limit)
+	req := &v1.ListUserRequest{ListOptions: gormutil.ListOptions{Offset: o.Offset, Limit: o.Limit}}
+	resp, err := o.b.Users().List(context.Background(), req)
 	if err != nil {
 		return err
 	}
@@ -99,8 +103,8 @@ func (o *ListOptions) Run(args []string) error {
 			user.Nickname,
 			user.Email,
 			user.Phone,
-			user.CreatedAt.Format("2006-01-02 15:04:05"),
-			user.UpdatedAt.Format("2006-01-02 15:04:05"),
+			user.CreatedAt.Format(time.DateTime),
+			user.UpdatedAt.Format(time.DateTime),
 		})
 	}
 

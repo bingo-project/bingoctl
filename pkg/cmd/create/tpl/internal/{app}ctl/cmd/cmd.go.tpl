@@ -4,16 +4,20 @@ import (
 	"io"
 	"os"
 
+	"github.com/bingo-project/bingoctl/pkg/cmd/migrate"
 	"github.com/bingo-project/component-base/cli/genericclioptions"
 	"github.com/bingo-project/component-base/cli/templates"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/bootstrap"
+	"{[.RootPackage]}/internal/apiserver/facade"
+	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/db"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/key"
-	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/migrate"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/user"
 	"{[.RootPackage]}/internal/{[.AppName]}ctl/cmd/version"
+	"{[.RootPackage]}/internal/{[.AppName]}ctl/database/migration"
 )
 
 func NewDefault{[.AppNameCamel]}CtlCommand() *cobra.Command {
@@ -29,7 +33,8 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 	}
 
 	// Load config
-	cobra.OnInitialize(initConfig)
+	// cobra.OnInitialize(initConfig)
+	initConfig()
 
 	ioStreams := genericclioptions.IOStreams{In: in, Out: out, ErrOut: err}
 
@@ -44,7 +49,7 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 			Message: "Database Commands:",
 			Commands: []*cobra.Command{
 				db.NewCmdDb(),
-				migrate.NewCmdMigrate(),
+				migrate.NewCmdMigrate(store.S.DB(), facade.Config.Server.Mode == gin.ReleaseMode),
 			},
 		},
 		{
@@ -72,6 +77,9 @@ func New{[.AppNameCamel]}CtlCommand(in io.Reader, out, err io.Writer) *cobra.Com
 func initConfig() {
 	bootstrap.InitConfig()
 	bootstrap.Boot()
+
+	// Init migration
+	migration.Initialize()
 }
 
 func runHelp(cmd *cobra.Command, args []string) {

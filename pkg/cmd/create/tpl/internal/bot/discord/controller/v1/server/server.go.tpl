@@ -1,0 +1,104 @@
+package server
+
+import (
+	"github.com/bingo-project/component-base/log"
+	"github.com/bingo-project/component-base/version"
+	"github.com/bwmarrin/discordgo"
+	"github.com/duke-git/lancet/v2/convertor"
+
+	"{[.RootPackage]}/internal/apiserver/biz"
+	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1/bot"
+	"{[.RootPackage]}/internal/apiserver/model/bot"
+	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/discord/client"
+	mw "{[.RootPackage]}/internal/bot/discord/middleware"
+)
+
+type ServerController struct {
+	b biz.IBiz
+	*client.Client
+}
+
+func New(ds store.IStore, s *discordgo.Session, i *discordgo.InteractionCreate) *ServerController {
+	return &ServerController{
+		b:      biz.NewBiz(ds),
+		Client: client.NewClient(s, i),
+	}
+}
+
+func (ctrl *ServerController) Pong() {
+	log.C(mw.Ctx).Infow("Pong function called")
+
+	ctrl.WriteResponse("pong")
+}
+
+func (ctrl *ServerController) Healthz() {
+	log.C(mw.Ctx).Infow("Healthz function called")
+
+	status, err := ctrl.b.Servers().Status(mw.Ctx)
+	if err != nil {
+		ctrl.WriteResponse(err.Error())
+
+		return
+	}
+
+	ctrl.WriteResponse(status)
+}
+
+func (ctrl *ServerController) Version() {
+	log.C(mw.Ctx).Infow("Version function called")
+
+	v := version.Get().GitVersion
+
+	ctrl.WriteResponse(v)
+}
+
+func (ctrl *ServerController) ToggleMaintenance() {
+	log.C(mw.Ctx).Infow("ToggleMaintenance function called")
+
+	err := ctrl.b.Servers().ToggleMaintenance(mw.Ctx)
+	if err != nil {
+		ctrl.WriteResponse("Operation failed:" + err.Error())
+
+		return
+	}
+
+	ctrl.WriteResponse("Operation success")
+}
+
+func (ctrl *ServerController) Subscribe() {
+	log.C(mw.Ctx).Infow("Subscribe function called")
+
+	user := ctrl.I.User
+	if ctrl.I.User == nil {
+		user = ctrl.I.Member.User
+	}
+
+	req := v1.CreateChannelRequest{
+		Source:    string(bot.SourceDiscord),
+		ChannelID: ctrl.I.ChannelID,
+		Author:    convertor.ToString(user),
+	}
+
+	_, err := ctrl.b.Channels().Create(mw.Ctx, &req)
+	if err != nil {
+		ctrl.WriteResponse(err.Error())
+
+		return
+	}
+
+	ctrl.WriteResponse("Successfully subscribe, enjoy it!")
+}
+
+func (ctrl *ServerController) UnSubscribe() {
+	log.C(mw.Ctx).Infow("UnSubscribe function called")
+
+	err := ctrl.b.Channels().DeleteChannel(mw.Ctx, ctrl.I.ChannelID)
+	if err != nil {
+		ctrl.WriteResponse(err.Error())
+
+		return
+	}
+
+	ctrl.WriteResponse("Successfully unsubscribe, thanks for your support!")
+}

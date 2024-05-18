@@ -1,16 +1,18 @@
 version: v1
 
-rootPackage: {[.RootPackage]}
+rootPackage: {[.AppName]}
 
 directory:
   cmd: internal/{[.AppName]}ctl/cmd
-  model: internal/pkg/model
+  model: internal/apiserver/model
   store: internal/apiserver/store
-  request: pkg/api/{[.AppName]}/v1
   biz: internal/apiserver/biz
-  controller: internal/apiserver/controller/v1
-  middleware: internal/pkg/middleware
+  controller: internal/apiserver/http/controller/v1
+  middleware: internal/apiserver/http/middleware
+  request: internal/apiserver/http/request/v1
   job: internal/watcher/watcher
+  migration: internal/{[.AppName]}ctl/database/migration
+  seeder: internal/{[.AppName]}ctl/database/seeder
 
 registries:
   router: internal/apiserver/router/api.go
@@ -25,4 +27,4 @@ mysql:
   host: 127.0.0.1:3306
   username: root
   password:
-  database: bingo
+  database: {[.AppName]}

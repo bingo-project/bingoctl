@@ -2,63 +2,143 @@ package store
 
 import (
 	"context"
+	"errors"
 
+	"github.com/bingo-project/component-base/util/gormutil"
 	"gorm.io/gorm"
 
-	"{[.RootPackage]}/internal/pkg/model"
-	"{[.RootPackage]}/internal/pkg/util/helper"
+	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
+	"{[.RootPackage]}/internal/apiserver/model"
 )
 
-// UserStore 定义了 user 模块在 store 层所实现的方法.
 type UserStore interface {
+	List(ctx context.Context, req *v1.ListUserRequest) (int64, []*model.UserM, error)
 	Create(ctx context.Context, user *model.UserM) error
 	Get(ctx context.Context, username string) (*model.UserM, error)
 	Update(ctx context.Context, user *model.UserM, fields ...string) error
-	List(ctx context.Context, offset, limit int) (int64, []*model.UserM, error)
 	Delete(ctx context.Context, username string) error
+
+	IsExist(ctx context.Context, user *model.UserM) (exist bool, err error)
+	GetByUID(ctx context.Context, uid string) (user *model.UserM, err error)
+
+	CreateWithAccount(ctx context.Context, user *model.UserM, account *model.UserAccount) error
+	FindAccounts(ctx context.Context, uid string) ([]*model.UserAccount, error)
+	CountAccounts(ctx context.Context, uid string) (ret int64, err error)
 }
 
-// UserStore 接口的实现.
 type users struct {
 	db *gorm.DB
 }
 
-// 确保 users 实现了 UserStore 接口.
 var _ UserStore = (*users)(nil)
 
 func newUsers(db *gorm.DB) *users {
 	return &users{db: db}
 }
 
-// List 根据 offset 和 limit 返回 user 列表.
-func (u *users) List(ctx context.Context, offset, limit int) (count int64, ret []*model.UserM, err error) {
-	err = u.db.Offset(offset).Limit(helper.DefaultLimit(limit)).Order("id desc").Find(&ret).
-		Offset(-1).
-		Limit(-1).
-		Count(&count).
+func (u *users) List(ctx context.Context, req *v1.ListUserRequest) (count int64, ret []*model.UserM, err error) {
+	count, err = gormutil.Paginate(u.db.WithContext(ctx), &req.ListOptions, &ret)
+
+	return
+}
+
+func (u *users) Create(ctx context.Context, user *model.UserM) error {
+	return u.db.WithContext(ctx).Create(&user).Error
+}
+
+func (u *users) Get(ctx context.Context, username string) (user *model.UserM, err error) {
+	err = u.db.WithContext(ctx).Where("username = ?", username).First(&user).Error
+
+	return
+}
+
+func (u *users) Update(ctx context.Context, user *model.UserM, fields ...string) error {
+	return u.db.WithContext(ctx).Select(fields).Save(&user).Error
+}
+
+func (u *users) Delete(ctx context.Context, username string) error {
+	return u.db.WithContext(ctx).Where("username = ?", username).Delete(&model.UserM{}).Error
+}
+
+func (u *users) IsExist(ctx context.Context, user *model.UserM) (exist bool, err error) {
+	db := u.db.WithContext(ctx).Model(&model.UserM{})
+
+	if user.UID != "" {
+		db = db.Where("uid = ?", user.UID)
+	}
+	if user.Username != "" {
+		db = db.Where("username = ?", user.Username)
+	}
+	if user.Email != "" {
+		db = db.Where("email = ?", user.Email)
+	}
+	if user.Phone != "" {
+		db = db.Where("phone = ?", user.Phone)
+	}
+
+	var id int
+	err = db.Select("ID").Take(&id).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return
+	}
+
+	return id > 0, nil
+}
+
+func (u *users) GetByUID(ctx context.Context, uid string) (user *model.UserM, err error) {
+	err = u.db.WithContext(ctx).Where("uid = ?", uid).First(&user).Error
+
+	return
+}
+
+func (u *users) CreateWithAccount(ctx context.Context, user *model.UserM, account *model.UserAccount) error {
+	return u.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Check exist.
+		err := tx.Model(&model.UserAccount{}).
+			Where("provider = ?", account.Provider).
+			Where("account_id = ?", account.AccountID).
+			First(&account).
+			Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		// Update account info
+		if account.ID > 0 {
+			tx.Where("uid = ?", account.UID).Updates(&model.UserM{
+				LastLoginTime: user.LastLoginTime,
+				LastLoginIP:   user.LastLoginIP,
+				LastLoginType: user.LastLoginType,
+			})
+
+			return nil
+		}
+
+		// Create user
+		err = tx.Create(account).Error
+		if err != nil {
+			return err
+		}
+
+		return tx.Create(user).Error
+	})
+}
+
+func (u *users) FindAccounts(ctx context.Context, uid string) (ret []*model.UserAccount, err error) {
+	err = u.db.WithContext(ctx).
+		Where("uid = ?", uid).
+		Find(&ret).
 		Error
 
 	return
 }
 
-// Create 插入一条 user 记录.
-func (u *users) Create(ctx context.Context, user *model.UserM) error {
-	return u.db.Create(&user).Error
-}
-
-// Get 根据用户名查询指定 user 的数据库记录.
-func (u *users) Get(ctx context.Context, username string) (user *model.UserM, err error) {
-	err = u.db.Where("username = ?", username).First(&user).Error
+func (u *users) CountAccounts(ctx context.Context, uid string) (ret int64, err error) {
+	err = u.db.WithContext(ctx).
+		Model(&model.UserAccount{}).
+		Where("uid = ?", uid).
+		Count(&ret).
+		Error
 
 	return
-}
-
-// Update 更新一条 user 数据库记录.
-func (u *users) Update(ctx context.Context, user *model.UserM, fields ...string) error {
-	return u.db.Select(fields).Save(&user).Error
-}
-
-// Delete 根据 username 删除数据库 user 记录.
-func (u *users) Delete(ctx context.Context, username string) error {
-	return u.db.Where("username = ?", username).Delete(&model.UserM{}).Error
 }

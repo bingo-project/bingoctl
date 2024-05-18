@@ -6,7 +6,9 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"gorm.io/plugin/prometheus"
+
+	"{[.RootPackage]}/internal/pkg/logger"
 )
 
 // MySQLOptions defines options for mysql database.
@@ -35,16 +37,26 @@ func (o *MySQLOptions) DSN() string {
 
 // NewMySQL create a new gorm db instance with the given options.
 func NewMySQL(opts *MySQLOptions) (*gorm.DB, error) {
-	logLevel := logger.Silent
-	if opts.LogLevel != 0 {
-		logLevel = logger.LogLevel(opts.LogLevel)
-	}
 	db, err := gorm.Open(mysql.Open(opts.DSN()), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		Logger:                                   logger.New(opts.LogLevel),
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	_ = db.Use(prometheus.New(prometheus.Config{
+		DBName:          "bingo", // 使用 `DBName` 作为指标 label
+		RefreshInterval: 15,      // 指标刷新频率（默认为 15 秒）
+		PushAddr:        "",      // 如果配置了 `PushAddr`，则推送指标
+		StartServer:     false,   // 启用一个 http 服务来暴露指标
+		HTTPServerPort:  8080,    // 配置 http 服务监听端口，默认端口为 8080 （如果您配置了多个，只有第一个 `HTTPServerPort` 会被使用）
+		MetricsCollector: []prometheus.MetricsCollector{
+			&prometheus.MySQL{
+				VariableNames: []string{"Threads_running"},
+			},
+		}, // 用户自定义指标
+	}))
 
 	sqlDB, err := db.DB()
 	if err != nil {
