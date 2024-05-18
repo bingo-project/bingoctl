@@ -110,7 +110,7 @@ func (o *Options) GetFieldsFromDB() error {
 		replaces["{{.NameSnake}}"] = strcase.ToSnake(field.Name)
 		replaces["{{.VariableName}}"] = o.VariableName
 		for search, replace := range replaces {
-			if search == "{{.Type}}" {
+			if search == "{{.Type}}" && !strings.Contains(replace, "*") {
 				replace = "*" + replace
 			}
 
