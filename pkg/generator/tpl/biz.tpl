@@ -95,7 +95,7 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Upda
 	}
 
 	var resp v1.{{.StructName}}Info
-	_ = copier.Copy(&resp, req)
+	_ = copier.Copy(&resp, {{.VariableName}}M)
 
 	return &resp, nil
 }
