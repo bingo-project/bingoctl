@@ -31,6 +31,7 @@ func (w *{{.StructName}}Watcher) Init(ctx context.Context, rs *redsync.Mutex, co
 
 // Run runs the watcher job.
 func (w *{{.StructName}}Watcher) Run() {
+	w.ctx = context.WithValue(w.ctx, log.KeyTrace, uuid.New().String())
 	if err := w.mutex.Lock(); err != nil {
 		log.C(w.ctx).Infow("{{.StructName}}Watcher already run.")
 
