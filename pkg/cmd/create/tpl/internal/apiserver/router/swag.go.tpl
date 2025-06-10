@@ -5,7 +5,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"{[.RootPackage]}/api/swagger/docs"
+	docs "{[.RootPackage]}/api/swagger/apiserver"
 )
 
 // MapSwagRouters

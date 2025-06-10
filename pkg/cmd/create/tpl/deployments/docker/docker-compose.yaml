@@ -19,21 +19,39 @@ services:
     volumes:
       - ${DATA_PATH_HOST}/config:/etc/{[.AppName]}
       - ${DATA_PATH_HOST}/data/{[.AppName]}:/opt/{[.AppName]}/storage/public
-      - ${DATA_PATH_HOST}/log/apiserver:/opt/{[.AppName]}/storage/log
+      - ${DATA_PATH_HOST}/log:/opt/{[.AppName]}/storage/log
 
-  watcher:
-    image: ${REGISTRY_PREFIX}/${APP_NAME}-watcher:${APP_VERSION}
-    container_name: ${APP_NAME}-watcher
+  admserver:
+    image: ${REGISTRY_PREFIX}/${APP_NAME}-admserver:${APP_VERSION}
+    container_name: ${APP_NAME}-admserver
     restart: always
     platform: ${IMAGE_PLATFORM}
     build:
       context: ../../
-      dockerfile: build/docker/{[.AppName]}-watcher/Dockerfile
+      dockerfile: build/docker/{[.AppName]}-admserver/Dockerfile
+    networks:
+      - {[.AppName]}
+    ports:
+      - '${APP_PORT}:8080'
+      - '${GRPC_PORT}:8081'
+    volumes:
+      - ${DATA_PATH_HOST}/config:/etc/{[.AppName]}
+      - ${DATA_PATH_HOST}/data/{[.AppName]}:/opt/{[.AppName]}/storage/public
+      - ${DATA_PATH_HOST}/log:/opt/{[.AppName]}/storage/log
+
+  scheduler:
+    image: ${REGISTRY_PREFIX}/${APP_NAME}-scheduler:${APP_VERSION}
+    container_name: ${APP_NAME}-scheduler
+    restart: always
+    platform: ${IMAGE_PLATFORM}
+    build:
+      context: ../../
+      dockerfile: build/docker/{[.AppName]}-scheduler/Dockerfile
     networks:
       - {[.AppName]}
     volumes:
       - ${DATA_PATH_HOST}/config:/etc/{[.AppName]}
-      - ${DATA_PATH_HOST}/log/watcher:/opt/{[.AppName]}/storage/log
+      - ${DATA_PATH_HOST}/log:/opt/{[.AppName]}/storage/log
 
   bot:
     image: ${REGISTRY_PREFIX}/${APP_NAME}-bot:${APP_VERSION}
@@ -47,7 +65,7 @@ services:
       - {[.AppName]}
     volumes:
       - ${DATA_PATH_HOST}/config:/etc/{[.AppName]}
-      - ${DATA_PATH_HOST}/log/bot:/opt/{[.AppName]}/storage/log
+      - ${DATA_PATH_HOST}/log:/opt/{[.AppName]}/storage/log
 
   # add alias to zsh to run {[.AppName]}ctl cmd.
   # alias {[.AppName]}ctl="docker run --rm -v /opt/{[.AppName]}/config:/etc/{[.AppName]} --network {[.AppName]}_{[.AppName]} {[.AppName]}/{[.AppName]}ctl:{APP_VERSION}"
@@ -63,7 +81,7 @@ services:
       - {[.AppName]}
     volumes:
       - ${DATA_PATH_HOST}/config:/etc/{[.AppName]}
-      - ${DATA_PATH_HOST}/log/{[.AppName]}ctl:/opt/{[.AppName]}/storage/log
+      - ${DATA_PATH_HOST}/log:/opt/{[.AppName]}/storage/log
 
   promtail:
     image: grafana/promtail

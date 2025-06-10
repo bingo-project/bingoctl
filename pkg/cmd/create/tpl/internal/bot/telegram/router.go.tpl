@@ -3,7 +3,7 @@ package telegram
 import (
 	"gopkg.in/telebot.v3"
 
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/store"
 	"{[.RootPackage]}/internal/bot/telegram/controller/v1/server"
 	"{[.RootPackage]}/internal/bot/telegram/middleware"
 )

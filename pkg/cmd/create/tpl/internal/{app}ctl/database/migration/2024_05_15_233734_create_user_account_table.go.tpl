@@ -5,7 +5,7 @@ import (
 
 	"github.com/bingo-project/bingoctl/pkg/migrate"
 
-	"{[.RootPackage]}/internal/apiserver/model"
+	"{[.RootPackage]}/internal/pkg/model"
 )
 
 type CreateUserAccountTable struct {
@@ -19,6 +19,7 @@ type CreateUserAccountTable struct {
 	Email     string `gorm:"type:varchar(255);not null;default:''"`
 	Bio       string `gorm:"type:varchar(255);not null;default:''"`
 	Avatar    string `gorm:"type:varchar(255);not null;default:''"`
+	Nonce     string `gorm:"type:varchar(255);not null;default:''"`
 }
 
 func (CreateUserAccountTable) TableName() string {

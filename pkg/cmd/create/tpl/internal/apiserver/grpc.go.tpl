@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
-	"{[.RootPackage]}/internal/apiserver/grpc/interceptor"
 	"{[.RootPackage]}/internal/apiserver/router"
+	"{[.RootPackage]}/internal/pkg/facade"
+	"{[.RootPackage]}/internal/pkg/grpc/interceptor"
 )
 
 type grpcAPIServer struct {

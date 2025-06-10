@@ -9,10 +9,10 @@ import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
-	"{[.RootPackage]}/internal/apiserver/model"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	"{[.RootPackage]}/internal/pkg/model"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1"
 )
 
 // UserBiz 定义了 user 模块在 biz 层所实现的方法.

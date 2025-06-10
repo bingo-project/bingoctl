@@ -14,12 +14,12 @@ import (
 	"github.com/spf13/cast"
 	"golang.org/x/oauth2"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
-	"{[.RootPackage]}/internal/apiserver/global"
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
-	"{[.RootPackage]}/internal/apiserver/model"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	"{[.RootPackage]}/internal/pkg/facade"
+	"{[.RootPackage]}/internal/pkg/global"
+	"{[.RootPackage]}/internal/pkg/model"
+	"{[.RootPackage]}/pkg/api/apiserver/v1"
 	"{[.RootPackage]}/pkg/auth"
 )
 
@@ -27,6 +27,10 @@ import (
 type AuthBiz interface {
 	Register(ctx context.Context, r *v1.RegisterRequest) (*v1.LoginResponse, error)
 	Login(ctx context.Context, r *v1.LoginRequest) (*v1.LoginResponse, error)
+
+	Nonce(ctx *gin.Context, req *v1.AddressRequest) (ret *v1.NonceResponse, err error)
+	LoginByAddress(ctx *gin.Context, req *v1.LoginByAddressRequest) (ret *v1.LoginResponse, err error)
+
 	LoginByProvider(ctx *gin.Context, provider string, req *v1.LoginByProviderRequest) (*v1.LoginResponse, error)
 	Bind(ctx *gin.Context, provider string, req *v1.LoginByProviderRequest, user *model.UserM) (ret *v1.UserAccountInfo, err error)
 

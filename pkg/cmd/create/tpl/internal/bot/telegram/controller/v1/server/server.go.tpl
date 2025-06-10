@@ -7,11 +7,11 @@ import (
 	"github.com/spf13/cast"
 	"gopkg.in/telebot.v3"
 
-	"{[.RootPackage]}/internal/apiserver/biz"
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1/bot"
-	"{[.RootPackage]}/internal/apiserver/model/bot"
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/biz"
+	"{[.RootPackage]}/internal/bot/store"
 	mw "{[.RootPackage]}/internal/bot/telegram/middleware"
+	"{[.RootPackage]}/internal/pkg/model/bot"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1/bot"
 )
 
 type ServerController struct {

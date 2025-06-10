@@ -3,9 +3,9 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
-	"{[.RootPackage]}/internal/apiserver/http/controller/v1/common"
-	"{[.RootPackage]}/internal/apiserver/http/controller/v1/file"
-	"{[.RootPackage]}/internal/apiserver/http/middleware"
+	"{[.RootPackage]}/internal/apiserver/controller/v1/common"
+	"{[.RootPackage]}/internal/apiserver/controller/v1/file"
+	"{[.RootPackage]}/internal/apiserver/middleware"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/core"
 	"{[.RootPackage]}/internal/pkg/errno"

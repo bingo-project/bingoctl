@@ -6,16 +6,14 @@ import (
 	"time"
 
 	"github.com/bingo-project/component-base/log"
-	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/duke-git/lancet/v2/random"
-	"github.com/hibiken/asynq"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
-	"{[.RootPackage]}/internal/apiserver/global"
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
-	"{[.RootPackage]}/internal/apiserver/job"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	"{[.RootPackage]}/internal/pkg/facade"
+	"{[.RootPackage]}/internal/pkg/global"
+	"{[.RootPackage]}/internal/pkg/task"
+	"{[.RootPackage]}/pkg/api/apiserver/v1"
 )
 
 type EmailBiz interface {
@@ -46,15 +44,14 @@ func (b *emailBiz) SendEmailVerifyCode(ctx context.Context, req *v1.SendEmailReq
 	msg := fmt.Sprintf("Your verification code is: %s, please note that it will expire in 5 minutes.", code)
 
 	// Email task payload
-	payload := &job.EmailVerificationCodePayload{
+	payload := &task.EmailVerificationCodePayload{
 		To:      req.Email,
 		Subject: subject,
 		Content: msg,
 	}
 
 	// Enqueue email task
-	t := asynq.NewTask(job.EmailVerificationCode, []byte(convertor.ToString(payload)))
-	_, err := facade.Queue.Enqueue(t)
+	_, err := task.T.Queue(ctx, task.EmailVerificationCode, payload).Dispatch()
 	if err != nil {
 		log.C(ctx).Errorw("enqueue failed", "err", err)
 

@@ -3,12 +3,11 @@ package biz
 //go:generate mockgen -destination mock_biz.go -package biz {[.RootPackage]}/internal/apiserver/biz IBiz
 
 import (
+	"{[.RootPackage]}/internal/apiserver/biz/app"
 	"{[.RootPackage]}/internal/apiserver/biz/auth"
-	"{[.RootPackage]}/internal/apiserver/biz/bot"
 	"{[.RootPackage]}/internal/apiserver/biz/common"
 	"{[.RootPackage]}/internal/apiserver/biz/file"
 	"{[.RootPackage]}/internal/apiserver/biz/syscfg"
-	"{[.RootPackage]}/internal/apiserver/biz/system"
 	"{[.RootPackage]}/internal/apiserver/biz/user"
 	"{[.RootPackage]}/internal/apiserver/store"
 )
@@ -23,16 +22,11 @@ type IBiz interface {
 	Email() common.EmailBiz
 	Files() file.FileBiz
 
-	Admins() system.AdminBiz
-	Roles() system.RoleBiz
-	Apis() system.ApiBiz
-	Menus() system.MenuBiz
-
 	AppVersions() syscfg.AppVersionBiz
 	Configs() syscfg.ConfigBiz
 
-	Bots() bot.BotBiz
-	Channels() bot.ChannelBiz
+	Apps() app.AppBiz
+	ApiKeys() app.ApiKeyBiz
 }
 
 // biz 是 IBiz 的一个具体实现.
@@ -73,24 +67,6 @@ func (b *biz) Files() file.FileBiz {
 	return file.NewFile(b.ds)
 }
 
-// Admins 管理员.
-func (b *biz) Admins() system.AdminBiz {
-	return system.NewAdmin(b.ds)
-}
-
-// Roles 角色管理.
-func (b *biz) Roles() system.RoleBiz {
-	return system.NewRole(b.ds)
-}
-
-func (b *biz) Apis() system.ApiBiz {
-	return system.NewApi(b.ds)
-}
-
-func (b *biz) Menus() system.MenuBiz {
-	return system.NewMenu(b.ds)
-}
-
 func (b *biz) AppVersions() syscfg.AppVersionBiz {
 	return syscfg.NewAppVersion(b.ds)
 }
@@ -99,10 +75,10 @@ func (b *biz) Configs() syscfg.ConfigBiz {
 	return syscfg.NewConfig(b.ds)
 }
 
-func (b *biz) Bots() bot.BotBiz {
-	return bot.NewBot(b.ds)
+func (b *biz) Apps() app.AppBiz {
+	return app.NewApp(b.ds)
 }
 
-func (b *biz) Channels() bot.ChannelBiz {
-	return bot.NewChannel(b.ds)
+func (b *biz) ApiKeys() app.ApiKeyBiz {
+	return app.NewApiKey(b.ds)
 }

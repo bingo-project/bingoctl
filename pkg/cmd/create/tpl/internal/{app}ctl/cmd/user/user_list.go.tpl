@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"{[.RootPackage]}/internal/apiserver/biz"
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
 	"{[.RootPackage]}/internal/apiserver/store"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1"
 )
 
 const (

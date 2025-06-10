@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cast"
 	"gopkg.in/telebot.v3"
 
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/store"
 	"{[.RootPackage]}/internal/pkg/errno"
 )
 

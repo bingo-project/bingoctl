@@ -3,8 +3,8 @@ package syscfg
 import (
 	"context"
 
-	model "{[.RootPackage]}/internal/apiserver/model/syscfg"
 	"{[.RootPackage]}/internal/apiserver/store"
+	model "{[.RootPackage]}/internal/pkg/model/syscfg"
 )
 
 type ServerBiz interface {

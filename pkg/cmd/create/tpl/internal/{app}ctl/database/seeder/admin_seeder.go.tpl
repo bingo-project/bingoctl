@@ -3,7 +3,9 @@ package seeder
 import (
 	"context"
 
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/admserver/store"
+	"{[.RootPackage]}/internal/pkg/global"
+	"{[.RootPackage]}/pkg/auth"
 )
 
 type AdminSeeder struct {
@@ -20,6 +22,13 @@ func (AdminSeeder) Run() error {
 
 	// Init admin account.
 	err := store.S.Admins().InitData(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Init permission
+	authz, _ := auth.NewAuthz(store.S.DB())
+	_, err = authz.AddNamedPolicy("p", global.RolePrefix+global.RoleRoot, "*", auth.AclDefaultMethods)
 	if err != nil {
 		return err
 	}

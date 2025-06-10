@@ -25,6 +25,8 @@ e = some(where (p.eft == allow))
 
 [matchers]
 m = g(r.sub, p.sub) && r.sub == p.sub && keyMatch2(r.obj, p.obj) && regexMatch(r.act, p.act)`
+
+	AclDefaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
 )
 
 // Authz 定义了一个授权器，提供授权功能.
@@ -35,7 +37,7 @@ type Authz struct {
 // NewAuthz 创建一个使用 casbin 完成授权的授权器.
 func NewAuthz(db *gorm.DB) (*Authz, error) {
 	// Initialize a Gorm adapter and use it in a Casbin enforcer
-	adapter, err := adapter.NewAdapterByDB(db)
+	adapter, err := adapter.NewAdapterByDBUseTableName(db, "sys", "casbin_rule")
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +54,7 @@ func NewAuthz(db *gorm.DB) (*Authz, error) {
 	if err := enforcer.LoadPolicy(); err != nil {
 		return nil, err
 	}
-	enforcer.StartAutoLoadPolicy(5 * time.Second)
+	enforcer.StartAutoLoadPolicy(time.Second * 5)
 
 	a := &Authz{enforcer}
 

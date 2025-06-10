@@ -7,10 +7,10 @@ import (
 	"github.com/bingo-project/component-base/log"
 	"github.com/jinzhu/copier"
 
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1/syscfg"
-	model "{[.RootPackage]}/internal/apiserver/model/syscfg"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	model "{[.RootPackage]}/internal/pkg/model/syscfg"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1/syscfg"
 )
 
 type AppVersionBiz interface {
@@ -112,7 +112,7 @@ func (b *appVersionBiz) Update(ctx context.Context, ID uint, req *v1.UpdateAppVe
 	}
 
 	var resp v1.AppVersionInfo
-	_ = copier.Copy(&resp, req)
+	_ = copier.Copy(&resp, appM)
 
 	return &resp, nil
 }

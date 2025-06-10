@@ -11,9 +11,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gookit/goutil/fsutil"
 
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
 	"{[.RootPackage]}/internal/apiserver/store"
 	imageutil "{[.RootPackage]}/internal/pkg/util/image"
+	"{[.RootPackage]}/pkg/api/apiserver/v1"
 )
 
 type FileBiz interface {
@@ -104,7 +104,7 @@ func getResizeRatio(size int64) float64 {
 	}
 
 	// 10M - 20M
-	if size <= 1024*1024*10 {
+	if size <= 1024*1024*20 {
 		return 0.3
 	}
 

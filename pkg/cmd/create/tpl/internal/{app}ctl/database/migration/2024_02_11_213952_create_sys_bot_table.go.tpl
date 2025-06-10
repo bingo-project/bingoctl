@@ -5,7 +5,7 @@ import (
 
 	"github.com/bingo-project/bingoctl/pkg/migrate"
 
-	"{[.RootPackage]}/internal/apiserver/model"
+	"{[.RootPackage]}/internal/pkg/model"
 )
 
 type CreateSysBotTable struct {

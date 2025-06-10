@@ -6,12 +6,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/duke-git/lancet/v2/convertor"
 
-	"{[.RootPackage]}/internal/apiserver/biz"
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1/bot"
-	"{[.RootPackage]}/internal/apiserver/model/bot"
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/biz"
 	"{[.RootPackage]}/internal/bot/discord/client"
 	mw "{[.RootPackage]}/internal/bot/discord/middleware"
+	"{[.RootPackage]}/internal/bot/store"
+	"{[.RootPackage]}/internal/pkg/model/bot"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1/bot"
 )
 
 type ServerController struct {

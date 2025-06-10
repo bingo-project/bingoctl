@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/bwmarrin/discordgo"
 
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/bot/store"
 )
 
 func IsAdmin(s *discordgo.Session, i *discordgo.InteractionCreate) bool {

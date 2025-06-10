@@ -7,7 +7,7 @@ import (
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
+	"{[.RootPackage]}/internal/pkg/facade"
 )
 
 const (

@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"github.com/bingo-project/component-base/log"
+	"github.com/gin-gonic/gin"
 
-	"{[.RootPackage]}/internal/apiserver/bootstrap"
-	"{[.RootPackage]}/internal/apiserver/facade"
+	"{[.RootPackage]}/internal/apiserver/router"
+	"{[.RootPackage]}/internal/pkg/bootstrap"
+	"{[.RootPackage]}/internal/pkg/facade"
 )
 
 type httpAPIServer struct {
@@ -21,6 +23,8 @@ type httpAPIServer struct {
 // NewHttp create a grpcAPIServer instance.
 func NewHttp() *httpAPIServer {
 	g := bootstrap.InitGin()
+	installRouters(g)
+
 	srv := &http.Server{Addr: facade.Config.Server.Addr, Handler: g}
 
 	return &httpAPIServer{insecureServer: srv, insecureAddress: facade.Config.Server.Addr}
@@ -51,4 +55,19 @@ func (s *httpAPIServer) Close() {
 	}
 
 	log.Infow(fmt.Sprintf("HTTP server on %s stopped", s.insecureAddress))
+}
+
+func installRouters(g *gin.Engine) *gin.Engine {
+	// Swagger
+	if facade.Config.Feature.ApiDoc {
+		router.MapSwagRouters(g)
+	}
+
+	// Common router
+	router.MapCommonRouters(g)
+
+	// Api
+	router.MapApiRouters(g)
+
+	return g
 }

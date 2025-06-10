@@ -13,7 +13,7 @@ import (
 
 const (
 	// RecommendedName defines the default project name.
-	RecommendedName = "{[.AppName]}"
+	RecommendedName = "bingo"
 )
 
 var (

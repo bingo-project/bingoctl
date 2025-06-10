@@ -9,10 +9,10 @@ import (
 	"github.com/jinzhu/copier"
 	"golang.org/x/oauth2"
 
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1"
-	model "{[.RootPackage]}/internal/apiserver/model"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	"{[.RootPackage]}/internal/pkg/model"
+	"{[.RootPackage]}/pkg/api/apiserver/v1"
 )
 
 type AuthProviderBiz interface {
@@ -130,7 +130,7 @@ func (b *authProviderBiz) Update(ctx context.Context, ID uint, req *v1.UpdateAut
 	}
 
 	var resp v1.AuthProviderInfo
-	_ = copier.Copy(&resp, req)
+	_ = copier.Copy(&resp, authProviderM)
 
 	return &resp, nil
 }

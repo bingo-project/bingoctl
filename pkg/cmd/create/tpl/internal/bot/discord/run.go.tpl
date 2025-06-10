@@ -4,7 +4,7 @@ import (
 	"github.com/bingo-project/component-base/log"
 	"github.com/bwmarrin/discordgo"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
+	"{[.RootPackage]}/internal/pkg/facade"
 )
 
 type DiscordServer struct {

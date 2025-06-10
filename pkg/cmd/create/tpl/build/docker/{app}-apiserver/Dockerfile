@@ -11,7 +11,10 @@ COPY go.sum .
 RUN go mod download
 
 # Copy the sources
-COPY . .
+COPY api/ api/
+COPY cmd/{[.AppName]}-apiserver cmd/{[.AppName]}-apiserver
+COPY pkg/ pkg/
+COPY internal/ internal/
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
@@ -21,6 +24,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=${OS:-linux} GOARCH=${ARCH:-amd64} go build -a ./cmd/{[.AppName]}-apiserver
 
 FROM alpine:latest
+LABEL maintainer="<brooksyang@outlook.com>"
 
 WORKDIR /opt/{[.AppName]}
 

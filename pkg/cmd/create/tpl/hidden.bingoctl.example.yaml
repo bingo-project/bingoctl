@@ -4,12 +4,12 @@ rootPackage: {[.AppName]}
 
 directory:
   cmd: internal/{[.AppName]}ctl/cmd
-  model: internal/apiserver/model
+  model: internal/pkg/model
   store: internal/apiserver/store
   biz: internal/apiserver/biz
-  controller: internal/apiserver/http/controller/v1
-  middleware: internal/apiserver/http/middleware
-  request: internal/apiserver/http/request/v1
+  controller: internal/apiserver/controller/v1
+  middleware: internal/pkg/http/middleware
+  request: pkg/api/apiserver/v1
   job: internal/watcher/watcher
   migration: internal/{[.AppName]}ctl/database/migration
   seeder: internal/{[.AppName]}ctl/database/seeder

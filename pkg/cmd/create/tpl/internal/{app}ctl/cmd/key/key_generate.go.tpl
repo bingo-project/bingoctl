@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"{[.RootPackage]}/internal/apiserver/facade"
+	"{[.RootPackage]}/internal/pkg/facade"
 )
 
 const (

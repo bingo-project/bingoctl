@@ -7,10 +7,10 @@ import (
 	"github.com/bingo-project/component-base/log"
 	"github.com/jinzhu/copier"
 
-	v1 "{[.RootPackage]}/internal/apiserver/http/request/v1/syscfg"
-	model "{[.RootPackage]}/internal/apiserver/model/syscfg"
 	"{[.RootPackage]}/internal/apiserver/store"
 	"{[.RootPackage]}/internal/pkg/errno"
+	model "{[.RootPackage]}/internal/pkg/model/syscfg"
+	v1 "{[.RootPackage]}/pkg/api/apiserver/v1/syscfg"
 )
 
 type ConfigBiz interface {
@@ -109,7 +109,7 @@ func (b *configBiz) Update(ctx context.Context, ID uint, req *v1.UpdateConfigReq
 	}
 
 	var resp v1.ConfigInfo
-	_ = copier.Copy(&resp, req)
+	_ = copier.Copy(&resp, configM)
 
 	return &resp, nil
 }
