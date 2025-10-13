@@ -10,8 +10,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 
-	"{[.RootPackage]}/internal/apiserver/biz"
-	"{[.RootPackage]}/internal/apiserver/store"
+	"{[.RootPackage]}/internal/admserver/biz"
+	"{[.RootPackage]}/internal/admserver/store"
 )
 
 const (

@@ -88,10 +88,11 @@ _output
 
 # Tools
 .air.toml
-.{[.AppName]}ctl.yaml
+.bingoctl.yaml
 
 # Config
 {[.AppName]}-apiserver.yaml
 {[.AppName]}-admserver.yaml
 {[.AppName]}-scheduler.yaml
 {[.AppName]}-bot.yaml
+{[.AppName]}ctl.yaml
