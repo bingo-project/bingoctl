@@ -55,7 +55,7 @@ func NewSchedulerCommand() *cobra.Command {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	bootstrap.InitConfig("bingo-scheduler.yaml")
+	bootstrap.InitConfig("{[.AppName]}-bot.yaml")
 	bootstrap.Boot()
 
 	// Init store
