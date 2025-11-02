@@ -70,7 +70,6 @@ func (o *GenOptions) Run(args []string) error {
 
 		// generate model global configuration
 		FieldNullable:     true,
-		FieldCoverable:    true,
 		FieldSignable:     true,
 		FieldWithIndexTag: true,
 		FieldWithTypeTag:  true,

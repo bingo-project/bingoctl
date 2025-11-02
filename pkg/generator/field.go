@@ -35,7 +35,7 @@ func (o *Options) ReadMetaFields() error {
 		ModelPkgPath: o.Directory,
 
 		// generate model global configuration
-		FieldCoverable:    true,
+		FieldNullable:     true,
 		FieldSignable:     true,
 		FieldWithIndexTag: true,
 		FieldWithTypeTag:  true,
@@ -80,6 +80,8 @@ func (o *Options) GetFieldsFromDB() error {
 		if field.Type == "gorm.DeletedAt" && o.Name == string(TmplRequest) {
 			field.Type = "*time.Time"
 		}
+
+		field.GORMTag.Remove("column")
 
 		// Replaces
 		replaces := make(map[string]string)

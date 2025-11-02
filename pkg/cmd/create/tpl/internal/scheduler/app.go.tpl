@@ -55,7 +55,7 @@ func NewSchedulerCommand() *cobra.Command {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	bootstrap.InitConfig("{[.AppName]}-bot.yaml")
+	bootstrap.InitConfig("{[.AppName]}-scheduler.yaml")
 	bootstrap.Boot()
 
 	// Init store
