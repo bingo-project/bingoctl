@@ -30,11 +30,6 @@ func (q *queue) Dispatch(opts ...asynq.Option) (*asynq.TaskInfo, error) {
 	opt := []asynq.Option{asynq.Queue(defaultQueue)}
 	opt = append(opt, opts...)
 
-	// TaskID
-	if trace := q.Context.Value(log.KeyTrace); trace != nil {
-		opt = append(opt, asynq.TaskID(convertor.ToString(trace)))
-	}
-
 	t := asynq.NewTask(q.Name, []byte(payload), opt...)
 
 	return T.client.EnqueueContext(q.Context, t)

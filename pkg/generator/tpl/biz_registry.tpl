@@ -1,3 +1,3 @@
-func (b *biz) {{.StructNamePlural}}() {{.Package}}{{.StructName}}Biz {
-	return {{.Package}}New{{.StructName}}(b.ds)
+func (b *biz) {{.StructName}}V1() {{.Package}}{{.StructName}}Biz {
+	return {{.Package}}New{{.StructName}}(b.store)
 }

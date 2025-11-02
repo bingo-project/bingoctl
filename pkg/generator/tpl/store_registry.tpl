@@ -1,3 +1,3 @@
-func (ds *datastore) {{.StructNamePlural}}() {{.Package}}{{.StructName}}Store {
-	return {{.Package}}New{{.StructNamePlural}}(ds.db)
+func (store *datastore) {{.StructName}}() {{.Package}}{{.StructName}}Store {
+	return {{.Package}}New{{.StructName}}Store(store)
 }

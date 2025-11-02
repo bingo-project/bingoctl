@@ -6,7 +6,7 @@ directory:
   cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
-  biz: internal/apiserver/biz
+  biz: internal/apiserver/biz/1
   controller: internal/apiserver/http/controller/v1
   middleware: internal/apiserver/http/middleware
   request: internal/apiserver/http/request/v1

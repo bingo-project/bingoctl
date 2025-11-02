@@ -1,1 +1,1 @@
-{{.StructNamePlural}}() {{.Package}}{{.StructName}}Store
+{{.StructName}}() {{.Package}}{{.StructName}}Store

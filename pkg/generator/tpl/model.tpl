@@ -4,12 +4,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type {{.StructName}} struct {
+type {{.StructName}}M struct {
 	gorm.Model
 
 	{{.MainFields}}
 }
 
-func (*{{.StructName}}) TableName() string {
+func (*{{.StructName}}M) TableName() string {
 	return "{{.TableName}}"
 }

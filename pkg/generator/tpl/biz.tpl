@@ -19,6 +19,11 @@ type {{.StructName}}Biz interface {
 	Get(ctx context.Context, ID uint) (*v1.{{.StructName}}Info, error)
 	Update(ctx context.Context, ID uint, req *v1.Update{{.StructName}}Request) (*v1.{{.StructName}}Info, error)
 	Delete(ctx context.Context, ID uint) error
+
+	{{.StructName}}Expansion
+}
+
+type {{.StructName}}Expansion interface{
 }
 
 type {{.VariableName}}Biz struct {
@@ -32,9 +37,9 @@ func New{{.StructName}}(ds store.IStore) *{{.VariableName}}Biz {
 }
 
 func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.List{{.StructName}}Response, error) {
-	count, list, err := b.ds.{{.StructNamePlural}}().List(ctx, req)
+	count, list, err := b.ds.{{.StructName}}().List(ctx, req)
 	if err != nil {
-		log.C(ctx).Errorw("Failed to list {{.VariableNamePlural}}", "err", err)
+		log.C(ctx).Errorw("Failed to list {{.VariableName}}", "err", err)
 
 		return nil, err
 	}
@@ -54,7 +59,7 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.Stru
 	var {{.VariableName}}M model.{{.StructName}}
 	_ = copier.Copy(&{{.VariableName}}M, req)
 
-	err := b.ds.{{.StructNamePlural}}().Create(ctx, &{{.VariableName}}M)
+	err := b.ds.{{.StructName}}().Create(ctx, &{{.VariableName}}M)
 	if err != nil {
 		// Check exists
 		if match, _ := regexp.MatchString("Duplicate entry '.*' for key", err.Error()); match {
@@ -71,7 +76,7 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.Stru
 }
 
 func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.{{.StructName}}Info, error) {
-	{{.VariableName}}, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
+	{{.VariableName}}, err := b.ds.{{.StructName}}().Get(ctx, ID)
 	if err != nil {
 		return nil, errno.ErrResourceNotFound
 	}
@@ -83,14 +88,14 @@ func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.{{.StructN
 }
 
 func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Update{{.StructName}}Request) (*v1.{{.StructName}}Info, error) {
-	{{.VariableName}}M, err := b.ds.{{.StructNamePlural}}().Get(ctx, ID)
+	{{.VariableName}}M, err := b.ds.{{.StructName}}().Get(ctx, ID)
 	if err != nil {
 		return nil, errno.ErrResourceNotFound
 	}
 
     {{.UpdatableFields}}
 
-	if err := b.ds.{{.StructNamePlural}}().Update(ctx, {{.VariableName}}M); err != nil {
+	if err := b.ds.{{.StructName}}().Update(ctx, {{.VariableName}}M); err != nil {
 		return nil, err
 	}
 
@@ -101,5 +106,5 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Upda
 }
 
 func (b *{{.VariableName}}Biz) Delete(ctx context.Context, ID uint) error {
-	return b.ds.{{.StructNamePlural}}().Delete(ctx, ID)
+	return b.ds.{{.StructName}}().Delete(ctx, ID)
 }
