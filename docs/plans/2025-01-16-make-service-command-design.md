@@ -292,7 +292,8 @@ log:
 - ✅ `bingoctl make service` 基础命令
 - ✅ `--http` 标志 - 生成 HTTP 服务器
 - ✅ `--grpc` 标志 - 生成 gRPC 服务器
-- ✅ `--with-biz` 标志 - 生成 biz 目录
+- ✅ `--with-biz` 标志 - 生成 biz 目录 (默认启用)
+- ✅ `--no-biz` 标志 - 不生成 biz 目录 (覆盖 --with-biz)
 - ✅ `--with-store` 标志 - 生成 store 目录
 - ✅ `--with-controller` 标志 - 生成 controller 目录
 - ✅ `--with-middleware` 标志 - 生成 middleware 目录
@@ -305,12 +306,15 @@ log:
 
 **使用示例:**
 ```bash
-# 最小化服务
+# 最小化服务（默认包含 biz 目录）
 bingoctl make service payment
+
+# 不包含 biz 目录的最小化服务
+bingoctl make service payment --no-biz
 
 # HTTP API 服务
 bingoctl make service order --http --with-router
 
 # 完整服务
-bingoctl make service inventory --http --grpc --with-biz --with-store --with-controller --with-router
+bingoctl make service inventory --http --grpc --with-store --with-controller --with-router
 ```
