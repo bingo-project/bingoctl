@@ -19,6 +19,7 @@ type Options struct {
 	VariableNamePlural string
 	TableName          string
 	ModelName          string
+	ServiceName        string
 
 	// Code attributes - import path
 	RootPackage  string
@@ -27,6 +28,15 @@ type Options struct {
 	RequestPath  string
 	ModelPath    string
 	RelativePath string
+
+	// Service flags
+	EnableHTTP     bool
+	EnableGRPC     bool
+	WithBiz        bool
+	WithStore      bool
+	WithController bool
+	WithMiddleware bool
+	WithRouter     bool
 
 	// Generate by gorm.gen
 	Table           string
