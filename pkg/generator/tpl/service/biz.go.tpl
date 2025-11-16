@@ -1,7 +1,7 @@
 package biz
 
 import (
-	"{{.RootPackage}}/internal/{{.ServiceName}}/store"
+	"{{.RootPackage}}/internal/pkg/store"
 )
 
 // IBiz 定义了 Biz 层需要实现的方法.
