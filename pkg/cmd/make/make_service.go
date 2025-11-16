@@ -240,6 +240,7 @@ func (o *ServiceOptions) generateApp() error {
 	defer file.Close()
 
 	data := map[string]string{
+		"RootPackage": config.Cfg.RootPackage,
 		"ServiceName": o.ServiceName,
 	}
 
