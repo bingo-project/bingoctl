@@ -1,21 +1,57 @@
+// Package {{.ServiceName}} does all the work necessary to create a {{.ServiceName}} service.
 package {{.ServiceName}}
 
 import (
-	"github.com/bingo-project/component-base/cli"
+	"fmt"
+
+	"github.com/bingo-project/component-base/log"
+	"github.com/bingo-project/component-base/version/verflag"
 	"github.com/spf13/cobra"
+
+	"{{.RootPackage}}/internal/pkg/bootstrap"
 )
 
-// NewAppCommand creates the application command.
+// NewAppCommand creates an App object with default parameters.
 func NewAppCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "{{.ServiceName}}",
-		Short: "{{.ServiceName}} service",
+		Use:          "{{.ServiceName}}",
+		Short:        "{{.ServiceName}} service",
+		Long:         `{{.ServiceName}} service, used to create user with basic information.`,
+		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			verflag.PrintAndExitIfRequested()
+			defer log.Sync() // Sync 将缓存中的日志刷新到磁盘文件中
+
 			return run()
+		},
+		// 这里设置命令运行时，不需要指定命令行参数
+		Args: func(cmd *cobra.Command, args []string) error {
+			for _, arg := range args {
+				if len(arg) > 0 {
+					return fmt.Errorf("%q does not take any arguments, got %q", cmd.CommandPath(), args)
+				}
+			}
+
+			return nil
 		},
 	}
 
-	cli.AddConfigFlag(cmd, "{{.ServiceName}}")
+	// 以下设置，使得 InitConfig 函数在每个命令运行时都会被调用以读取配置
+	cobra.OnInitialize(initConfig)
+
+	// 在这里您将定义标志和配置设置。
+
+	// Cobra 支持持久性标志(PersistentFlag)，该标志可用于它所分配的命令以及该命令下的每个子命令
+	cmd.PersistentFlags().StringVarP(&bootstrap.CfgFile, "config", "c", "", "The path to the configuration file. Empty string for no configuration file.")
+
+	// 添加 --version 标志
+	verflag.AddFlags(cmd.PersistentFlags())
 
 	return cmd
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	bootstrap.InitConfig("{{.ServiceName}}.yaml")
+	bootstrap.Boot()
 }
