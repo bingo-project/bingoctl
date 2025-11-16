@@ -491,5 +491,10 @@ func (o *ServiceOptions) createDirectoryWithFile(dirType string, parts ...string
 	defer file.Close()
 
 	// Execute template
-	return tmpl.Execute(file, nil)
+	data := map[string]string{
+		"RootPackage": config.Cfg.RootPackage,
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
 }
