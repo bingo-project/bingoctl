@@ -37,6 +37,7 @@ type Options struct {
 	WithController bool
 	WithMiddleware bool
 	WithRouter     bool
+	NoBiz          bool
 
 	// Generate by gorm.gen
 	Table           string

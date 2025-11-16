@@ -47,7 +47,8 @@ func (o *Options) GenerateService(name string) error {
 	}
 
 	// Generate optional directories
-	if o.WithBiz {
+	// Generate biz directory by default unless --no-biz is specified
+	if o.WithBiz && !o.NoBiz {
 		if err := o.createDirectoryWithFile("biz", "internal", o.ServiceName, "biz"); err != nil {
 			return err
 		}

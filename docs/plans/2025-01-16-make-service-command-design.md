@@ -24,7 +24,8 @@ bingoctl make service <name> [flags]
 
 - `--http` - 生成 HTTP 服务器相关代码
 - `--grpc` - 生成 gRPC 服务器相关代码
-- `--with-biz` - 生成 biz/ 业务逻辑层目录
+- `--with-biz` - 生成 biz/ 业务逻辑层目录 (默认启用)
+- `--no-biz` - 不生成 biz/ 业务逻辑层目录 (覆盖 --with-biz)
 - `--with-store` - 生成 store/ 数据访问层目录
 - `--with-controller` - 生成 controller/ 控制器目录
 - `--with-middleware` - 生成 middleware/ 中间件目录
@@ -33,14 +34,17 @@ bingoctl make service <name> [flags]
 ### 使用示例
 
 ```bash
-# 最小化服务（只有基础框架）
+# 最小化服务（只有基础框架，默认包含 biz 目录）
 bingoctl make service payment
+
+# 不包含 biz 目录的最小化服务
+bingoctl make service payment --no-biz
 
 # HTTP API 服务
 bingoctl make service payment --http --with-controller --with-router
 
 # 完整的 HTTP+gRPC 服务
-bingoctl make service payment --http --grpc --with-biz --with-store --with-controller --with-router --with-middleware
+bingoctl make service payment --http --grpc --with-store --with-controller --with-router --with-middleware
 ```
 
 ## 生成的目录结构
@@ -55,6 +59,8 @@ cmd/payment/
 
 internal/payment/
   ├── app.go              # Cobra 命令定义，应用初始化
+  ├── biz/                # 业务逻辑层目录（默认创建）
+  │   └── biz.go          # 基本的业务逻辑接口和实现
   └── run.go              # 服务启动逻辑（空框架）
 
 configs/

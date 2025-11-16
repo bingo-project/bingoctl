@@ -56,11 +56,12 @@ func NewCmdService() *cobra.Command {
 
 	cmd.Flags().BoolVar(&o.EnableHTTP, "http", false, "Enable HTTP server")
 	cmd.Flags().BoolVar(&o.EnableGRPC, "grpc", false, "Enable gRPC server")
-	cmd.Flags().BoolVar(&o.WithBiz, "with-biz", false, "Generate biz layer")
+	cmd.Flags().BoolVar(&o.WithBiz, "with-biz", true, "Generate biz layer (default true)")
 	cmd.Flags().BoolVar(&o.WithStore, "with-store", false, "Generate store layer")
 	cmd.Flags().BoolVar(&o.WithController, "with-controller", false, "Generate controller layer")
 	cmd.Flags().BoolVar(&o.WithMiddleware, "with-middleware", false, "Generate middleware directory")
 	cmd.Flags().BoolVar(&o.WithRouter, "with-router", false, "Generate router directory")
+	cmd.Flags().BoolVar(&o.NoBiz, "no-biz", false, "Do not generate biz layer (overrides --with-biz)")
 
 	return cmd
 }
