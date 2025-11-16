@@ -147,7 +147,7 @@ func (o *ServiceOptions) Run(args []string) error {
 
 	// Generate optional directories
 	if o.WithBiz {
-		if err := o.createDirectory("internal", o.ServiceName, "biz"); err != nil {
+		if err := o.createDirectoryWithFile("biz", "internal", o.ServiceName, "biz"); err != nil {
 			return err
 		}
 	}
@@ -157,7 +157,7 @@ func (o *ServiceOptions) Run(args []string) error {
 		}
 	}
 	if o.WithController {
-		if err := o.createDirectory("internal", o.ServiceName, "controller"); err != nil {
+		if err := o.createDirectoryWithFile("controller", "internal", o.ServiceName, "controller"); err != nil {
 			return err
 		}
 	}
@@ -442,4 +442,54 @@ func (o *ServiceOptions) createDirectory(parts ...string) error {
 	defer file.Close()
 
 	return nil
+}
+
+// createDirectoryWithFile creates a directory and a basic file for specific directories.
+func (o *ServiceOptions) createDirectoryWithFile(dirType string, parts ...string) error {
+	dir := filepath.Join(parts...)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	// Create a basic file based on directory type
+	var fileName, tplName string
+	switch dirType {
+	case "biz":
+		fileName = "biz.go"
+		tplName = "biz.go.tpl"
+	case "controller":
+		fileName = "controller.go"
+		tplName = "controller.go.tpl"
+	default:
+		// For other directories, just create .gitkeep
+		gitkeepPath := filepath.Join(dir, ".gitkeep")
+		file, err := os.Create(gitkeepPath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		return nil
+	}
+
+	// Read template
+	tplContent, err := generator.ReadServiceTemplate(tplName)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New(tplName).Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	// Create file
+	filePath := filepath.Join(dir, fileName)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Execute template
+	return tmpl.Execute(file, nil)
 }
