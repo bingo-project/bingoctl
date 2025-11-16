@@ -26,6 +26,11 @@ const (
 	TmplService    Tmpl = "service"
 )
 
+// ReadServiceTemplate reads a service template file by name.
+func ReadServiceTemplate(name string) ([]byte, error) {
+	return tplFS.ReadFile(fmt.Sprintf("tpl/service/%s", name))
+}
+
 func (o *Options) ReadCodeTemplates() *Options {
 	// Read template
 	codeTemplateBytes, _ := tplFS.ReadFile(fmt.Sprintf("tpl/%s.tpl", o.Name))

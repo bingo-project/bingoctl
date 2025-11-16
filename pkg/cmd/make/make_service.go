@@ -1,0 +1,444 @@
+// ABOUTME: make service 子命令，用于生成服务模块
+// ABOUTME: 支持通过标志配置 HTTP/gRPC 服务器和业务层目录
+
+package make
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"text/template"
+
+	"github.com/spf13/cobra"
+
+	"github.com/bingo-project/bingoctl/pkg/config"
+	"github.com/bingo-project/bingoctl/pkg/generator"
+	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
+)
+
+const (
+	serviceUsageStr = "service NAME"
+)
+
+var (
+	serviceUsageErrStr = fmt.Sprintf(
+		"expected '%s'.\nNAME is a required argument for the service command",
+		serviceUsageStr,
+	)
+)
+
+// ServiceOptions is an option struct to support 'service' sub command.
+type ServiceOptions struct {
+	*generator.Options
+	ServiceName    string
+	EnableHTTP     bool
+	EnableGRPC     bool
+	WithBiz        bool
+	WithStore      bool
+	WithController bool
+	WithMiddleware bool
+	WithRouter     bool
+}
+
+// NewServiceOptions returns an initialized ServiceOptions instance.
+func NewServiceOptions() *ServiceOptions {
+	return &ServiceOptions{
+		Options: opt,
+	}
+}
+
+// NewCmdService returns new initialized instance of 'service' sub command.
+func NewCmdService() *cobra.Command {
+	o := NewServiceOptions()
+
+	cmd := &cobra.Command{
+		Use:                   serviceUsageStr,
+		DisableFlagsInUseLine: true,
+		Short:                 "Generate service code",
+		Long:                  "Generate a new service module with configurable HTTP/gRPC servers and business layers.",
+		TraverseChildren:      true,
+		Run: func(cmd *cobra.Command, args []string) {
+			cmdutil.CheckErr(o.Validate(cmd, args))
+			cmdutil.CheckErr(o.Complete(cmd, args))
+			cmdutil.CheckErr(o.Run(args))
+		},
+	}
+
+	cmd.Flags().BoolVar(&o.EnableHTTP, "http", false, "Enable HTTP server")
+	cmd.Flags().BoolVar(&o.EnableGRPC, "grpc", false, "Enable gRPC server")
+	cmd.Flags().BoolVar(&o.WithBiz, "with-biz", false, "Generate biz layer")
+	cmd.Flags().BoolVar(&o.WithStore, "with-store", false, "Generate store layer")
+	cmd.Flags().BoolVar(&o.WithController, "with-controller", false, "Generate controller layer")
+	cmd.Flags().BoolVar(&o.WithMiddleware, "with-middleware", false, "Generate middleware directory")
+	cmd.Flags().BoolVar(&o.WithRouter, "with-router", false, "Generate router directory")
+
+	return cmd
+}
+
+// Validate makes sure there is no discrepancy in command options.
+func (o *ServiceOptions) Validate(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		return cmdutil.UsageErrorf(cmd, serviceUsageErrStr)
+	}
+
+	o.ServiceName = args[0]
+
+	// Check if cmd/ and internal/ directories exist
+	if _, err := os.Stat("cmd"); os.IsNotExist(err) {
+		return fmt.Errorf("cmd/ directory does not exist, please run this command in a project root")
+	}
+	if _, err := os.Stat("internal"); os.IsNotExist(err) {
+		return fmt.Errorf("internal/ directory does not exist, please run this command in a project root")
+	}
+
+	// Check if service already exists
+	cmdPath := filepath.Join("cmd", o.ServiceName)
+	if _, err := os.Stat(cmdPath); !os.IsNotExist(err) {
+		return fmt.Errorf("service already exists: %s", cmdPath)
+	}
+
+	internalPath := filepath.Join("internal", o.ServiceName)
+	if _, err := os.Stat(internalPath); !os.IsNotExist(err) {
+		return fmt.Errorf("service already exists: %s", internalPath)
+	}
+
+	return nil
+}
+
+// Complete completes all the required options.
+func (o *ServiceOptions) Complete(cmd *cobra.Command, args []string) error {
+	return nil
+}
+
+// Run executes a new sub command using the specified options.
+func (o *ServiceOptions) Run(args []string) error {
+	// Generate cmd/<name>/main.go
+	if err := o.generateCmdMain(); err != nil {
+		return err
+	}
+
+	// Generate internal/<name>/app.go
+	if err := o.generateApp(); err != nil {
+		return err
+	}
+
+	// Generate internal/<name>/run.go
+	if err := o.generateRun(); err != nil {
+		return err
+	}
+
+	// Generate HTTP server if enabled
+	if o.EnableHTTP {
+		if err := o.generateHTTPServer(); err != nil {
+			return err
+		}
+	}
+
+	// Generate gRPC server if enabled
+	if o.EnableGRPC {
+		if err := o.generateGRPCServer(); err != nil {
+			return err
+		}
+		// Create grpc/ directory
+		if err := o.createDirectory("internal", o.ServiceName, "grpc"); err != nil {
+			return err
+		}
+	}
+
+	// Generate optional directories
+	if o.WithBiz {
+		if err := o.createDirectory("internal", o.ServiceName, "biz"); err != nil {
+			return err
+		}
+	}
+	if o.WithStore {
+		if err := o.createDirectory("internal", o.ServiceName, "store"); err != nil {
+			return err
+		}
+	}
+	if o.WithController {
+		if err := o.createDirectory("internal", o.ServiceName, "controller"); err != nil {
+			return err
+		}
+	}
+	if o.WithMiddleware {
+		if err := o.createDirectory("internal", o.ServiceName, "middleware"); err != nil {
+			return err
+		}
+	}
+	if o.WithRouter {
+		if err := o.generateRouter(); err != nil {
+			return err
+		}
+	}
+
+	// Generate config file
+	if err := o.generateConfig(); err != nil {
+		return err
+	}
+
+	fmt.Printf("Service '%s' generated successfully!\n", o.ServiceName)
+	fmt.Printf("  - cmd/%s/main.go\n", o.ServiceName)
+	fmt.Printf("  - internal/%s/\n", o.ServiceName)
+	fmt.Printf("  - configs/%s.yaml\n", o.ServiceName)
+
+	return nil
+}
+
+func (o *ServiceOptions) generateCmdMain() error {
+	tplContent, err := generator.ReadServiceTemplate("cmd_main.go.tpl")
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("cmd_main").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	cmdDir := filepath.Join("cmd", o.ServiceName)
+	if err := os.MkdirAll(cmdDir, 0755); err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(cmdDir, "main.go")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]string{
+		"RootPackage": config.Cfg.RootPackage,
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) generateApp() error {
+	tplContent, err := generator.ReadServiceTemplate("app.go.tpl")
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("app").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	internalDir := filepath.Join("internal", o.ServiceName)
+	if err := os.MkdirAll(internalDir, 0755); err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(internalDir, "app.go")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]string{
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) generateRun() error {
+	// Select template based on server flags
+	var tplName string
+	if o.EnableHTTP && o.EnableGRPC {
+		tplName = "run_both.go.tpl"
+	} else if o.EnableHTTP {
+		tplName = "run_http.go.tpl"
+	} else if o.EnableGRPC {
+		tplName = "run_grpc.go.tpl"
+	} else {
+		tplName = "run_minimal.go.tpl"
+	}
+
+	tplContent, err := generator.ReadServiceTemplate(tplName)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("run").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	internalDir := filepath.Join("internal", o.ServiceName)
+	filePath := filepath.Join(internalDir, "run.go")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]string{
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) generateHTTPServer() error {
+	tplContent, err := generator.ReadServiceTemplate("server.go.tpl")
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("server").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	internalDir := filepath.Join("internal", o.ServiceName)
+	filePath := filepath.Join(internalDir, "server.go")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]string{
+		"RootPackage": config.Cfg.RootPackage,
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) generateGRPCServer() error {
+	tplContent, err := generator.ReadServiceTemplate("grpc.go.tpl")
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("grpc").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	internalDir := filepath.Join("internal", o.ServiceName)
+	filePath := filepath.Join(internalDir, "grpc.go")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]string{
+		"RootPackage": config.Cfg.RootPackage,
+		"ServiceName": o.ServiceName,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) generateRouter() error {
+	routerDir := filepath.Join("internal", o.ServiceName, "router")
+	if err := os.MkdirAll(routerDir, 0755); err != nil {
+		return err
+	}
+
+	// Generate HTTP router if HTTP is enabled
+	if o.EnableHTTP {
+		tplContent, err := generator.ReadServiceTemplate("router_http.go.tpl")
+		if err != nil {
+			return err
+		}
+
+		tmpl, err := template.New("router_http").Parse(string(tplContent))
+		if err != nil {
+			return err
+		}
+
+		filePath := filepath.Join(routerDir, "http.go")
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		if err := tmpl.Execute(file, nil); err != nil {
+			return err
+		}
+	}
+
+	// Generate gRPC router if gRPC is enabled
+	if o.EnableGRPC {
+		tplContent, err := generator.ReadServiceTemplate("router_grpc.go.tpl")
+		if err != nil {
+			return err
+		}
+
+		tmpl, err := template.New("router_grpc").Parse(string(tplContent))
+		if err != nil {
+			return err
+		}
+
+		filePath := filepath.Join(routerDir, "grpc.go")
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		if err := tmpl.Execute(file, nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *ServiceOptions) generateConfig() error {
+	tplContent, err := generator.ReadServiceTemplate("config.yaml.tpl")
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("config").Parse(string(tplContent))
+	if err != nil {
+		return err
+	}
+
+	configsDir := "configs"
+	if err := os.MkdirAll(configsDir, 0755); err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(configsDir, o.ServiceName+".yaml")
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := map[string]bool{
+		"EnableHTTP": o.EnableHTTP,
+		"EnableGRPC": o.EnableGRPC,
+	}
+
+	return tmpl.Execute(file, data)
+}
+
+func (o *ServiceOptions) createDirectory(parts ...string) error {
+	dir := filepath.Join(parts...)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	// Create .gitkeep file
+	gitkeepPath := filepath.Join(dir, ".gitkeep")
+	file, err := os.Create(gitkeepPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return nil
+}
