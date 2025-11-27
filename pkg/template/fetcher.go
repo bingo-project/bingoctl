@@ -3,8 +3,14 @@
 package template
 
 import (
+	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"time"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 const (
@@ -53,4 +59,53 @@ func (f *Fetcher) buildDownloadURL(ref string) string {
 	}
 
 	return url
+}
+
+// downloadWithTimeout downloads tarball with 30s timeout and shows progress bar
+func (f *Fetcher) downloadWithTimeout(url string) (string, error) {
+	// Create HTTP client with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to download: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("download failed with status: %d", resp.StatusCode)
+	}
+
+	// Create temporary file
+	tmpFile, err := os.CreateTemp(f.cacheDir, "bingoctl-*.tar.gz")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer tmpFile.Close()
+
+	// Download to temp file with progress bar
+	if resp.ContentLength > 0 {
+		bar := progressbar.DefaultBytes(
+			resp.ContentLength,
+			"Downloading",
+		)
+		if _, err := io.Copy(io.MultiWriter(tmpFile, bar), resp.Body); err != nil {
+			os.Remove(tmpFile.Name())
+			return "", fmt.Errorf("failed to write file: %w", err)
+		}
+	} else {
+		// No content length, copy without progress bar
+		if _, err := io.Copy(tmpFile, resp.Body); err != nil {
+			os.Remove(tmpFile.Name())
+			return "", fmt.Errorf("failed to write file: %w", err)
+		}
+	}
+
+	return tmpFile.Name(), nil
 }

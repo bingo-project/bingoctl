@@ -1,7 +1,11 @@
 package template
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
+	"time"
 )
 
 func TestBuildDownloadURL(t *testing.T) {
@@ -46,4 +50,68 @@ func TestBuildDownloadURL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDownloadWithTimeout(t *testing.T) {
+	// Create mock HTTP server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test tarball content"))
+	}))
+	defer server.Close()
+
+	tmpDir := t.TempDir()
+	f := &Fetcher{
+		cacheDir: tmpDir,
+		timeout:  defaultTimeout,
+		mirror:   "",
+	}
+
+	// Test download
+	tarPath, err := f.downloadWithTimeout(server.URL)
+	if err != nil {
+		t.Fatalf("downloadWithTimeout failed: %v", err)
+	}
+
+	// Verify file exists
+	if !fileExists(tarPath) {
+		t.Errorf("Downloaded file not found: %s", tarPath)
+	}
+
+	// Verify content
+	content, err := os.ReadFile(tarPath)
+	if err != nil {
+		t.Fatalf("Failed to read downloaded file: %v", err)
+	}
+
+	if string(content) != "test tarball content" {
+		t.Errorf("Downloaded content = %s, want 'test tarball content'", content)
+	}
+}
+
+func TestDownloadWithTimeout_Timeout(t *testing.T) {
+	// Create slow server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Delay longer than timeout
+		time.Sleep(2 * time.Second)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	tmpDir := t.TempDir()
+	f := &Fetcher{
+		cacheDir: tmpDir,
+		timeout:  100 * time.Millisecond, // Short timeout for test
+		mirror:   "",
+	}
+
+	_, err := f.downloadWithTimeout(server.URL)
+	if err == nil {
+		t.Error("Expected timeout error, got nil")
+	}
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
