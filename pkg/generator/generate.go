@@ -155,11 +155,17 @@ func discoverServices() ([]string, error) {
 
 		// Extract service name: myapp-apiserver → apiserver, myappctl → ctl
 		name := entry.Name()
+		var serviceName string
 		parts := strings.Split(name, "-")
 		if len(parts) > 1 {
-			services = append(services, parts[len(parts)-1])
+			serviceName = parts[len(parts)-1]
 		} else if strings.HasSuffix(name, "ctl") {
-			services = append(services, "ctl")
+			serviceName = "ctl"
+		}
+
+		// Skip empty service names
+		if serviceName != "" {
+			services = append(services, serviceName)
 		}
 	}
 
