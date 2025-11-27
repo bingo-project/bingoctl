@@ -49,8 +49,8 @@ bingoctl 是 bingo 脚手架的 CLI 工具，`create` 命令用于创建新项�
 ### 4. 服务过滤实现
 
 - **变更前**：硬编码服务映射
-- **变更后**：临时使用硬编码 + TODO，未来迁移到 `.bingoctl.yaml` 元数据文件
-- **原因**：降低维护成本，适应 bingo 项目结构变化
+- **变更后**：从 bingo 项目的 `.bingoctl.yaml` 元数据文件读取服务映射
+- **原因**：降低维护成本，适应 bingo 项目结构变化，bingoctl 无需硬编码服务列表
 
 ### 5. 操作原子性
 
@@ -120,19 +120,18 @@ bingoctl create demo --no-service bot,scheduler
 
 **设计原则：避免依赖 GitHub API，防止限流问题。**
 
-- **默认推荐版本**：在 bingoctl 中硬编码一个推荐版本（如 `v1.0.0`），每次 bingoctl 发布时更新
+- **默认推荐版本**：在 bingoctl 中硬编码一个推荐版本（如 `v1.0.0`）
   - 优点：不需要网络请求，快速可靠
   - 用户不指定 `-r` 时使用此版本
+  - 版本号由 bingoctl 项目维护，无需跟踪 bingo 项目发布
 
 - **固定版本**：用户通过 `-r` 指定具体的 tag 或 commit hash
   - 示例：`-r v1.2.3` 或 `-r abc123def`
+  - 支持任意有效的 git ref
 
-- **分支支持**：支持 `main` 等分支，使用 `--no-cache` 强制更新
+- **分支支持**：支持 `main` 等任意分支，使用 `--no-cache` 强制更新
   - 分支直接使用分支名作为缓存 key（如 `main`）
   - 如果需要最新代码，使用 `--no-cache` 标志
-
-- **版本过滤**：只推荐使用正式发布版本（如 `v1.2.3`），不包含 pre-release 版本（如 `v1.2.3-beta.1`）
-  - 文档中明确说明推荐版本的选择标准
 
 ### 3. 缓存策略
 
@@ -189,18 +188,20 @@ https://github.com/bingo-project/bingo/archive/refs/heads/{ref}.tar.gz
    - 使用 os.TempDir() 创建临时目录
    - 复制缓存内容到临时目录
    ↓
-3. 过滤服务（根据服务选择参数）
+3. 过滤服务（在重命名之前，使用原始目录名匹配）
+   - 从 .bingoctl.yaml 读取服务映射
    - 删除未选中的服务的 cmd/ 和 internal/ 目录
    - 保留 internal/pkg/（共享代码）
    - 例如：只选择 apiserver 时删除 cmd/bingo-admserver, internal/admserver 等
+   - 注意：此时目录名还是原始名称（如 cmd/bingo-apiserver）
    ↓
-4. 重命名目录（总是执行）
-   - cmd/bingo-apiserver → cmd/{app}-apiserver
-   - cmd/bingo-admserver → cmd/{app}-admserver
-   - cmd/bingo-bot → cmd/{app}-bot
-   - cmd/bingo-scheduler → cmd/{app}-scheduler
-   - cmd/bingoctl → cmd/{app}ctl
-   - 只重命名这些明确列出的目录
+4. 重命名目录（只重命名保留下来的目录）
+   - cmd/bingo-apiserver → cmd/{app}-apiserver（如果保留）
+   - cmd/bingo-admserver → cmd/{app}-admserver（如果保留）
+   - cmd/bingo-bot → cmd/{app}-bot（如果保留）
+   - cmd/bingo-scheduler → cmd/{app}-scheduler（如果保留）
+   - cmd/bingoctl → cmd/{app}ctl（如果保留）
+   - 只重命名这些明确列出的且未被删除的目录
    ↓
 5. 替换包名（仅当指定 -m 时）
    - go.mod: module bingo → module {newModule}
@@ -217,7 +218,11 @@ https://github.com/bingo-project/bingo/archive/refs/heads/{ref}.tar.gz
 
 **Tarball 解压注意事项：**
 - GitHub tarball 解压后有根目录（如 `bingo-v1.2.3/` 或 `bingo-main/`）
-- 需要检测并进入根目录，提取其中的内容到缓存
+- 解压逻辑：
+  1. 解压所有文件到临时目录
+  2. 检测根目录（应该有且仅有一个目录）
+  3. 将根目录中的内容移动到缓存目录
+  4. 如果格式异常（无根目录或多个根目录），返回错误
 
 ### 6. 错误处理
 
@@ -290,6 +295,12 @@ type Fetcher struct {
 }
 
 // FetchTemplate 下载模板到缓存（如不存在），返回缓存路径
+// 执行步骤：
+// 1. 检查缓存目录是否存在，不存在则创建（权限0755）
+// 2. 检查缓存目录是否可写，不可写则返回友好错误
+// 3. 检查缓存是否命中（除非 noCache=true）
+// 4. 如果需要下载，获取文件锁，下载并解压到缓存
+// 5. 返回缓存路径
 // noCache: 是否强制重新下载
 func (f *Fetcher) FetchTemplate(ref string, noCache bool) (string, error)
 
@@ -297,7 +308,11 @@ func (f *Fetcher) FetchTemplate(ref string, noCache bool) (string, error)
 func (f *Fetcher) downloadWithTimeout(url string) (string, error)
 
 // extractTarball 解压 tarball 到缓存目录
-// 处理 GitHub tarball 根目录（如 bingo-v1.2.3/）
+// 处理 GitHub tarball 根目录：
+//   1. 解压所有文件到临时目录
+//   2. 检测根目录（应该有且仅有一个目录）
+//   3. 将根目录中的内容移动到 destDir
+//   4. 如果格式异常（无根目录或多个根目录），返回错误
 func (f *Fetcher) extractTarball(tarPath, destDir string) error
 
 // buildDownloadURL 构建下载 URL（支持镜像）
@@ -315,7 +330,6 @@ func (f *Fetcher) acquireLock() (*flock.Flock, error)
 
 ```go
 // DefaultTemplateVersion 默认推荐的模板版本
-// 每次 bingoctl 发布时更新此版本号
 const DefaultTemplateVersion = "v1.0.0"
 
 // isValidRef 检查 ref 格式是否有效
@@ -328,7 +342,7 @@ func refType(ref string) string
 
 **设计说明：**
 - 不使用 GitHub API，避免限流和网络依赖
-- 硬编码推荐版本，每次 bingoctl 发布时手动更新
+- 硬编码推荐版本，无需跟踪 bingo 项目发布
 - 用户可通过 `-r` 参数指定任意版本
 
 #### 3. `pkg/template/replacer.go`
@@ -374,9 +388,13 @@ var replaceableExtensions = []string{
 
     // 配置文件
     ".yaml", ".yml", ".toml", ".json",
+    ".env", ".env.example", ".env.template",
 
     // Docker
     "Dockerfile", ".dockerignore",
+
+    // Git
+    ".gitignore",
 }
 ```
 
@@ -443,7 +461,7 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
     // 1. 解析模板版本
     if o.TemplateRef == "" {
         o.TemplateRef = template.DefaultTemplateVersion
-        console.Info(fmt.Sprintf("使用推荐版本: %s", o.TemplateRef))
+        console.Info(fmt.Sprintf("使用推荐版本：%s", o.TemplateRef))
     }
 
     // 2. 计算服务列表（保留现有逻辑）
@@ -511,23 +529,14 @@ func (o *CreateOptions) Run(args []string) error {
 
 // filterServices 删除未选中的服务目录
 func (o *CreateOptions) filterServices(targetDir string) error {
-    // 方案 A：从 bingo 项目的 .bingoctl.yaml 读取服务映射（推荐）
-    // 方案 B：约定优于配置，自动扫描 cmd/ 和 internal/ 目录
-
-    // 这里采用方案 B（简单实现）
-    // TODO: 未来迁移到方案 A，在 bingo 项目中添加 .bingoctl.yaml
-
-    // 硬编码服务映射（临时方案）
-    allServices := map[string]struct {
-        cmdDir      string
-        internalDir string
-    }{
-        "apiserver": {"cmd/bingo-apiserver", "internal/apiserver"},
-        "admserver": {"cmd/bingo-admserver", "internal/admserver"},
-        "bot":       {"cmd/bingo-bot", "internal/bot"},
-        "scheduler": {"cmd/bingo-scheduler", "internal/scheduler"},
-        "ctl":       {"cmd/bingoctl", "internal/bingoctl"},
+    // 从 bingo 项目的 .bingoctl.yaml 读取服务映射
+    configPath := filepath.Join(targetDir, ".bingoctl.yaml")
+    config, err := loadBingoctlConfig(configPath)
+    if err != nil {
+        return fmt.Errorf("加载 .bingoctl.yaml 失败: %w", err)
     }
+
+    allServices := config.Services
 
     // 标记选中的服务
     selected := make(map[string]bool)
@@ -536,23 +545,23 @@ func (o *CreateOptions) filterServices(targetDir string) error {
     }
 
     // 删除未选中的服务目录
-    for svc, dirs := range allServices {
+    for svc, service := range allServices {
         if !selected[svc] {
             // 删除 cmd 目录
-            cmdPath := filepath.Join(targetDir, dirs.cmdDir)
+            cmdPath := filepath.Join(targetDir, service.Cmd)
             if exists(cmdPath) {
-                console.Info(fmt.Sprintf("  删除 %s", dirs.cmdDir))
+                console.Info(fmt.Sprintf("  删除 %s", service.Cmd))
                 if err := os.RemoveAll(cmdPath); err != nil {
-                    return fmt.Errorf("删除 %s 失败: %w", dirs.cmdDir, err)
+                    return fmt.Errorf("删除 %s 失败: %w", service.Cmd, err)
                 }
             }
 
             // 删除 internal 目录
-            internalPath := filepath.Join(targetDir, dirs.internalDir)
+            internalPath := filepath.Join(targetDir, service.Internal)
             if exists(internalPath) {
-                console.Info(fmt.Sprintf("  删除 %s", dirs.internalDir))
+                console.Info(fmt.Sprintf("  删除 %s", service.Internal))
                 if err := os.RemoveAll(internalPath); err != nil {
-                    return fmt.Errorf("删除 %s 失败: %w", dirs.internalDir, err)
+                    return fmt.Errorf("删除 %s 失败: %w", service.Internal, err)
                 }
             }
         }
@@ -562,9 +571,9 @@ func (o *CreateOptions) filterServices(targetDir string) error {
 }
 ```
 
-**服务过滤改进方案（未来）：**
+**服务配置文件（.bingoctl.yaml）：**
 
-在 bingo 项目中添加 `.bingoctl.yaml`：
+bingo 项目需要包含 `.bingoctl.yaml` 元数据文件：
 
 ```yaml
 # bingo/.bingoctl.yaml
@@ -592,10 +601,42 @@ services:
     description: 命令行工具
 ```
 
-优点：
+**配置文件加载函数：**
+
+```go
+// BingoctlConfig 表示 .bingoctl.yaml 配置文件结构
+type BingoctlConfig struct {
+    Version  int                    `yaml:"version"`
+    Services map[string]ServiceInfo `yaml:"services"`
+}
+
+type ServiceInfo struct {
+    Cmd         string `yaml:"cmd"`
+    Internal    string `yaml:"internal"`
+    Description string `yaml:"description"`
+}
+
+// loadBingoctlConfig 加载并解析 .bingoctl.yaml
+func loadBingoctlConfig(path string) (*BingoctlConfig, error) {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return nil, err
+    }
+
+    var config BingoctlConfig
+    if err := yaml.Unmarshal(data, &config); err != nil {
+        return nil, err
+    }
+
+    return &config, nil
+}
+```
+
+**优点：**
 - 消除硬编码，bingo 项目结构变化时无需修改 bingoctl
 - 可以添加更多元数据（描述、依赖等）
 - 支持更灵活的服务管理
+- bingoctl 和 bingo 项目解耦
 
 ### 工具函数
 
@@ -808,16 +849,26 @@ bingoctl create test-mirror
 
 ## 实施步骤
 
+### 前置条件（bingo 项目）
+
+1. [ ] 在 bingo 项目中创建 `.bingoctl.yaml` 元数据文件
+2. [ ] 定义所有服务的 cmd 和 internal 目录映射
+3. [ ] 提交到 bingo 项目主分支
+
+### bingoctl 实施步骤
+
 1. ✅ 完成设计文档
-2. [ ] 实现 `pkg/template/version.go`（版本解析）
-3. [ ] 实现 `pkg/template/fetcher.go`（下载和缓存）
-4. [ ] 实现 `pkg/template/replacer.go`（替换逻辑）
-5. [ ] 修改 `pkg/cmd/create/create.go`（集成新模块）
-6. [ ] 删除 `pkg/cmd/create/tpl/` 目录
-7. [ ] 删除 `pkg/generator/template.go` 中的 embed（如果不再需要）
-8. [ ] 编写单元测试
-9. [ ] 编写集成测试
-10. [ ] 文档更新（README, 用户指南）
+2. [ ] 安装依赖：`go get github.com/gofrs/flock github.com/schollz/progressbar/v3 gopkg.in/yaml.v3`
+3. [ ] 实现 `pkg/template/version.go`（版本解析）
+4. [ ] 实现 `pkg/template/fetcher.go`（下载和缓存）
+5. [ ] 实现 `pkg/template/replacer.go`（替换逻辑）
+6. [ ] 实现 `pkg/template/config.go`（加载 .bingoctl.yaml）
+7. [ ] 修改 `pkg/cmd/create/create.go`（集成新模块）
+8. [ ] 删除 `pkg/cmd/create/tpl/` 目录
+9. [ ] 删除 `pkg/generator/template.go` 中的 embed（如果不再需要）
+10. [ ] 编写单元测试
+11. [ ] 编写集成测试
+12. [ ] 文档更新（README, 用户指南）
 
 ## 风险与缓解
 
@@ -825,11 +876,11 @@ bingoctl create test-mirror
 |-----|------|---------|
 | 网络不可用 | 首次使用失败 | 支持镜像配置，提供友好错误提示 |
 | 下载超时 | 用户体验差 | 30秒超时 + 镜像支持 + 显示进度条 |
-| bingo 项目结构变化 | 替换逻辑失效 | 使用 .bingoctl.yaml 元数据文件（未来） |
+| bingo 项目结构变化 | 替换逻辑失效 | 使用 .bingoctl.yaml 元数据文件，bingo 项目维护服务映射 |
 | 包名替换不完整 | 生成的项目无法编译 | 白名单文件类型 + 充分测试 |
 | 缓存目录冲突 | 多实例同时运行失败 | 使用文件锁保证并发安全 |
 | Tarball 格式变化 | 解压失败 | 检测并处理根目录名 |
-| 默认版本过时 | 用户使用旧版本 | 每次 bingoctl 发布时更新推荐版本 |
+| .bingoctl.yaml 文件缺失或格式错误 | 服务过滤失败 | 提供清晰错误提示，验证文件存在性和格式 |
 
 ## 附录
 
@@ -878,10 +929,10 @@ bingoctl cache info              # 显示缓存目录大小和位置
 // 文件锁（并发安全）
 github.com/gofrs/flock
 
-// 进度条（可选，提升用户体验）
+// 进度条（提升用户体验）
 github.com/schollz/progressbar/v3
 
-// YAML 解析（用于 .bingoctl.yaml，未来）
+// YAML 解析（用于 .bingoctl.yaml）
 gopkg.in/yaml.v3
 ```
 
