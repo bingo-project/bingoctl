@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -81,6 +82,9 @@ type CreateOptions struct {
 	AddServices []string // Services to add to defaults
 	Interactive bool     // Whether to use interactive mode (default true)
 
+	// Git initialization
+	InitGit bool // Initialize git repository (default true)
+
 	selectedServices []string // Final computed service list (internal)
 }
 
@@ -88,6 +92,7 @@ type CreateOptions struct {
 func NewCreateOptions() *CreateOptions {
 	return &CreateOptions{
 		GoVersion: cmdutil.GetGoVersion(),
+		InitGit:   true, // Initialize git by default
 	}
 }
 
@@ -117,6 +122,8 @@ func NewCmdCreate() *cobra.Command {
 		"Template version (tag/branch/commit, default: recommended version)")
 	cmd.Flags().BoolVar(&o.NoCache, "no-cache", false,
 		"Force re-download template (for branches)")
+	cmd.Flags().BoolVar(&o.InitGit, "init-git", true,
+		"Initialize git repository in the created project")
 
 	return cmd
 }
@@ -302,6 +309,13 @@ func (o *CreateOptions) Run(args []string) error {
 		cmdutil.CopyFile(configsSrcPath, configsDstPath)
 	}
 
+	// 10. Initialize git repository if requested
+	if o.InitGit {
+		if err := o.initializeGit(projectPath); err != nil {
+			console.Warn(fmt.Sprintf("Failed to initialize git repository: %v", err))
+		}
+	}
+
 	// Success message - show in green
 	console.Info(fmt.Sprintf("Project '%s' created successfully", o.AppName))
 	if len(o.selectedServices) == 0 {
@@ -347,6 +361,32 @@ func (o *CreateOptions) computeServiceList() []string {
 	}
 
 	return result
+}
+
+// initializeGit initializes a git repository in the project directory
+func (o *CreateOptions) initializeGit(projectPath string) error {
+	// Initialize git repository
+	cmd := exec.Command("git", "init")
+	cmd.Dir = projectPath
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to initialize git: %w", err)
+	}
+
+	// Add all files
+	cmd = exec.Command("git", "add", ".")
+	cmd.Dir = projectPath
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to add files to git: %w", err)
+	}
+
+	// Create initial commit
+	cmd = exec.Command("git", "commit", "-m", "Initial commit from bingoctl")
+	cmd.Dir = projectPath
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to create initial commit: %w", err)
+	}
+
+	return nil
 }
 
 // filterServices deletes unselected service directories
