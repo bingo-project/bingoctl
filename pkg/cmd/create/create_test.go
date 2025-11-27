@@ -9,41 +9,41 @@ import (
 
 func TestComputeServiceList(t *testing.T) {
 	tests := []struct {
-		name         string
-		services     []string
-		noServices   []string
-		addServices  []string
-		expected     []string
+		name        string
+		services    []string
+		noServices  []string
+		addServices []string
+		expected    []string
 	}{
 		{
-			name:       "explicit services override",
-			services:   []string{"apiserver", "bot"},
-			expected:   []string{"apiserver", "bot"},
+			name:     "explicit services override",
+			services: []string{"apiserver", "bot"},
+			expected: []string{"apiserver", "bot"},
 		},
 		{
-			name:       "services none",
-			services:   []string{"none"},
-			expected:   []string{},
+			name:     "services none",
+			services: []string{"none"},
+			expected: []string{},
 		},
 		{
-			name:       "no flags uses defaults",
-			expected:   []string{"apiserver", "ctl"},
+			name:     "no flags uses defaults",
+			expected: []string{"apiserver"},
 		},
 		{
 			name:       "exclude service",
-			noServices: []string{"ctl"},
-			expected:   []string{"apiserver"},
+			noServices: []string{"apiserver"},
+			expected:   []string{},
 		},
 		{
 			name:        "add services",
 			addServices: []string{"bot", "scheduler"},
-			expected:    []string{"apiserver", "ctl", "bot", "scheduler"},
+			expected:    []string{"apiserver", "bot", "scheduler"},
 		},
 		{
 			name:        "combined exclude and add",
-			noServices:  []string{"ctl"},
+			noServices:  []string{"apiserver"},
 			addServices: []string{"admserver"},
-			expected:    []string{"apiserver", "admserver"},
+			expected:    []string{"admserver"},
 		},
 	}
 

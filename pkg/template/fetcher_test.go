@@ -200,7 +200,7 @@ func createTestTarball(path, rootDir string) error {
 
 	// Add files with root directory prefix (like GitHub tarball)
 	files := map[string]string{
-		rootDir + "/file1.txt":         "content1",
+		rootDir + "/file1.txt":        "content1",
 		rootDir + "/subdir/file2.txt": "content2",
 	}
 

@@ -13,8 +13,8 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 	"github.com/bingo-project/bingoctl/pkg/template"
+	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
 )
 
 const (
@@ -33,7 +33,7 @@ var (
 		createUsageStr,
 	)
 
-	defaultServices   = []string{"apiserver", "ctl"}
+	defaultServices   = []string{"apiserver"}
 	availableServices = []string{"apiserver", "ctl", "admserver", "bot", "scheduler"}
 
 	// defaultServiceMapping defines the default service directory structure
@@ -168,19 +168,8 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Using recommended version: %s\n", o.TemplateRef)
 	}
 
-	// 2. Compute service list (keep existing logic)
-	o.Interactive = len(o.Services) == 0 && len(o.NoServices) == 0 && len(o.AddServices) == 0
-
-	if o.Interactive {
-		fmt.Println("Entering interactive mode...")
-		selected, err := o.selectServicesInteractively()
-		if err != nil {
-			return err
-		}
-		o.selectedServices = selected
-	} else {
-		o.selectedServices = o.computeServiceList()
-	}
+	// 2. Compute service list
+	o.selectedServices = o.computeServiceList()
 
 	// Warn if no services selected
 	if len(o.selectedServices) == 0 {
@@ -196,42 +185,6 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-// selectServicesInteractively shows interactive multi-select for services
-func (o *CreateOptions) selectServicesInteractively() ([]string, error) {
-	type service struct {
-		Name     string
-		Selected bool
-	}
-
-	services := []service{
-		{Name: "apiserver", Selected: true},
-		{Name: "ctl", Selected: true},
-		{Name: "admserver", Selected: false},
-		{Name: "bot", Selected: false},
-		{Name: "scheduler", Selected: false},
-	}
-
-	fmt.Println("Select services to create:")
-	fmt.Println("Tip: Use ↑↓ to move cursor, 's' to toggle selection, Enter to confirm")
-
-	// Note: promptui.Select doesn't support multi-select natively
-	// We'll use a simpler approach with individual confirmations
-	selected := make([]string, 0)
-	for _, svc := range services {
-		if svc.Selected {
-			selected = append(selected, svc.Name)
-		}
-	}
-
-	// For now, return the default selection
-	// A full implementation would require a custom multi-select prompt
-	// or using a library that supports it better
-	fmt.Printf("Default selection: %v\n", selected)
-	fmt.Println("(Multi-select will be improved in future versions)")
-
-	return selected, nil
 }
 
 // handleFetchError provides user-friendly error messages for template fetch failures

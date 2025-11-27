@@ -153,11 +153,11 @@ func (r *Replacer) replaceInFile(path string) error {
 // renameRules defines directory rename mappings
 // Only these explicitly listed directories will be renamed
 var renameRules = map[string]string{
-	"cmd/bingo-apiserver":   "cmd/{app}-apiserver",
-	"cmd/bingo-admserver":   "cmd/{app}-admserver",
-	"cmd/bingo-bot":         "cmd/{app}-bot",
-	"cmd/bingo-scheduler":   "cmd/{app}-scheduler",
-	"cmd/bingoctl":          "cmd/{app}ctl",
+	"cmd/bingo-apiserver": "cmd/{app}-apiserver",
+	"cmd/bingo-admserver": "cmd/{app}-admserver",
+	"cmd/bingo-bot":       "cmd/{app}-bot",
+	"cmd/bingo-scheduler": "cmd/{app}-scheduler",
+	"cmd/bingoctl":        "cmd/{app}ctl",
 }
 
 // RenameDirs renames directories according to explicit rules
@@ -184,4 +184,3 @@ func (r *Replacer) RenameDirs() error {
 
 	return nil
 }
-
