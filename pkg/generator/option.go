@@ -39,6 +39,9 @@ type Options struct {
 	WithRouter     bool
 	NoBiz          bool
 
+	// Service selection - new
+	Service string // Target service name for path inference
+
 	// Generate by gorm.gen
 	Table           string
 	FieldTemplate   string
