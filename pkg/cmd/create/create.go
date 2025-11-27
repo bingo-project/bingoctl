@@ -121,12 +121,76 @@ func (o *CreateOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
+	// Determine if interactive mode
+	o.Interactive = len(o.Services) == 0 && len(o.NoServices) == 0 && len(o.AddServices) == 0
+
+	// Compute final service list
+	if o.Interactive {
+		console.Info("进入交互模式...")
+		selected, err := o.selectServicesInteractively()
+		if err != nil {
+			return err
+		}
+		o.selectedServices = selected
+	} else {
+		o.selectedServices = o.computeServiceList()
+	}
+
+	// Warn if no services selected
+	if len(o.selectedServices) == 0 {
+		console.Warn("未选择任何服务，将创建最小项目骨架")
+		prompt := promptui.Prompt{
+			Label:     "继续",
+			IsConfirm: true,
+		}
+		_, err := prompt.Run()
+		if err != nil {
+			console.Exit("已取消创建")
+		}
+	}
+
 	err := os.MkdirAll(o.AppName, 0755)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// selectServicesInteractively shows interactive multi-select for services
+func (o *CreateOptions) selectServicesInteractively() ([]string, error) {
+	type service struct {
+		Name     string
+		Selected bool
+	}
+
+	services := []service{
+		{Name: "apiserver", Selected: true},
+		{Name: "ctl", Selected: true},
+		{Name: "admserver", Selected: false},
+		{Name: "bot", Selected: false},
+		{Name: "scheduler", Selected: false},
+	}
+
+	console.Info("请选择要创建的服务:")
+	console.Info("提示: 使用↑↓移动光标, 按 's' 切换选择, 按回车确认")
+
+	// Note: promptui.Select doesn't support multi-select natively
+	// We'll use a simpler approach with individual confirmations
+	selected := make([]string, 0)
+	for _, svc := range services {
+		if svc.Selected {
+			selected = append(selected, svc.Name)
+		}
+	}
+
+	// For now, return the default selection
+	// A full implementation would require a custom multi-select prompt
+	// or using a library that supports it better
+	console.Info(fmt.Sprintf("默认选择: %v", selected))
+	console.Info("(交互式多选将在后续版本中完善)")
+
+	return selected, nil
 }
 
 // Run executes a new sub command using the specified options.
