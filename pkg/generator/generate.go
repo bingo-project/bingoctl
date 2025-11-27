@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,6 +18,15 @@ import (
 
 func (o *Options) GenerateCode(tmpl, path string) error {
 	dir := GetMapDirectory(tmpl)
+
+	// Apply service-based path inference if --service flag is provided
+	if o.Service != "" {
+		inferredDir, err := o.InferDirectoryForService(dir, o.Service)
+		if err != nil {
+			return fmt.Errorf("failed to infer directory for service %s: %w", o.Service, err)
+		}
+		dir = inferredDir
+	}
 
 	o.SetName(tmpl)
 	o.ReadCodeTemplates()
