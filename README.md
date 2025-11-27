@@ -83,7 +83,31 @@ bingoctl create github.com/myorg/myapp
 -d, --directory string   指定生成文件的目录
 -p, --package string     指定包名
 -t, --table string       从数据库表读取字段
+-s, --service string     目标服务名称，用于自动推断路径
 ```
+
+#### 服务选择
+
+当项目包含多个服务时，可以使用 `--service` 参数自动推断生成路径：
+
+```bash
+# 为 apiserver 生成代码（使用配置默认路径）
+bingoctl make model user
+
+# 为 admserver 生成代码（自动推断路径）
+bingoctl make model user --service admserver
+
+# 完整 CRUD 为指定服务生成
+bingoctl make crud order --service admserver
+
+# 明确指定路径（优先级最高）
+bingoctl make model user -d custom/path
+```
+
+路径推断规则：
+1. 扫描 `cmd/` 目录识别已存在的服务
+2. 如果配置路径包含服务名，则智能替换（如 `internal/apiserver/model` → `internal/admserver/model`）
+3. 否则使用固定模式：`internal/{service}/{suffix}`
 
 #### crud - 生成完整 CRUD 代码
 
