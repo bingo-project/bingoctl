@@ -87,6 +87,31 @@ func GetMapDirectory(tmpl string) (dir string) {
 	return
 }
 
+// InferDirectoryForService infers the target directory based on service name
+func (o *Options) InferDirectoryForService(baseDir, serviceName string) (string, error) {
+	if serviceName == "" {
+		return baseDir, nil
+	}
+
+	// 1. Discover existing services from cmd/
+	services, err := discoverServices()
+	if err != nil {
+		// If cmd/ doesn't exist, fall back to pattern-based inference
+		services = []string{}
+	}
+
+	// 2. Smart replacement: if path contains a known service name, replace it
+	for _, svc := range services {
+		if strings.Contains(baseDir, svc) {
+			return strings.ReplaceAll(baseDir, svc, serviceName), nil
+		}
+	}
+
+	// 3. Fallback pattern: extract suffix and join with internal/{service}/
+	suffix := extractSuffix(baseDir)
+	return filepath.Join("internal", serviceName, suffix), nil
+}
+
 func (o *Options) GenerateAttributes(directory string, path string) *Options {
 	// Set code attributes
 	o.RootPackage = config.Cfg.RootPackage

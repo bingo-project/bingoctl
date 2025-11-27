@@ -198,3 +198,61 @@ func TestExtractSuffix(t *testing.T) {
 		})
 	}
 }
+
+func TestInferDirectoryForService(t *testing.T) {
+	// Setup temp directory with cmd structure
+	tmpDir := t.TempDir()
+	cmdDir := filepath.Join(tmpDir, "cmd")
+	os.MkdirAll(filepath.Join(cmdDir, "myapp-apiserver"), 0755)
+	os.MkdirAll(filepath.Join(cmdDir, "myapp-admserver"), 0755)
+
+	originalDir, _ := os.Getwd()
+	defer os.Chdir(originalDir)
+	os.Chdir(tmpDir)
+
+	tests := []struct {
+		name        string
+		baseDir     string
+		serviceName string
+		expected    string
+	}{
+		{
+			name:        "empty service returns base",
+			baseDir:     "internal/apiserver/model",
+			serviceName: "",
+			expected:    "internal/apiserver/model",
+		},
+		{
+			name:        "smart replacement",
+			baseDir:     "internal/apiserver/model",
+			serviceName: "admserver",
+			expected:    "internal/admserver/model",
+		},
+		{
+			name:        "smart replacement with nested path",
+			baseDir:     "internal/apiserver/controller/v1",
+			serviceName: "admserver",
+			expected:    "internal/admserver/controller/v1",
+		},
+		{
+			name:        "fallback pattern",
+			baseDir:     "internal/pkg/model",
+			serviceName: "admserver",
+			expected:    "internal/admserver/model",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &Options{}
+			result, err := o.InferDirectoryForService(tt.baseDir, tt.serviceName)
+			if err != nil {
+				t.Fatalf("InferDirectoryForService failed: %v", err)
+			}
+			if result != tt.expected {
+				t.Errorf("InferDirectoryForService(%q, %q) = %q, want %q",
+					tt.baseDir, tt.serviceName, result, tt.expected)
+			}
+		})
+	}
+}
