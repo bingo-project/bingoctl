@@ -2,6 +2,7 @@ package create
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -164,14 +165,14 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
 	// 1. Parse template version
 	if o.TemplateRef == "" {
 		o.TemplateRef = template.DefaultTemplateVersion
-		console.Info(fmt.Sprintf("使用推荐版本：%s", o.TemplateRef))
+		fmt.Printf("Using recommended version: %s\n", o.TemplateRef)
 	}
 
 	// 2. Compute service list (keep existing logic)
 	o.Interactive = len(o.Services) == 0 && len(o.NoServices) == 0 && len(o.AddServices) == 0
 
 	if o.Interactive {
-		console.Info("进入交互模式...")
+		fmt.Println("Entering interactive mode...")
 		selected, err := o.selectServicesInteractively()
 		if err != nil {
 			return err
@@ -183,14 +184,14 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
 
 	// Warn if no services selected
 	if len(o.selectedServices) == 0 {
-		console.Warn("未选择任何服务，将创建最小项目骨架")
+		console.Warn("No services selected. Creating minimal project skeleton")
 		prompt := promptui.Prompt{
-			Label:     "继续",
+			Label:     "Continue",
 			IsConfirm: true,
 		}
 		_, err := prompt.Run()
 		if err != nil {
-			console.Exit("已取消创建")
+			console.Exit("Project creation cancelled")
 		}
 	}
 
@@ -212,8 +213,8 @@ func (o *CreateOptions) selectServicesInteractively() ([]string, error) {
 		{Name: "scheduler", Selected: false},
 	}
 
-	console.Info("请选择要创建的服务:")
-	console.Info("提示: 使用↑↓移动光标, 按 's' 切换选择, 按回车确认")
+	fmt.Println("Select services to create:")
+	fmt.Println("Tip: Use ↑↓ to move cursor, 's' to toggle selection, Enter to confirm")
 
 	// Note: promptui.Select doesn't support multi-select natively
 	// We'll use a simpler approach with individual confirmations
@@ -227,15 +228,45 @@ func (o *CreateOptions) selectServicesInteractively() ([]string, error) {
 	// For now, return the default selection
 	// A full implementation would require a custom multi-select prompt
 	// or using a library that supports it better
-	console.Info(fmt.Sprintf("默认选择: %v", selected))
-	console.Info("(交互式多选将在后续版本中完善)")
+	fmt.Printf("Default selection: %v\n", selected)
+	fmt.Println("(Multi-select will be improved in future versions)")
 
 	return selected, nil
 }
 
+// handleFetchError provides user-friendly error messages for template fetch failures
+func (o *CreateOptions) handleFetchError(err error) error {
+	errMsg := err.Error()
+	var msg string
+
+	// Check for network connectivity issues
+	if strings.Contains(errMsg, "connection refused") {
+		msg = "failed to download template: network connection refused. Please check your internet connection and try again"
+	} else if strings.Contains(errMsg, "no such host") {
+		msg = "failed to download template: cannot resolve domain. Please check your internet connection"
+	} else if strings.Contains(errMsg, "i/o timeout") {
+		msg = "failed to download template: connection timeout. Try using --no-cache to force re-download"
+	} else if strings.Contains(errMsg, "404") {
+		// Check for HTTP 404 errors
+		msg = "failed to download template: template version not found. Check the version with -r flag (e.g., -r develop)"
+	} else if strings.Contains(errMsg, "403") {
+		// Check for HTTP 403 errors
+		msg = "failed to download template: access denied. Please check your network permissions"
+	} else if _, ok := err.(net.Error); ok {
+		// Generic network error
+		msg = "failed to download template: network error. Please check your internet connection and try again"
+	} else {
+		// Default: show original error
+		msg = fmt.Sprintf("failed to download template: %v", err)
+	}
+
+	console.Error(msg)
+	return cmdutil.ErrExit
+}
+
 // Run executes a new sub command using the specified options.
 func (o *CreateOptions) Run(args []string) error {
-	console.Info(fmt.Sprintf("Creating project %s", o.RootPackage))
+	fmt.Printf("Creating project '%s'...\n", o.AppName)
 
 	// 1. Fetch template (download or use cache)
 	fetcher, err := template.NewFetcher()
@@ -245,7 +276,7 @@ func (o *CreateOptions) Run(args []string) error {
 
 	templatePath, err := fetcher.FetchTemplate(o.TemplateRef, o.NoCache)
 	if err != nil {
-		return fmt.Errorf("获取模板失败: %w", err)
+		return o.handleFetchError(err)
 	}
 
 	// 2. Create temporary directory
@@ -253,14 +284,12 @@ func (o *CreateOptions) Run(args []string) error {
 	defer os.RemoveAll(tmpDir)
 
 	// 3. Copy to temporary directory
-	console.Info("复制模板...")
 	if err := cmdutil.CopyDir(templatePath, tmpDir); err != nil {
-		return fmt.Errorf("复制模板失败: %w", err)
+		return fmt.Errorf("failed to copy template: %w", err)
 	}
 
 	// 4. Filter services (before renaming, using original directory names)
 	if len(o.selectedServices) > 0 {
-		console.Info("过滤服务...")
 		if err := o.filterServices(tmpDir); err != nil {
 			return err
 		}
@@ -268,14 +297,14 @@ func (o *CreateOptions) Run(args []string) error {
 
 	// 5. Rename directories (always execute, only for remaining directories)
 	replacer := template.NewReplacer(tmpDir, "bingo", o.ModuleName, o.AppName)
-	console.Info("重命名目录...")
 	if err := replacer.RenameDirs(); err != nil {
 		return fmt.Errorf("重命名目录失败: %w", err)
 	}
 
 	// 6. Replace module name (only if -m specified)
+	// Only replace if user explicitly provided a new module name
+	// Otherwise, keep original module name from go.mod
 	if o.ModuleName != "" {
-		console.Info(fmt.Sprintf("替换模块名: bingo -> %s", o.ModuleName))
 		if err := replacer.ReplaceModuleName(); err != nil {
 			return fmt.Errorf("替换模块名失败: %w", err)
 		}
@@ -286,23 +315,44 @@ func (o *CreateOptions) Run(args []string) error {
 	targetConfigPath := filepath.Join(tmpDir, ".bingoctl.yaml")
 
 	if cmdutil.Exists(exampleConfigPath) {
-		console.Info("生成 .bingoctl.yaml...")
 		if err := cmdutil.CopyFile(exampleConfigPath, targetConfigPath); err != nil {
 			return fmt.Errorf("复制 .bingoctl.yaml 失败: %w", err)
 		}
-	} else {
-		console.Warn("未找到 .bingoctl.example.yaml，跳过生成 .bingoctl.yaml")
 	}
 
 	// 8. Atomically move to target location
-	if err := os.Rename(tmpDir, o.AppName); err != nil {
-		return fmt.Errorf("移动项目失败: %w", err)
+	// If project already exists (from Validate overwrite confirmation), remove it first
+	if cmdutil.Overwrite && cmdutil.Exists(o.AppName) {
+		if err := os.RemoveAll(o.AppName); err != nil {
+			return fmt.Errorf("failed to remove existing project: %w", err)
+		}
 	}
 
-	// 9. Success message
-	console.Info("✓ 项目创建成功！")
+	if err := os.Rename(tmpDir, o.AppName); err != nil {
+		return fmt.Errorf("failed to move project: %w", err)
+	}
+
+	// 9. Setup configuration files
+	projectPath := o.AppName
+
+	// Copy .air.example.toml to .air.toml
+	airExamplePath := filepath.Join(projectPath, ".air.example.toml")
+	airPath := filepath.Join(projectPath, ".air.toml")
+	if cmdutil.Exists(airExamplePath) {
+		cmdutil.CopyFile(airExamplePath, airPath)
+	}
+
+	// Copy config file for apiserver
+	configsSrcPath := filepath.Join(projectPath, "configs", fmt.Sprintf("%s-apiserver.yaml", o.AppName))
+	configsDstPath := filepath.Join(projectPath, "configs", "app-apiserver.yaml")
+	if cmdutil.Exists(configsSrcPath) {
+		cmdutil.CopyFile(configsSrcPath, configsDstPath)
+	}
+
+	// Success message - show in green
+	console.Info(fmt.Sprintf("Project '%s' created successfully", o.AppName))
 	if len(o.selectedServices) == 0 {
-		console.Info("提示：已删除所有服务，建议运行 'go mod tidy' 清理未使用的依赖")
+		console.Warn("All services were removed. Consider running 'go mod tidy' to clean up unused dependencies")
 	}
 
 	return nil
@@ -354,7 +404,6 @@ func (o *CreateOptions) filterServices(targetDir string) error {
 	config, err := template.LoadBingoctlConfig(configPath)
 	if err != nil {
 		// If config file doesn't exist, use default mapping
-		console.Info("使用默认服务映射进行过滤...")
 		return o.filterServicesWithMapping(targetDir, defaultServiceMapping)
 	}
 
@@ -384,7 +433,6 @@ func (o *CreateOptions) filterServicesWithMapping(targetDir string, mapping map[
 			// Delete cmd directory
 			cmdPath := filepath.Join(targetDir, serviceMapping.Cmd)
 			if cmdutil.Exists(cmdPath) {
-				console.Info(fmt.Sprintf("  删除 %s", serviceMapping.Cmd))
 				if err := os.RemoveAll(cmdPath); err != nil {
 					return fmt.Errorf("删除 %s 失败: %w", serviceMapping.Cmd, err)
 				}
@@ -393,9 +441,16 @@ func (o *CreateOptions) filterServicesWithMapping(targetDir string, mapping map[
 			// Delete internal directory
 			internalPath := filepath.Join(targetDir, serviceMapping.Internal)
 			if cmdutil.Exists(internalPath) {
-				console.Info(fmt.Sprintf("  删除 %s", serviceMapping.Internal))
 				if err := os.RemoveAll(internalPath); err != nil {
 					return fmt.Errorf("删除 %s 失败: %w", serviceMapping.Internal, err)
+				}
+			}
+
+			// Delete bootstrap file for this service
+			bootstrapPath := filepath.Join(targetDir, "internal/pkg/bootstrap", svc+".go")
+			if cmdutil.Exists(bootstrapPath) {
+				if err := os.Remove(bootstrapPath); err != nil {
+					return fmt.Errorf("删除 %s 失败: %w", bootstrapPath, err)
 				}
 			}
 		}

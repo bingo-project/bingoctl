@@ -108,7 +108,13 @@ func (r *Replacer) ReplaceModuleName() error {
 
 // replaceInFile replaces module name in a single file
 // Uses string replacement to avoid breaking binary files
+// Only performs replacements if newModule is not empty
 func (r *Replacer) replaceInFile(path string) error {
+	// Skip replacement if no new module name specified
+	if r.newModule == "" {
+		return nil
+	}
+
 	// Read file
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -127,6 +133,13 @@ func (r *Replacer) replaceInFile(path string) error {
 	// 3. paths in strings: bingo/ -> {newModule}/
 	// Note: This is aggressive but necessary for Makefile, Dockerfile, etc.
 	str = strings.ReplaceAll(str, r.oldModule+"/", r.newModule+"/")
+
+	// 4. Makefile-style assignments: ROOT_PACKAGE=bingo -> ROOT_PACKAGE={newModule}
+	// This handles cases like "ROOT_PACKAGE=bingo" or "REGISTRY_PREFIX = bingo"
+	str = strings.ReplaceAll(str, "="+r.oldModule, "="+r.newModule)
+
+	// 5. Makefile-style conditional assignments: REGISTRY_PREFIX ?= bingo -> REGISTRY_PREFIX ?= {newModule}
+	str = strings.ReplaceAll(str, "?= "+r.oldModule, "?= "+r.newModule)
 
 	// Write back
 	err = os.WriteFile(path, []byte(str), 0644)

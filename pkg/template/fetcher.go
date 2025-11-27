@@ -273,7 +273,10 @@ func (f *Fetcher) FetchTemplate(ref string, noCache bool) (string, error) {
 
 	// Step 3: Check cache
 	cachePath := filepath.Join(f.cacheDir, ref)
-	if !noCache && fileExists(cachePath) {
+	if noCache && fileExists(cachePath) {
+		// Delete existing cache when --no-cache is specified
+		os.RemoveAll(cachePath)
+	} else if !noCache && fileExists(cachePath) {
 		return cachePath, nil
 	}
 
