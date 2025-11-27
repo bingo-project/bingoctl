@@ -1,9 +1,12 @@
 package template
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -114,4 +117,141 @@ func TestDownloadWithTimeout_Timeout(t *testing.T) {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func TestExtractTarball(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create a test tarball with root directory structure (like GitHub)
+	tarPath := filepath.Join(tmpDir, "test.tar.gz")
+	if err := createTestTarball(tarPath, "bingo-v1.0.0"); err != nil {
+		t.Fatalf("Failed to create test tarball: %v", err)
+	}
+
+	// Extract
+	destDir := filepath.Join(tmpDir, "extracted")
+	f := &Fetcher{}
+	err := f.extractTarball(tarPath, destDir)
+	if err != nil {
+		t.Fatalf("extractTarball failed: %v", err)
+	}
+
+	// Verify files extracted (should be in destDir directly, not in bingo-v1.0.0/)
+	if !fileExists(filepath.Join(destDir, "file1.txt")) {
+		t.Error("file1.txt not extracted")
+	}
+
+	if !fileExists(filepath.Join(destDir, "subdir", "file2.txt")) {
+		t.Error("subdir/file2.txt not extracted")
+	}
+
+	// Verify content
+	content, _ := os.ReadFile(filepath.Join(destDir, "file1.txt"))
+	if string(content) != "content1" {
+		t.Errorf("file1.txt content = %s, want content1", content)
+	}
+}
+
+func TestExtractTarball_InvalidFormat(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create tarball with multiple root directories (invalid)
+	tarPath := filepath.Join(tmpDir, "invalid.tar.gz")
+	if err := createInvalidTarball(tarPath); err != nil {
+		t.Fatalf("Failed to create invalid tarball: %v", err)
+	}
+
+	destDir := filepath.Join(tmpDir, "extracted")
+	f := &Fetcher{}
+	err := f.extractTarball(tarPath, destDir)
+	if err == nil {
+		t.Error("Expected error for invalid tarball format, got nil")
+	}
+}
+
+// Helper: create test tarball with GitHub-like structure
+func createTestTarball(path, rootDir string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	gzw := gzip.NewWriter(file)
+	defer gzw.Close()
+
+	tw := tar.NewWriter(gzw)
+	defer tw.Close()
+
+	// Add files with root directory prefix (like GitHub tarball)
+	files := map[string]string{
+		rootDir + "/file1.txt":         "content1",
+		rootDir + "/subdir/file2.txt": "content2",
+	}
+
+	for name, content := range files {
+		// Add directory entry if needed
+		if filepath.Dir(name) != rootDir {
+			dirHeader := &tar.Header{
+				Name:     filepath.Dir(name) + "/",
+				Mode:     0755,
+				Typeflag: tar.TypeDir,
+			}
+			if err := tw.WriteHeader(dirHeader); err != nil {
+				return err
+			}
+		}
+
+		// Add file
+		header := &tar.Header{
+			Name: name,
+			Mode: 0644,
+			Size: int64(len(content)),
+		}
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+		if _, err := tw.Write([]byte(content)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Helper: create tarball with invalid structure (multiple root dirs)
+func createInvalidTarball(path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	gzw := gzip.NewWriter(file)
+	defer gzw.Close()
+
+	tw := tar.NewWriter(gzw)
+	defer tw.Close()
+
+	// Add files in multiple root directories
+	files := map[string]string{
+		"root1/file1.txt": "content1",
+		"root2/file2.txt": "content2",
+	}
+
+	for name, content := range files {
+		header := &tar.Header{
+			Name: name,
+			Mode: 0644,
+			Size: int64(len(content)),
+		}
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+		if _, err := tw.Write([]byte(content)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
