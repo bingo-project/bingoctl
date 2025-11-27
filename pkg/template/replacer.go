@@ -136,3 +136,39 @@ func (r *Replacer) replaceInFile(path string) error {
 
 	return nil
 }
+
+// renameRules defines directory rename mappings
+// Only these explicitly listed directories will be renamed
+var renameRules = map[string]string{
+	"cmd/bingo-apiserver":   "cmd/{app}-apiserver",
+	"cmd/bingo-admserver":   "cmd/{app}-admserver",
+	"cmd/bingo-bot":         "cmd/{app}-bot",
+	"cmd/bingo-scheduler":   "cmd/{app}-scheduler",
+	"cmd/bingoctl":          "cmd/{app}ctl",
+}
+
+// RenameDirs renames directories according to explicit rules
+// Only renames directories that still exist (after service filtering)
+func (r *Replacer) RenameDirs() error {
+	for oldPath, newPathTemplate := range renameRules {
+		// Replace {app} placeholder
+		newPath := strings.ReplaceAll(newPathTemplate, "{app}", r.appName)
+
+		oldFullPath := filepath.Join(r.targetDir, oldPath)
+		newFullPath := filepath.Join(r.targetDir, newPath)
+
+		// Skip if old path doesn't exist (may be filtered out)
+		if !fileExists(oldFullPath) {
+			continue
+		}
+
+		// Rename
+		err := os.Rename(oldFullPath, newFullPath)
+		if err != nil {
+			return fmt.Errorf("failed to rename %s to %s: %w", oldPath, newPath, err)
+		}
+	}
+
+	return nil
+}
+

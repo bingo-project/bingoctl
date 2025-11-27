@@ -1,3 +1,0 @@
-package migration
-
-func Initialize() {}

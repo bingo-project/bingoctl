@@ -21,8 +21,8 @@ type ServiceInfo struct {
 	Description string `yaml:"description"`
 }
 
-// loadBingoctlConfig loads and parses .bingoctl.yaml
-func loadBingoctlConfig(path string) (*BingoctlConfig, error) {
+// LoadBingoctlConfig loads and parses .bingoctl.yaml
+func LoadBingoctlConfig(path string) (*BingoctlConfig, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

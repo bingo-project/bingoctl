@@ -1,11 +1,11 @@
 package create
 
 import (
-	"embed"
 	"fmt"
-	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/bingo-project/component-base/cli/console"
 	"github.com/iancoleman/strcase"
@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/bingo-project/bingoctl/pkg/util"
+	"github.com/bingo-project/bingoctl/pkg/template"
 )
 
 const (
@@ -20,10 +21,6 @@ const (
 )
 
 var (
-	//go:embed tpl
-	tplFS embed.FS
-	root  = "tpl"
-
 	createUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nNAME is a required argument for the create command",
 		createUsageStr,
@@ -40,6 +37,11 @@ type CreateOptions struct {
 	RootPackage  string
 	AppName      string
 	AppNameCamel string
+
+	// GitHub template
+	ModuleName  string // Go module name (optional)
+	TemplateRef string // Template version
+	NoCache     bool   // Force re-download
 
 	// Service selection
 	Services    []string // Explicitly specified services
@@ -76,6 +78,13 @@ func NewCmdCreate() *cobra.Command {
 	cmd.Flags().StringSliceVar(&o.Services, "services", nil, "Explicitly specify services to create (comma-separated). Use 'none' for minimal skeleton")
 	cmd.Flags().StringSliceVar(&o.NoServices, "no-service", nil, "Exclude services from defaults (comma-separated)")
 	cmd.Flags().StringSliceVar(&o.AddServices, "add-service", nil, "Add services to defaults (comma-separated)")
+
+	cmd.Flags().StringVarP(&o.ModuleName, "module", "m", "",
+		"Go module name (e.g., github.com/mycompany/myapp)")
+	cmd.Flags().StringVarP(&o.TemplateRef, "ref", "r", "",
+		"Template version (tag/branch/commit, default: recommended version)")
+	cmd.Flags().BoolVar(&o.NoCache, "no-cache", false,
+		"Force re-download template (for branches)")
 
 	return cmd
 }
@@ -121,10 +130,15 @@ func (o *CreateOptions) Validate(cmd *cobra.Command, args []string) error {
 
 // Complete completes all the required options.
 func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
-	// Determine if interactive mode
+	// 1. Parse template version
+	if o.TemplateRef == "" {
+		o.TemplateRef = template.DefaultTemplateVersion
+		console.Info(fmt.Sprintf("使用推荐版本：%s", o.TemplateRef))
+	}
+
+	// 2. Compute service list (keep existing logic)
 	o.Interactive = len(o.Services) == 0 && len(o.NoServices) == 0 && len(o.AddServices) == 0
 
-	// Compute final service list
 	if o.Interactive {
 		console.Info("进入交互模式...")
 		selected, err := o.selectServicesInteractively()
@@ -147,11 +161,6 @@ func (o *CreateOptions) Complete(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			console.Exit("已取消创建")
 		}
-	}
-
-	err := os.MkdirAll(o.AppName, 0755)
-	if err != nil {
-		return err
 	}
 
 	return nil
@@ -196,39 +205,61 @@ func (o *CreateOptions) selectServicesInteractively() ([]string, error) {
 // Run executes a new sub command using the specified options.
 func (o *CreateOptions) Run(args []string) error {
 	console.Info(fmt.Sprintf("Creating project %s", o.RootPackage))
-	err := fs.WalkDir(tplFS, root, func(path string, d fs.DirEntry, err error) error {
-		// Cannot happen
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
 
-		b, err := fs.ReadFile(tplFS, path)
-		if err != nil {
-			return err
-		}
-
-		// Copy files
-		dest := strings.Replace(path, root+"/", o.AppName+"/", 1)
-		dest = strings.Replace(dest, "."+root, "", 1)
-		dest = strings.Replace(dest, "{app}", o.AppName, 1)
-		dest = strings.Replace(dest, "hidden", "", 1)
-
-		// Generate code
-		err = cmdutil.GenerateCode(dest, string(b), "init", o)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
+	// 1. Fetch template (download or use cache)
+	fetcher, err := template.NewFetcher()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create fetcher: %w", err)
 	}
 
-	console.Info("done.")
+	templatePath, err := fetcher.FetchTemplate(o.TemplateRef, o.NoCache)
+	if err != nil {
+		return fmt.Errorf("获取模板失败: %w", err)
+	}
+
+	// 2. Create temporary directory
+	tmpDir := filepath.Join(os.TempDir(), fmt.Sprintf("bingoctl-%d", time.Now().Unix()))
+	defer os.RemoveAll(tmpDir)
+
+	// 3. Copy to temporary directory
+	console.Info("复制模板...")
+	if err := cmdutil.CopyDir(templatePath, tmpDir); err != nil {
+		return fmt.Errorf("复制模板失败: %w", err)
+	}
+
+	// 4. Filter services (before renaming, using original directory names)
+	if len(o.selectedServices) > 0 {
+		console.Info("过滤服务...")
+		if err := o.filterServices(tmpDir); err != nil {
+			return err
+		}
+	}
+
+	// 5. Rename directories (always execute, only for remaining directories)
+	replacer := template.NewReplacer(tmpDir, "bingo", o.ModuleName, o.AppName)
+	console.Info("重命名目录...")
+	if err := replacer.RenameDirs(); err != nil {
+		return fmt.Errorf("重命名目录失败: %w", err)
+	}
+
+	// 6. Replace module name (only if -m specified)
+	if o.ModuleName != "" {
+		console.Info(fmt.Sprintf("替换模块名: bingo -> %s", o.ModuleName))
+		if err := replacer.ReplaceModuleName(); err != nil {
+			return fmt.Errorf("替换模块名失败: %w", err)
+		}
+	}
+
+	// 7. Atomically move to target location
+	if err := os.Rename(tmpDir, o.AppName); err != nil {
+		return fmt.Errorf("移动项目失败: %w", err)
+	}
+
+	// 8. Success message
+	console.Info("✓ 项目创建成功！")
+	if len(o.selectedServices) == 0 {
+		console.Info("提示：已删除所有服务，建议运行 'go mod tidy' 清理未使用的依赖")
+	}
 
 	return nil
 }
@@ -269,4 +300,48 @@ func (o *CreateOptions) computeServiceList() []string {
 	}
 
 	return result
+}
+
+// filterServices deletes unselected service directories
+// Reads service mapping from .bingoctl.yaml
+func (o *CreateOptions) filterServices(targetDir string) error {
+	// Load .bingoctl.yaml
+	configPath := filepath.Join(targetDir, ".bingoctl.yaml")
+	config, err := template.LoadBingoctlConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("加载 .bingoctl.yaml 失败: %w\n提示：模板版本 %s 可能不包含此配置文件", err, o.TemplateRef)
+	}
+
+	allServices := config.Services
+
+	// Mark selected services
+	selected := make(map[string]bool)
+	for _, svc := range o.selectedServices {
+		selected[svc] = true
+	}
+
+	// Delete unselected service directories
+	for svc, service := range allServices {
+		if !selected[svc] {
+			// Delete cmd directory
+			cmdPath := filepath.Join(targetDir, service.Cmd)
+			if cmdutil.Exists(cmdPath) {
+				console.Info(fmt.Sprintf("  删除 %s", service.Cmd))
+				if err := os.RemoveAll(cmdPath); err != nil {
+					return fmt.Errorf("删除 %s 失败: %w", service.Cmd, err)
+				}
+			}
+
+			// Delete internal directory
+			internalPath := filepath.Join(targetDir, service.Internal)
+			if cmdutil.Exists(internalPath) {
+				console.Info(fmt.Sprintf("  删除 %s", service.Internal))
+				if err := os.RemoveAll(internalPath); err != nil {
+					return fmt.Errorf("删除 %s 失败: %w", service.Internal, err)
+				}
+			}
+		}
+	}
+
+	return nil
 }
