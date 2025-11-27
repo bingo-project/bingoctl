@@ -20,6 +20,12 @@ const (
 	createUsageStr = "create NAME"
 )
 
+// ServiceMapping describes a service's directory structure
+type ServiceMapping struct {
+	Cmd      string
+	Internal string
+}
+
 var (
 	createUsageErrStr = fmt.Sprintf(
 		"expected '%s'.\nNAME is a required argument for the create command",
@@ -28,6 +34,31 @@ var (
 
 	defaultServices   = []string{"apiserver", "ctl"}
 	availableServices = []string{"apiserver", "ctl", "admserver", "bot", "scheduler"}
+
+	// defaultServiceMapping defines the default service directory structure
+	// Used when .bingoctl.yaml is not available
+	defaultServiceMapping = map[string]ServiceMapping{
+		"apiserver": {
+			Cmd:      "cmd/bingo-apiserver",
+			Internal: "internal/apiserver",
+		},
+		"admserver": {
+			Cmd:      "cmd/bingo-admserver",
+			Internal: "internal/admserver",
+		},
+		"bot": {
+			Cmd:      "cmd/bingo-bot",
+			Internal: "internal/bot",
+		},
+		"scheduler": {
+			Cmd:      "cmd/bingo-scheduler",
+			Internal: "internal/scheduler",
+		},
+		"ctl": {
+			Cmd:      "cmd/bingoctl",
+			Internal: "internal/bingoctl",
+		},
+	}
 )
 
 // CreateOptions is an option struct to support 'create' sub command.
@@ -250,12 +281,25 @@ func (o *CreateOptions) Run(args []string) error {
 		}
 	}
 
-	// 7. Atomically move to target location
+	// 7. Copy .bingoctl.example.yaml to .bingoctl.yaml
+	exampleConfigPath := filepath.Join(tmpDir, ".bingoctl.example.yaml")
+	targetConfigPath := filepath.Join(tmpDir, ".bingoctl.yaml")
+
+	if cmdutil.Exists(exampleConfigPath) {
+		console.Info("生成 .bingoctl.yaml...")
+		if err := cmdutil.CopyFile(exampleConfigPath, targetConfigPath); err != nil {
+			return fmt.Errorf("复制 .bingoctl.yaml 失败: %w", err)
+		}
+	} else {
+		console.Warn("未找到 .bingoctl.example.yaml，跳过生成 .bingoctl.yaml")
+	}
+
+	// 8. Atomically move to target location
 	if err := os.Rename(tmpDir, o.AppName); err != nil {
 		return fmt.Errorf("移动项目失败: %w", err)
 	}
 
-	// 8. Success message
+	// 9. Success message
 	console.Info("✓ 项目创建成功！")
 	if len(o.selectedServices) == 0 {
 		console.Info("提示：已删除所有服务，建议运行 'go mod tidy' 清理未使用的依赖")
@@ -303,17 +347,31 @@ func (o *CreateOptions) computeServiceList() []string {
 }
 
 // filterServices deletes unselected service directories
-// Reads service mapping from .bingoctl.yaml
+// Uses service mapping from .bingoctl.yaml if available, otherwise uses default mapping
 func (o *CreateOptions) filterServices(targetDir string) error {
-	// Load .bingoctl.yaml
+	// Try to load .bingoctl.yaml
 	configPath := filepath.Join(targetDir, ".bingoctl.yaml")
 	config, err := template.LoadBingoctlConfig(configPath)
 	if err != nil {
-		return fmt.Errorf("加载 .bingoctl.yaml 失败: %w\n提示：模板版本 %s 可能不包含此配置文件", err, o.TemplateRef)
+		// If config file doesn't exist, use default mapping
+		console.Info("使用默认服务映射进行过滤...")
+		return o.filterServicesWithMapping(targetDir, defaultServiceMapping)
 	}
 
-	allServices := config.Services
+	// Convert config services to ServiceMapping format
+	mapping := make(map[string]ServiceMapping)
+	for svc, info := range config.Services {
+		mapping[svc] = ServiceMapping{
+			Cmd:      info.Cmd,
+			Internal: info.Internal,
+		}
+	}
 
+	return o.filterServicesWithMapping(targetDir, mapping)
+}
+
+// filterServicesWithMapping deletes unselected service directories using the provided mapping
+func (o *CreateOptions) filterServicesWithMapping(targetDir string, mapping map[string]ServiceMapping) error {
 	// Mark selected services
 	selected := make(map[string]bool)
 	for _, svc := range o.selectedServices {
@@ -321,23 +379,23 @@ func (o *CreateOptions) filterServices(targetDir string) error {
 	}
 
 	// Delete unselected service directories
-	for svc, service := range allServices {
+	for svc, serviceMapping := range mapping {
 		if !selected[svc] {
 			// Delete cmd directory
-			cmdPath := filepath.Join(targetDir, service.Cmd)
+			cmdPath := filepath.Join(targetDir, serviceMapping.Cmd)
 			if cmdutil.Exists(cmdPath) {
-				console.Info(fmt.Sprintf("  删除 %s", service.Cmd))
+				console.Info(fmt.Sprintf("  删除 %s", serviceMapping.Cmd))
 				if err := os.RemoveAll(cmdPath); err != nil {
-					return fmt.Errorf("删除 %s 失败: %w", service.Cmd, err)
+					return fmt.Errorf("删除 %s 失败: %w", serviceMapping.Cmd, err)
 				}
 			}
 
 			// Delete internal directory
-			internalPath := filepath.Join(targetDir, service.Internal)
+			internalPath := filepath.Join(targetDir, serviceMapping.Internal)
 			if cmdutil.Exists(internalPath) {
-				console.Info(fmt.Sprintf("  删除 %s", service.Internal))
+				console.Info(fmt.Sprintf("  删除 %s", serviceMapping.Internal))
 				if err := os.RemoveAll(internalPath); err != nil {
-					return fmt.Errorf("删除 %s 失败: %w", service.Internal, err)
+					return fmt.Errorf("删除 %s 失败: %w", serviceMapping.Internal, err)
 				}
 			}
 		}

@@ -98,17 +98,23 @@ func CopyDir(src, dst string) error {
 		}
 
 		// Copy file
-		return copyFile(path, dstPath, info.Mode())
+		return CopyFile(path, dstPath)
 	})
 }
 
-// copyFile copies a single file
-func copyFile(src, dst string, mode os.FileMode) error {
+// CopyFile copies a single file from src to dst
+func CopyFile(src, dst string) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
+
+	// Get source file mode
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
 
 	// Create parent directory
 	dstDir := filepath.Dir(dst)
@@ -126,5 +132,5 @@ func copyFile(src, dst string, mode os.FileMode) error {
 		return err
 	}
 
-	return os.Chmod(dst, mode)
+	return os.Chmod(dst, info.Mode())
 }
