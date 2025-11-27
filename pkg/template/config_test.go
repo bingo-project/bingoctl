@@ -29,7 +29,7 @@ services:
 	}
 
 	// Test loading
-	config, err := loadBingoctlConfig(configPath)
+	config, err := LoadBingoctlConfig(configPath)
 	if err != nil {
 		t.Fatalf("loadBingoctlConfig failed: %v", err)
 	}
@@ -58,7 +58,7 @@ services:
 }
 
 func TestLoadBingoctlConfig_FileNotExists(t *testing.T) {
-	_, err := loadBingoctlConfig("/nonexistent/path/.bingoctl.yaml")
+	_, err := LoadBingoctlConfig("/nonexistent/path/.bingoctl.yaml")
 	if err == nil {
 		t.Error("Expected error for non-existent file, got nil")
 	}
@@ -74,7 +74,7 @@ func TestLoadBingoctlConfig_InvalidYAML(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	_, err = loadBingoctlConfig(configPath)
+	_, err = LoadBingoctlConfig(configPath)
 	if err == nil {
 		t.Error("Expected error for invalid YAML, got nil")
 	}
