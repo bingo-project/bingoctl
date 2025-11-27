@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -75,4 +76,55 @@ func GetDirectoryFromPath(filePath string) string {
 
 func GetFileNameWithoutExtension(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
+}
+
+// CopyDir recursively copies a directory
+func CopyDir(src, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Calculate destination path
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		dstPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			// Create directory
+			return os.MkdirAll(dstPath, info.Mode())
+		}
+
+		// Copy file
+		return copyFile(path, dstPath, info.Mode())
+	})
+}
+
+// copyFile copies a single file
+func copyFile(src, dst string, mode os.FileMode) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	// Create parent directory
+	dstDir := filepath.Dir(dst)
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		return err
+	}
+
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return err
+	}
+
+	return os.Chmod(dst, mode)
 }
