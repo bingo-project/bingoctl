@@ -178,6 +178,26 @@ func createTestTarball(path, rootDir string) error {
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
 
+	// Add root directory entry first
+	rootHeader := &tar.Header{
+		Name:     rootDir + "/",
+		Mode:     0755,
+		Typeflag: tar.TypeDir,
+	}
+	if err := tw.WriteHeader(rootHeader); err != nil {
+		return err
+	}
+
+	// Add subdirectory
+	subdirHeader := &tar.Header{
+		Name:     rootDir + "/subdir/",
+		Mode:     0755,
+		Typeflag: tar.TypeDir,
+	}
+	if err := tw.WriteHeader(subdirHeader); err != nil {
+		return err
+	}
+
 	// Add files with root directory prefix (like GitHub tarball)
 	files := map[string]string{
 		rootDir + "/file1.txt":         "content1",
@@ -185,18 +205,6 @@ func createTestTarball(path, rootDir string) error {
 	}
 
 	for name, content := range files {
-		// Add directory entry if needed
-		if filepath.Dir(name) != rootDir {
-			dirHeader := &tar.Header{
-				Name:     filepath.Dir(name) + "/",
-				Mode:     0755,
-				Typeflag: tar.TypeDir,
-			}
-			if err := tw.WriteHeader(dirHeader); err != nil {
-				return err
-			}
-		}
-
 		// Add file
 		header := &tar.Header{
 			Name: name,
@@ -227,6 +235,25 @@ func createInvalidTarball(path string) error {
 
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
+
+	// Add two root directories
+	root1Header := &tar.Header{
+		Name:     "root1/",
+		Mode:     0755,
+		Typeflag: tar.TypeDir,
+	}
+	if err := tw.WriteHeader(root1Header); err != nil {
+		return err
+	}
+
+	root2Header := &tar.Header{
+		Name:     "root2/",
+		Mode:     0755,
+		Typeflag: tar.TypeDir,
+	}
+	if err := tw.WriteHeader(root2Header); err != nil {
+		return err
+	}
 
 	// Add files in multiple root directories
 	files := map[string]string{

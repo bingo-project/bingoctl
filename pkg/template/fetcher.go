@@ -162,10 +162,13 @@ func (f *Fetcher) extractTarball(tarPath, destDir string) error {
 			return fmt.Errorf("failed to read tar header: %w", err)
 		}
 
-		// Get root directory name
-		parts := strings.Split(header.Name, "/")
-		if len(parts) > 0 && parts[0] != "" {
-			rootDirs[parts[0]] = true
+		// Get root directory name - only count TypeDir entries that are root level
+		// GitHub tarball format: bingo-main/, bingo-main/file, bingo-main/dir/, etc.
+		if header.Typeflag == tar.TypeDir {
+			parts := strings.Split(strings.TrimSuffix(header.Name, "/"), "/")
+			if len(parts) == 1 && parts[0] != "" {
+				rootDirs[parts[0]] = true
+			}
 		}
 
 		target := filepath.Join(tmpExtractDir, header.Name)
