@@ -205,6 +205,7 @@ func TestInferDirectoryForService(t *testing.T) {
 	cmdDir := filepath.Join(tmpDir, "cmd")
 	os.MkdirAll(filepath.Join(cmdDir, "myapp-apiserver"), 0755)
 	os.MkdirAll(filepath.Join(cmdDir, "myapp-admserver"), 0755)
+	os.MkdirAll(filepath.Join(cmdDir, "myapp-api"), 0755)
 
 	originalDir, _ := os.Getwd()
 	defer os.Chdir(originalDir)
@@ -215,6 +216,7 @@ func TestInferDirectoryForService(t *testing.T) {
 		baseDir     string
 		serviceName string
 		expected    string
+		expectError bool
 	}{
 		{
 			name:        "empty service returns base",
@@ -240,12 +242,43 @@ func TestInferDirectoryForService(t *testing.T) {
 			serviceName: "admserver",
 			expected:    "internal/admserver/model",
 		},
+		{
+			name:        "substring collision - api vs apiserver",
+			baseDir:     "internal/apiserver/model",
+			serviceName: "api",
+			expected:    "internal/api/model",
+		},
+		{
+			name:        "pkg prefix paths with known service",
+			baseDir:     "pkg/api/v1",
+			serviceName: "admserver",
+			expected:    "pkg/admserver/v1",
+		},
+		{
+			name:        "invalid service name with path separator",
+			baseDir:     "internal/apiserver/model",
+			serviceName: "adm/server",
+			expectError: true,
+		},
+		{
+			name:        "invalid service name with parent directory reference",
+			baseDir:     "internal/apiserver/model",
+			serviceName: "../admserver",
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &Options{}
 			result, err := o.InferDirectoryForService(tt.baseDir, tt.serviceName)
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("InferDirectoryForService(%q, %q) expected error, got nil",
+						tt.baseDir, tt.serviceName)
+				}
+				return
+			}
 			if err != nil {
 				t.Fatalf("InferDirectoryForService failed: %v", err)
 			}
@@ -254,5 +287,25 @@ func TestInferDirectoryForService(t *testing.T) {
 					tt.baseDir, tt.serviceName, result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestInferDirectoryForService_DiscoveryFailure(t *testing.T) {
+	// Test behavior when cmd/ directory doesn't exist
+	tmpDir := t.TempDir()
+	originalDir, _ := os.Getwd()
+	defer os.Chdir(originalDir)
+	os.Chdir(tmpDir)
+
+	o := &Options{}
+	result, err := o.InferDirectoryForService("internal/unknown/model", "admserver")
+	if err != nil {
+		t.Fatalf("InferDirectoryForService failed: %v", err)
+	}
+
+	// Should fall back to pattern-based inference
+	expected := "internal/admserver/model"
+	if result != expected {
+		t.Errorf("InferDirectoryForService with no cmd/ = %q, want %q", result, expected)
 	}
 }

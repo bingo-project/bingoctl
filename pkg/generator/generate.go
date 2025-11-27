@@ -87,10 +87,20 @@ func GetMapDirectory(tmpl string) (dir string) {
 	return
 }
 
-// InferDirectoryForService infers the target directory based on service name
+// InferDirectoryForService infers the target directory based on service name using a three-tier strategy:
+// 1. Discover services from cmd/ directory (e.g., cmd/myapp-apiserver → "apiserver")
+// 2. Smart replacement: replace service name in path if found as a path segment
+// 3. Fallback: construct internal/{service}/{suffix} pattern
+//
+// Example: InferDirectoryForService("internal/apiserver/model", "admserver") → "internal/admserver/model"
 func (o *Options) InferDirectoryForService(baseDir, serviceName string) (string, error) {
 	if serviceName == "" {
 		return baseDir, nil
+	}
+
+	// Validate service name doesn't contain path separators or ".."
+	if strings.Contains(serviceName, string(filepath.Separator)) || strings.Contains(serviceName, "..") {
+		return "", os.ErrInvalid
 	}
 
 	// 1. Discover existing services from cmd/
@@ -100,10 +110,14 @@ func (o *Options) InferDirectoryForService(baseDir, serviceName string) (string,
 		services = []string{}
 	}
 
-	// 2. Smart replacement: if path contains a known service name, replace it
+	// 2. Smart replacement: if path contains a known service name as a path segment, replace it
+	parts := strings.Split(filepath.Clean(baseDir), string(filepath.Separator))
 	for _, svc := range services {
-		if strings.Contains(baseDir, svc) {
-			return strings.ReplaceAll(baseDir, svc, serviceName), nil
+		for i, part := range parts {
+			if part == svc {
+				parts[i] = serviceName
+				return strings.Join(parts, string(filepath.Separator)), nil
+			}
 		}
 	}
 
