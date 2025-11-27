@@ -1,6 +1,9 @@
 package template
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -37,5 +40,53 @@ func TestShouldReplaceFile(t *testing.T) {
 				t.Errorf("shouldReplaceFile(%q) = %v, want %v", tt.path, result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestReplaceInFile(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test file
+	testFile := filepath.Join(tmpDir, "test.go")
+	content := `package main
+
+import "bingo/internal/pkg/log"
+
+func main() {
+	log.Info("bingo application")
+	path := "bingo/cmd/server"
+}
+`
+	err := os.WriteFile(testFile, []byte(content), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Replace
+	r := NewReplacer(tmpDir, "bingo", "github.com/myapp/myapp", "myapp")
+	err = r.replaceInFile(testFile)
+	if err != nil {
+		t.Fatalf("replaceInFile failed: %v", err)
+	}
+
+	// Verify
+	result, err := os.ReadFile(testFile)
+	if err != nil {
+		t.Fatalf("Failed to read result: %v", err)
+	}
+
+	resultStr := string(result)
+
+	// Check replacements
+	if !strings.Contains(resultStr, `import "github.com/myapp/myapp/internal/pkg/log"`) {
+		t.Error("Import path not replaced")
+	}
+
+	if !strings.Contains(resultStr, `log.Info("bingo application")`) {
+		t.Error("String literal should not be replaced with full module name")
+	}
+
+	if !strings.Contains(resultStr, `"github.com/myapp/myapp/cmd/server"`) {
+		t.Error("Path in string not replaced")
 	}
 }

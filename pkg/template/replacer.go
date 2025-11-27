@@ -3,6 +3,9 @@
 package template
 
 import (
+	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -81,4 +84,55 @@ func (r *Replacer) shouldReplaceFile(path string) bool {
 	}
 
 	return false
+}
+
+// ReplaceModuleName replaces all files with module name
+// Traverses target directory, replaces based on file extension
+func (r *Replacer) ReplaceModuleName() error {
+	return filepath.WalkDir(r.targetDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if r.shouldReplaceFile(path) {
+			return r.replaceInFile(path)
+		}
+
+		return nil
+	})
+}
+
+// replaceInFile replaces module name in a single file
+// Uses string replacement to avoid breaking binary files
+func (r *Replacer) replaceInFile(path string) error {
+	// Read file
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+
+	str := string(content)
+
+	// Replace patterns
+	// 1. go.mod: module bingo -> module {newModule}
+	str = strings.ReplaceAll(str, "module "+r.oldModule, "module "+r.newModule)
+
+	// 2. imports: "bingo/xxx" -> "{newModule}/xxx"
+	str = strings.ReplaceAll(str, `"`+r.oldModule+"/", `"`+r.newModule+"/")
+
+	// 3. paths in strings: bingo/ -> {newModule}/
+	// Note: This is aggressive but necessary for Makefile, Dockerfile, etc.
+	str = strings.ReplaceAll(str, r.oldModule+"/", r.newModule+"/")
+
+	// Write back
+	err = os.WriteFile(path, []byte(str), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write file %s: %w", path, err)
+	}
+
+	return nil
 }
