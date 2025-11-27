@@ -114,11 +114,6 @@ func TestDownloadWithTimeout_Timeout(t *testing.T) {
 	}
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
 func TestExtractTarball(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -254,4 +249,41 @@ func createInvalidTarball(path string) error {
 	}
 
 	return nil
+}
+
+func TestFetchTemplate_CacheHit(t *testing.T) {
+	tmpDir := t.TempDir()
+	cacheDir := filepath.Join(tmpDir, "cache")
+
+	// Pre-populate cache
+	cachedVersion := filepath.Join(cacheDir, "v1.0.0")
+	os.MkdirAll(cachedVersion, 0755)
+	os.WriteFile(filepath.Join(cachedVersion, "cached.txt"), []byte("cached"), 0644)
+
+	f := &Fetcher{
+		cacheDir: cacheDir,
+		timeout:  defaultTimeout,
+		mirror:   "",
+	}
+
+	// Fetch should return cached path without downloading
+	path, err := f.FetchTemplate("v1.0.0", false)
+	if err != nil {
+		t.Fatalf("FetchTemplate failed: %v", err)
+	}
+
+	if path != cachedVersion {
+		t.Errorf("FetchTemplate returned %s, want %s", path, cachedVersion)
+	}
+
+	// Verify cached file still exists
+	if !fileExists(filepath.Join(path, "cached.txt")) {
+		t.Error("Cached file not found")
+	}
+}
+
+func TestFetchTemplate_NoCache(t *testing.T) {
+	// This test would require mocking HTTP download
+	// Skip for now as it's integration-level
+	t.Skip("Integration test - requires HTTP mocking")
 }

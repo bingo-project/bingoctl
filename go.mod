@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/bingo-project/component-base v0.1.8
 	github.com/gertd/go-pluralize v0.2.1
+	github.com/gofrs/flock v0.13.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/manifoldco/promptui v0.9.0
@@ -40,7 +41,6 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	golang.org/x/mod v0.30.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
@@ -48,7 +48,6 @@ require (
 	golang.org/x/term v0.28.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/tools v0.39.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gorm.io/datatypes v1.2.0 // indirect
 	gorm.io/hints v1.1.2 // indirect

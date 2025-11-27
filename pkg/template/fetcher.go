@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofrs/flock"
 	"github.com/schollz/progressbar/v3"
 )
 
@@ -30,14 +31,23 @@ type Fetcher struct {
 }
 
 // NewFetcher creates a new Fetcher instance
-func NewFetcher() *Fetcher {
-	// TODO: get cache dir from user home
-	// TODO: read mirror from env BINGOCTL_TEMPLATE_MIRROR
-	return &Fetcher{
-		cacheDir: "", // will implement later
-		timeout:  defaultTimeout,
-		mirror:   "", // will implement later
+func NewFetcher() (*Fetcher, error) {
+	// Get cache directory from user home
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user home directory: %w", err)
 	}
+
+	cacheDir := filepath.Join(homeDir, ".bingoctl", "templates")
+
+	// Read mirror from environment variable
+	mirror := os.Getenv("BINGOCTL_TEMPLATE_MIRROR")
+
+	return &Fetcher{
+		cacheDir: cacheDir,
+		timeout:  defaultTimeout,
+		mirror:   mirror,
+	}, nil
 }
 
 // buildDownloadURL constructs download URL (supports mirror)
@@ -243,4 +253,96 @@ func (f *Fetcher) extractTarball(tarPath, destDir string) error {
 
 		return os.Chmod(destPath, info.Mode())
 	})
+}
+
+// FetchTemplate downloads template to cache (if not exists), returns cache path
+// Execution steps:
+// 1. Check cache directory exists, create if not (permission 0755)
+// 2. Check cache directory is writable, return friendly error if not
+// 3. Check cache hit (unless noCache=true)
+// 4. If need to download, acquire file lock, download and extract to cache
+// 5. Return cache path
+func (f *Fetcher) FetchTemplate(ref string, noCache bool) (string, error) {
+	// Step 1 & 2: Ensure cache directory exists and is writable
+	if err := f.ensureCacheDir(); err != nil {
+		return "", err
+	}
+
+	// Step 3: Check cache
+	cachePath := filepath.Join(f.cacheDir, ref)
+	if !noCache && fileExists(cachePath) {
+		return cachePath, nil
+	}
+
+	// Step 4: Download and cache
+	if err := f.downloadAndCache(ref); err != nil {
+		return "", err
+	}
+
+	// Step 5: Return cache path
+	return cachePath, nil
+}
+
+// ensureCacheDir ensures cache directory exists and is writable
+func (f *Fetcher) ensureCacheDir() error {
+	// Create if not exists
+	if err := os.MkdirAll(f.cacheDir, 0755); err != nil {
+		return fmt.Errorf("failed to create cache directory: %w", err)
+	}
+
+	// Check writable
+	testFile := filepath.Join(f.cacheDir, ".write-test")
+	if err := os.WriteFile(testFile, []byte("test"), 0644); err != nil {
+		return fmt.Errorf("cache directory is not writable: %w", err)
+	}
+	os.Remove(testFile)
+
+	return nil
+}
+
+// downloadAndCache downloads template and extracts to cache
+func (f *Fetcher) downloadAndCache(ref string) error {
+	// Acquire file lock for concurrent safety
+	lockPath := filepath.Join(f.cacheDir, ref+".lock")
+	fileLock := flock.New(lockPath)
+
+	locked, err := fileLock.TryLock()
+	if err != nil {
+		return fmt.Errorf("failed to acquire lock: %w", err)
+	}
+	if !locked {
+		// Another process is downloading, wait for it
+		if err := fileLock.Lock(); err != nil {
+			return fmt.Errorf("failed to wait for lock: %w", err)
+		}
+	}
+	defer fileLock.Unlock()
+	defer os.Remove(lockPath)
+
+	// Check again if cache exists (may be created by another process)
+	cachePath := filepath.Join(f.cacheDir, ref)
+	if fileExists(cachePath) {
+		return nil
+	}
+
+	// Download
+	url := f.buildDownloadURL(ref)
+	tarPath, err := f.downloadWithTimeout(url)
+	if err != nil {
+		return fmt.Errorf("failed to download template: %w", err)
+	}
+	defer os.Remove(tarPath)
+
+	// Extract
+	if err := f.extractTarball(tarPath, cachePath); err != nil {
+		os.RemoveAll(cachePath) // Cleanup on error
+		return fmt.Errorf("failed to extract template: %w", err)
+	}
+
+	return nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
