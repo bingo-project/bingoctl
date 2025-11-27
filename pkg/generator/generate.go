@@ -171,3 +171,24 @@ func discoverServices() ([]string, error) {
 
 	return services, nil
 }
+
+// extractSuffix extracts the path suffix after known prefixes
+func extractSuffix(path string) string {
+	parts := strings.Split(filepath.Clean(path), string(filepath.Separator))
+
+	// Find internal/ or pkg/ and return everything after the service name
+	for i, part := range parts {
+		if part == "internal" || part == "pkg" {
+			if i+2 < len(parts) {
+				return strings.Join(parts[i+2:], string(filepath.Separator))
+			}
+		}
+	}
+
+	// If not found, return the last segment
+	if len(parts) > 0 {
+		return parts[len(parts)-1]
+	}
+
+	return path
+}

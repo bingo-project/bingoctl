@@ -155,3 +155,46 @@ func TestDiscoverServices_EdgeCases(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractSuffix(t *testing.T) {
+	tests := []struct {
+		name     string
+		path     string
+		expected string
+	}{
+		{
+			name:     "internal with service",
+			path:     "internal/apiserver/model",
+			expected: "model",
+		},
+		{
+			name:     "internal with nested path",
+			path:     "internal/apiserver/controller/v1",
+			expected: "controller/v1",
+		},
+		{
+			name:     "pkg prefix",
+			path:     "pkg/api/v1",
+			expected: "v1",
+		},
+		{
+			name:     "no known prefix",
+			path:     "custom/path/model",
+			expected: "model",
+		},
+		{
+			name:     "single segment",
+			path:     "model",
+			expected: "model",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractSuffix(tt.path)
+			if result != tt.expected {
+				t.Errorf("extractSuffix(%q) = %q, want %q", tt.path, result, tt.expected)
+			}
+		})
+	}
+}
