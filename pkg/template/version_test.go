@@ -7,9 +7,9 @@ func TestDefaultTemplateVersion(t *testing.T) {
 		t.Error("DefaultTemplateVersion should not be empty")
 	}
 
-	// Should be a valid semver tag
-	if DefaultTemplateVersion[0] != 'v' {
-		t.Errorf("DefaultTemplateVersion should start with 'v', got: %s", DefaultTemplateVersion)
+	// Should be a valid ref (tag, branch, or commit)
+	if !isValidRef(DefaultTemplateVersion) {
+		t.Errorf("DefaultTemplateVersion should be a valid ref, got: %s", DefaultTemplateVersion)
 	}
 }
 
