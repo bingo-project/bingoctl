@@ -203,6 +203,8 @@ func discoverServices() ([]string, error) {
 		}
 
 		// Extract service name: myapp-apiserver → apiserver, myappctl → ctl
+		// Note: For multi-hyphen names (e.g., my-app-api-server), only the last
+		// segment is extracted. Use single-hyphen naming for best results.
 		name := entry.Name()
 		var serviceName string
 		parts := strings.Split(name, "-")
