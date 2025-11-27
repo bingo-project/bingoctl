@@ -37,6 +37,14 @@ type CreateOptions struct {
 	RootPackage  string
 	AppName      string
 	AppNameCamel string
+
+	// Service selection
+	Services    []string // Explicitly specified services
+	NoServices  []string // Services to exclude from defaults
+	AddServices []string // Services to add to defaults
+	Interactive bool     // Whether to use interactive mode (default true)
+
+	selectedServices []string // Final computed service list (internal)
 }
 
 // NewCreateOptions returns an initialized CreateOptions instance.
