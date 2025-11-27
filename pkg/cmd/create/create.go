@@ -28,6 +28,9 @@ var (
 		"expected '%s'.\nNAME is a required argument for the create command",
 		createUsageStr,
 	)
+
+	defaultServices   = []string{"apiserver", "ctl"}
+	availableServices = []string{"apiserver", "ctl", "admserver", "bot", "scheduler"}
 )
 
 // CreateOptions is an option struct to support 'create' sub command.
@@ -80,7 +83,7 @@ func NewCmdCreate() *cobra.Command {
 // Validate makes sure there is no discrepancy in command options.
 func (o *CreateOptions) Validate(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
-		return cmdutil.UsageErrorf(cmd, createUsageErrStr)
+		return cmdutil.UsageErrorf(cmd, "%s", createUsageErrStr)
 	}
 
 	// Root Package & App path
@@ -164,4 +167,42 @@ func (o *CreateOptions) Run(args []string) error {
 	console.Info("done.")
 
 	return nil
+}
+
+// computeServiceList computes the final service list based on flags
+func (o *CreateOptions) computeServiceList() []string {
+	// Priority 1: --services flag explicitly specified
+	if len(o.Services) > 0 {
+		if len(o.Services) == 1 && o.Services[0] == "none" {
+			return []string{}
+		}
+		return o.Services
+	}
+
+	// Priority 2: Start with defaults and apply modifications
+	services := make(map[string]bool)
+	for _, svc := range defaultServices {
+		services[svc] = true
+	}
+
+	// Apply exclusions
+	for _, svc := range o.NoServices {
+		delete(services, svc)
+	}
+
+	// Apply additions
+	for _, svc := range o.AddServices {
+		services[svc] = true
+	}
+
+	// Convert map back to slice
+	result := make([]string, 0, len(services))
+	// Maintain order: iterate through availableServices to preserve order
+	for _, svc := range availableServices {
+		if services[svc] {
+			result = append(result, svc)
+		}
+	}
+
+	return result
 }
