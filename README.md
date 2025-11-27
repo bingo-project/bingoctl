@@ -64,13 +64,79 @@ mysql:
 
 ### create - 创建项目
 
-从零创建一个新的项目脚手架。
+从零创建一个新的项目脚手架。从 GitHub 下载和缓存 Bingo 项目模板。
 
 ```bash
-bingoctl create <package-name>
+bingoctl create <package-name> [选项]
 
 # 示例
 bingoctl create github.com/myorg/myapp
+```
+
+#### 创建命令选项
+
+**模板版本 (Template Version)**
+
+```bash
+# 使用推荐版本（默认）
+bingoctl create myapp
+
+# 使用特定版本
+bingoctl create myapp -r v1.2.3
+
+# 使用分支（开发版本）
+bingoctl create myapp -r main
+
+# 强制重新下载分支模板
+bingoctl create myapp -r main --no-cache
+```
+
+**自定义模块名 (Module Name)**
+
+```bash
+# 替换包名
+bingoctl create myapp -m github.com/mycompany/myapp
+```
+
+**服务选择 (Service Selection)**
+
+```bash
+# 选择特定服务
+bingoctl create myapp --services apiserver,ctl
+
+# 排除服务
+bingoctl create myapp --no-service bot,scheduler
+
+# 添加服务到默认选择
+bingoctl create myapp --add-service admserver
+
+# 仅骨架，不包含任何服务
+bingoctl create myapp --services none
+```
+
+**缓存管理 (Cache Management)**
+
+```bash
+# 使用缓存（默认）- 加快创建速度
+bingoctl create myapp
+
+# 强制刷新模板（用于分支）
+bingoctl create myapp -r main --no-cache
+
+# 缓存位置：~/.bingoctl/templates/
+```
+
+**镜像配置 (Mirror Configuration)**
+
+对于 GitHub 访问困难的地区，可以配置镜像：
+
+```bash
+# 使用环境变量
+export BINGOCTL_TEMPLATE_MIRROR=https://ghproxy.com/
+bingoctl create myapp
+
+# 或临时设置
+BINGOCTL_TEMPLATE_MIRROR=https://ghproxy.com/ bingoctl create myapp
 ```
 
 ### make - 代码生成
