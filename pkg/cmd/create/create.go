@@ -77,6 +77,7 @@ type CreateOptions struct {
 	NoCache     bool   // Force re-download
 
 	// Service selection
+	All         bool     // Create all available services
 	Services    []string // Explicitly specified services
 	NoServices  []string // Services to exclude from defaults
 	AddServices []string // Services to add to defaults
@@ -112,6 +113,7 @@ func NewCmdCreate() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVarP(&o.All, "all", "a", false, "Create all available services (apiserver, ctl, admserver, bot, scheduler)")
 	cmd.Flags().StringSliceVar(&o.Services, "services", nil, "Explicitly specify services to create (comma-separated). Use 'none' for minimal skeleton")
 	cmd.Flags().StringSliceVar(&o.NoServices, "no-service", nil, "Exclude services from defaults (comma-separated)")
 	cmd.Flags().StringSliceVar(&o.AddServices, "add-service", nil, "Add services to defaults (comma-separated)")
@@ -327,7 +329,12 @@ func (o *CreateOptions) Run(args []string) error {
 
 // computeServiceList computes the final service list based on flags
 func (o *CreateOptions) computeServiceList() []string {
-	// Priority 1: --services flag explicitly specified
+	// Priority 1: --all flag
+	if o.All {
+		return availableServices
+	}
+
+	// Priority 2: --services flag explicitly specified
 	if len(o.Services) > 0 {
 		if len(o.Services) == 1 && o.Services[0] == "none" {
 			return []string{}
@@ -335,7 +342,7 @@ func (o *CreateOptions) computeServiceList() []string {
 		return o.Services
 	}
 
-	// Priority 2: Start with defaults and apply modifications
+	// Priority 3: Start with defaults and apply modifications
 	services := make(map[string]bool)
 	for _, svc := range defaultServices {
 		services[svc] = true

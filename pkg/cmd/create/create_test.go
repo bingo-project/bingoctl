@@ -10,11 +10,17 @@ import (
 func TestComputeServiceList(t *testing.T) {
 	tests := []struct {
 		name        string
+		all         bool
 		services    []string
 		noServices  []string
 		addServices []string
 		expected    []string
 	}{
+		{
+			name:     "all flag returns all services",
+			all:      true,
+			expected: []string{"apiserver", "ctl", "admserver", "bot", "scheduler"},
+		},
 		{
 			name:     "explicit services override",
 			services: []string{"apiserver", "bot"},
@@ -50,6 +56,7 @@ func TestComputeServiceList(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &CreateOptions{
+				All:         tt.all,
 				Services:    tt.services,
 				NoServices:  tt.noServices,
 				AddServices: tt.addServices,
