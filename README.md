@@ -98,17 +98,35 @@ bingoctl create myapp -r main --no-cache
 bingoctl create myapp -m github.com/mycompany/myapp
 ```
 
+**Git 初始化 (Git Initialization)**
+
+```bash
+# 创建项目并初始化 git 仓库（默认）
+bingoctl create myapp
+
+# 创建项目但不初始化 git
+bingoctl create myapp --init-git=false
+```
+
 **服务选择 (Service Selection)**
 
 ```bash
-# 选择特定服务
-bingoctl create myapp --services apiserver,ctl
+# 只包含 apiserver（默认）
+bingoctl create myapp
+
+# 创建所有可用服务
+bingoctl create myapp --all
+# 或
+bingoctl create myapp -a
+
+# 明确指定服务
+bingoctl create myapp --services apiserver,ctl,scheduler
+
+# 添加服务到默认的 apiserver
+bingoctl create myapp --add-service admserver
 
 # 排除服务
-bingoctl create myapp --no-service bot,scheduler
-
-# 添加服务到默认选择
-bingoctl create myapp --add-service admserver
+bingoctl create myapp --no-service bot
 
 # 仅骨架，不包含任何服务
 bingoctl create myapp --services none
@@ -154,26 +172,30 @@ BINGOCTL_TEMPLATE_MIRROR=https://ghproxy.com/ bingoctl create myapp
 
 #### 服务选择
 
-当项目包含多个服务时，可以使用 `--service` 参数自动推断生成路径：
+当项目包含多个服务时，可以使用 `--service` 参数自动推断生成路径。路径推断优先级：
+
+1. **明确指定目录** (`-d`) - 最高优先级
+2. **服务参数** (`--service`) - 自动推断路径
+3. **配置默认路径** - 通常是 apiserver 的路径
 
 ```bash
-# 为 apiserver 生成代码（使用配置默认路径）
+# 为默认服务（通常是 apiserver）生成代码
 bingoctl make model user
 
-# 为 admserver 生成代码（自动推断路径）
+# 为特定服务自动推断路径
 bingoctl make model user --service admserver
 
-# 完整 CRUD 为指定服务生成
+# 生成完整 CRUD（为指定服务）
 bingoctl make crud order --service admserver
 
-# 明确指定路径（优先级最高）
+# 明确指定目录（优先级最高）
 bingoctl make model user -d custom/path
 ```
 
-路径推断规则：
+**路径推断规则：**
 1. 扫描 `cmd/` 目录识别已存在的服务
-2. 如果配置路径包含服务名，则智能替换（如 `internal/apiserver/model` → `internal/admserver/model`）
-3. 否则使用固定模式：`internal/{service}/{suffix}`
+2. 若配置路径包含服务名，则智能替换（如 `internal/apiserver/model` → `internal/admserver/model`）
+3. 否则使用默认模式：`internal/{service}/{suffix}`
 
 #### crud - 生成完整 CRUD 代码
 
@@ -324,8 +346,14 @@ bingoctl version
 ### 1. 创建新项目
 
 ```bash
-# 创建项目
+# 创建项目（默认包含 apiserver 服务）
 bingoctl create github.com/myorg/blog
+
+# 创建包含所有服务的项目
+bingoctl create github.com/myorg/blog --all
+
+# 创建并指定特定服务
+bingoctl create github.com/myorg/blog --services apiserver,admserver
 
 # 进入项目目录
 cd blog
@@ -333,8 +361,8 @@ cd blog
 # 生成用户模块的完整 CRUD 代码
 bingoctl make crud user
 
-# 生成文章模块的完整 CRUD 代码
-bingoctl make crud post
+# 为 admserver 服务生成 CRUD 代码
+bingoctl make crud user --service admserver
 ```
 
 ### 2. 从数据库生成模型
@@ -404,6 +432,24 @@ myapp/
    - 使用 `bingoctl make migration` 创建迁移文件
    - 使用 `bingoctl make seeder` 创建数据填充文件
 5. **扩展功能**：根据需要使用 `make` 命令生成其他组件
+
+## 开发任务清单
+
+### 核心功能 ✅
+- [x] `bingoctl create` - 从 GitHub 拉取模板创建项目
+- [x] `bingoctl make` - 代码生成（model, store, biz, controller 等）
+- [x] `bingoctl make service` - 生成完整服务模块（HTTP/gRPC）
+- [x] `bingoctl gen` - 从数据库表生成模型代码
+- [x] 服务选择功能（`--services`, `--no-service`, `--add-service`, `--all`）
+- [x] Make 命令支持多服务（`--service` 参数自动推断路径）
+
+### 待完成任务 📋
+- [ ] 缓存管理命令：`bingoctl cache list/clean`（未来版本）
+
+### 文档 📚
+- [x] README 更新至最新功能
+- [x] 所有新参数说明完整
+- [x] 使用示例覆盖主要场景
 
 ## 许可证
 
