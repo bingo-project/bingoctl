@@ -17,6 +17,9 @@ BingoCTL 是一个 Go 语言的脚手架和代码生成工具，用于快速创�
 go install github.com/bingo-project/bingoctl@latest
 ```
 
+> 如需安装旧版本（v1.4.x 使用内置模板），可以指定版本：`go install github.com/bingo-project/bingoctl@v1.4.7`
+> 版本变更历史请查看 [CHANGELOG.md](CHANGELOG.md)
+
 ## 配置文件
 
 在项目根目录下创建配置文件 `.bingoctl.yaml`：
