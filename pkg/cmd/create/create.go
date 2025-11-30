@@ -294,7 +294,12 @@ func (o *CreateOptions) Run(args []string) error {
 		return fmt.Errorf("failed to move project: %w", err)
 	}
 
-	// 9. Setup configuration files
+	// 9. Cleanup template files (remove bingo docs and create new README)
+	if err := o.cleanupTemplateFiles(o.AppName); err != nil {
+		return err
+	}
+
+	// 10. Setup configuration files
 	projectPath := o.AppName
 
 	// Copy .air.example.toml to .air.toml
@@ -311,7 +316,12 @@ func (o *CreateOptions) Run(args []string) error {
 		cmdutil.CopyFile(configsSrcPath, configsDstPath)
 	}
 
-	// 10. Initialize git repository if requested
+	// Copy example configs to project root for easy configuration
+	if err := o.copyExampleConfigs(projectPath); err != nil {
+		return err
+	}
+
+	// 11. Initialize git repository if requested
 	if o.InitGit {
 		if err := o.initializeGit(projectPath); err != nil {
 			console.Warn(fmt.Sprintf("Failed to initialize git repository: %v", err))
@@ -417,6 +427,101 @@ func (o *CreateOptions) filterServices(targetDir string) error {
 	}
 
 	return o.filterServicesWithMapping(targetDir, mapping)
+}
+
+// copyExampleConfigs copies configs/*.example.yaml to project root as *.yaml
+func (o *CreateOptions) copyExampleConfigs(projectPath string) error {
+	configsDir := filepath.Join(projectPath, "configs")
+	if !cmdutil.Exists(configsDir) {
+		return nil
+	}
+
+	entries, err := os.ReadDir(configsDir)
+	if err != nil {
+		return fmt.Errorf("failed to read configs directory: %w", err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		name := entry.Name()
+		if !strings.HasSuffix(name, ".example.yaml") {
+			continue
+		}
+
+		// Remove .example from filename
+		targetName := strings.Replace(name, ".example.yaml", ".yaml", 1)
+		srcPath := filepath.Join(configsDir, name)
+		dstPath := filepath.Join(projectPath, targetName)
+
+		if err := cmdutil.CopyFile(srcPath, dstPath); err != nil {
+			return fmt.Errorf("failed to copy %s: %w", name, err)
+		}
+	}
+
+	return nil
+}
+
+// cleanupTemplateFiles removes bingo template docs and creates a new README
+func (o *CreateOptions) cleanupTemplateFiles(projectPath string) error {
+	// Remove docs directory
+	docsPath := filepath.Join(projectPath, "docs")
+	if cmdutil.Exists(docsPath) {
+		if err := os.RemoveAll(docsPath); err != nil {
+			return fmt.Errorf("failed to remove docs directory: %w", err)
+		}
+	}
+
+	// Remove CHANGELOG.md
+	changelogPath := filepath.Join(projectPath, "CHANGELOG.md")
+	if cmdutil.Exists(changelogPath) {
+		if err := os.Remove(changelogPath); err != nil {
+			return fmt.Errorf("failed to remove CHANGELOG.md: %w", err)
+		}
+	}
+
+	// Remove README.zh-CN.md
+	readmeZhPath := filepath.Join(projectPath, "README.zh-CN.md")
+	if cmdutil.Exists(readmeZhPath) {
+		if err := os.Remove(readmeZhPath); err != nil {
+			return fmt.Errorf("failed to remove README.zh-CN.md: %w", err)
+		}
+	}
+
+	// Create new README.md
+	readmePath := filepath.Join(projectPath, "README.md")
+	readmeContent := fmt.Sprintf(`# %s
+
+Project created with [bingoctl](https://github.com/bingo-project/bingoctl) based on the [bingo](https://github.com/bingo-project/bingo) scaffold.
+
+## Getting Started
+
+1. Configure MySQL and Redis in `+"`*.yaml`"+` (copied from `+"`configs/*.example.yaml`"+`)
+2. Build the project:
+
+`+"```bash"+`
+make build
+`+"```"+`
+
+3. Run the server:
+
+`+"```bash"+`
+./_output/platforms/<os>/<arch>/%s-apiserver
+`+"```"+`
+
+## Documentation
+
+- Online documentation: https://bingoctl.dev
+- GitHub: https://github.com/bingo-project/bingo
+`, o.AppName, o.AppName)
+
+	if err := os.WriteFile(readmePath, []byte(readmeContent), 0644); err != nil {
+		return fmt.Errorf("failed to create README.md: %w", err)
+	}
+
+	return nil
 }
 
 // filterServicesWithMapping deletes unselected service directories using the provided mapping
