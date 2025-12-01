@@ -321,12 +321,18 @@ func (o *CreateOptions) Run(args []string) error {
 		return err
 	}
 
-	// 11. Initialize git repository if requested
+	// 11. Run go mod tidy
+	o.runGoModTidy(projectPath)
+
+	// 12. Initialize git repository if requested
 	if o.InitGit {
 		if err := o.initializeGit(projectPath); err != nil {
 			console.Warn(fmt.Sprintf("Failed to initialize git repository: %v", err))
 		}
 	}
+
+	// 13. Run make build (after git init so Makefile can access git info)
+	o.runMakeBuild(projectPath)
 
 	// Success message - show in green
 	console.Info(fmt.Sprintf("Project '%s' created successfully", o.AppName))
@@ -378,6 +384,42 @@ func (o *CreateOptions) computeServiceList() []string {
 	}
 
 	return result
+}
+
+// runGoModTidy executes go mod tidy to clean up dependencies
+// Failures are warnings only, not blocking errors
+func (o *CreateOptions) runGoModTidy(projectPath string) {
+	fmt.Println("Running go mod tidy...")
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = projectPath
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		console.Warn(fmt.Sprintf("go mod tidy failed: %v", err))
+	} else {
+		console.Info("go mod tidy completed")
+	}
+}
+
+// runMakeBuild executes make build to compile the project
+// Failures are warnings only, not blocking errors
+func (o *CreateOptions) runMakeBuild(projectPath string) {
+	// Check if make is available
+	if _, err := exec.LookPath("make"); err != nil {
+		console.Warn("make not found, skipping make build")
+		return
+	}
+
+	fmt.Println("Running make build...")
+	cmd := exec.Command("make", "build")
+	cmd.Dir = projectPath
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		console.Warn(fmt.Sprintf("make build failed: %v", err))
+	} else {
+		console.Info("make build completed")
+	}
 }
 
 // initializeGit initializes a git repository in the project directory
