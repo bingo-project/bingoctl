@@ -21,6 +21,8 @@ type Options struct {
 	DB         *gorm.DB
 	Production bool
 	Force      bool
+	Verbose    bool
+	Rebuild    bool
 }
 
 // NewOptions returns an initialized Options instance.
@@ -40,6 +42,8 @@ func NewCmdMigrate(db *gorm.DB, production bool) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().BoolVarP(&opt.Force, "force", "f", false, "Force run migration command in production")
+	cmd.PersistentFlags().BoolVarP(&opt.Verbose, "verbose", "v", false, "Show detailed compilation output")
+	cmd.PersistentFlags().BoolVar(&opt.Rebuild, "rebuild", false, "Force rebuild migration binary")
 
 	// Add sub commands.
 	cmd.AddCommand(NewCmdUp())

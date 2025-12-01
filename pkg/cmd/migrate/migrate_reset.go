@@ -1,22 +1,15 @@
 package migrate
 
 import (
-	"fmt"
-
 	"github.com/bingo-project/component-base/cli/console"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
+
+	"github.com/bingo-project/bingoctl/pkg/migrate/runner"
 )
 
 const (
 	resetUsageStr = "reset"
-)
-
-var (
-	resetUsageErrStr = fmt.Sprintf(
-		"expected '%s'.\nNAME is a required argument for the reset command",
-		resetUsageStr,
-	)
 )
 
 // ResetOptions is an option struct to support 'reset' sub command.
@@ -67,7 +60,10 @@ func (o *ResetOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *ResetOptions) Run(args []string) error {
-	o.Migrator().Reset()
+	r, err := runner.NewRunner(o.Verbose, o.Rebuild)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return r.Run("reset")
 }

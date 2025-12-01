@@ -1,22 +1,15 @@
 package migrate
 
 import (
-	"fmt"
-
 	"github.com/bingo-project/component-base/cli/console"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
+
+	"github.com/bingo-project/bingoctl/pkg/migrate/runner"
 )
 
 const (
 	freshUsageStr = "fresh"
-)
-
-var (
-	freshUsageErrStr = fmt.Sprintf(
-		"expected '%s'.\nNAME is a required argument for the fresh command",
-		freshUsageStr,
-	)
 )
 
 // FreshOptions is an option struct to support 'fresh' sub command.
@@ -67,7 +60,10 @@ func (o *FreshOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *FreshOptions) Run(args []string) error {
-	o.Migrator().Fresh()
+	r, err := runner.NewRunner(o.Verbose, o.Rebuild)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return r.Run("fresh")
 }

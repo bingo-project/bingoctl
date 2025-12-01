@@ -1,22 +1,15 @@
 package migrate
 
 import (
-	"fmt"
-
 	"github.com/bingo-project/component-base/cli/console"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
+
+	"github.com/bingo-project/bingoctl/pkg/migrate/runner"
 )
 
 const (
 	rollbackUsageStr = "rollback"
-)
-
-var (
-	rollbackUsageErrStr = fmt.Sprintf(
-		"expected '%s'.\nNAME is a required argument for the rollback command",
-		rollbackUsageStr,
-	)
 )
 
 // RollbackOptions is an option struct to support 'rollback' sub command.
@@ -67,7 +60,10 @@ func (o *RollbackOptions) Complete(cmd *cobra.Command, args []string) error {
 
 // Run executes a new sub command using the specified options.
 func (o *RollbackOptions) Run(args []string) error {
-	o.Migrator().Rollback()
+	r, err := runner.NewRunner(o.Verbose, o.Rebuild)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	return r.Run("rollback")
 }
