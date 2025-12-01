@@ -47,13 +47,18 @@ func (Migration) TableName() string {
 
 // NewMigrator creates a new Migrator with default table name.
 func NewMigrator(db *gorm.DB) *Migrator {
-	return NewMigratorWithTable(db, DefaultTableName)
+	return NewMigratorWithTable(db, "")
 }
 
 // NewMigratorWithTable creates a new Migrator with custom table name.
+// If tableName is empty, uses the value from environment variable or default.
 func NewMigratorWithTable(db *gorm.DB, tableName string) *Migrator {
 	if tableName != "" {
 		migrationTableName = tableName
+	}
+	// If still empty (shouldn't happen), use default
+	if migrationTableName == "" {
+		migrationTableName = DefaultTableName
 	}
 
 	migrator := &Migrator{
