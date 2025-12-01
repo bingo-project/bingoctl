@@ -25,6 +25,7 @@ func TestShouldReplaceFile(t *testing.T) {
 		{".env.example", ".env.example", true},
 		{"yaml file", "config.yaml", true},
 		{"shell script", "build.sh", true},
+		{"proto file", "apiserver.proto", true},
 
 		// Should not replace
 		{"binary", "app", false},
@@ -88,5 +89,49 @@ func main() {
 
 	if !strings.Contains(resultStr, `"github.com/myapp/myapp/cmd/server"`) {
 		t.Error("Path in string not replaced")
+	}
+}
+
+func TestReplaceInProtoFile(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test proto file
+	testFile := filepath.Join(tmpDir, "apiserver.proto")
+	content := `syntax = "proto3";
+
+package v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "bingo/internal/apiserver/grpc/proto/v1/pb";
+
+service ApiServer {
+  rpc Healthz (HealthzRequest) returns (HealthzReply) {}
+}
+`
+	err := os.WriteFile(testFile, []byte(content), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Replace
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err = r.replaceInFile(testFile)
+	if err != nil {
+		t.Fatalf("replaceInFile failed: %v", err)
+	}
+
+	// Verify
+	result, err := os.ReadFile(testFile)
+	if err != nil {
+		t.Fatalf("Failed to read result: %v", err)
+	}
+
+	resultStr := string(result)
+
+	// Check go_package replacement
+	expected := `option go_package = "github.com/mycompany/demo/internal/apiserver/grpc/proto/v1/pb";`
+	if !strings.Contains(resultStr, expected) {
+		t.Errorf("go_package not replaced correctly.\nExpected: %s\nGot: %s", expected, resultStr)
 	}
 }

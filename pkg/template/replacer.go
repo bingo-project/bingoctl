@@ -12,9 +12,10 @@ import (
 
 var replaceableExtensions = map[string]bool{
 	// Go related
-	".go":  true,
-	".mod": true,
-	".sum": true,
+	".go":    true,
+	".mod":   true,
+	".sum":   true,
+	".proto": true,
 
 	// Documentation
 	".md":  true,
