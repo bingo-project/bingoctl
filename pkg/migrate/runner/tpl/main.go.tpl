@@ -18,17 +18,19 @@ func main() {
 		username string
 		password string
 		database string
+		table    string
 	)
 
 	pflag.StringVar(&host, "host", "", "database host")
 	pflag.StringVar(&username, "username", "", "database username")
 	pflag.StringVar(&password, "password", "", "database password")
 	pflag.StringVar(&database, "database", "", "database name")
+	pflag.StringVar(&table, "table", migrate.DefaultTableName, "migration table name")
 	pflag.Parse()
 
 	args := pflag.Args()
 	if len(args) < 1 {
-		fmt.Println("Usage: migrator <up|rollback|reset|refresh|fresh> --host=<host> --username=<user> --password=<pass> --database=<db>")
+		fmt.Println("Usage: migrator <up|rollback|reset|refresh|fresh> --host=<host> --username=<user> --password=<pass> --database=<db> [--table=<table>]")
 		os.Exit(1)
 	}
 
@@ -43,7 +45,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	migrator := migrate.NewMigrator(dbConn)
+	migrator := migrate.NewMigratorWithTable(dbConn, table)
 
 	switch args[0] {
 	case "up":

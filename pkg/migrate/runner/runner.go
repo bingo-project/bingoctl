@@ -30,7 +30,8 @@ type Runner struct {
 	migrationPath string
 
 	// Database config
-	dbOptions *db.MySQLOptions
+	dbOptions    *db.MySQLOptions
+	migrateTable string
 
 	// Directories
 	cacheDir string // ~/.bingoctl/migrator/<id>/ for binary
@@ -83,6 +84,7 @@ func NewRunner(verbose, rebuild bool) (*Runner, error) {
 		migrationDir:  migrationDir,
 		migrationPath: migrationPath,
 		dbOptions:     config.Cfg.MysqlOptions,
+		migrateTable:  config.Cfg.GetMigrateTable(),
 		cacheDir:      cacheDir,
 		tmpDir:        tmpDir,
 		verbose:       verbose,
@@ -245,6 +247,7 @@ func (r *Runner) execute(command string) error {
 		"--username", r.dbOptions.Username,
 		"--password", r.dbOptions.Password,
 		"--database", r.dbOptions.Database,
+		"--table", r.migrateTable,
 	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

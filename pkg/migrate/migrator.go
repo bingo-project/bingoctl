@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Default table name for migration records
+const DefaultTableName = "bingo_migration"
+
+// migrationTableName stores the configured table name
+var migrationTableName = DefaultTableName
+
 type Migrator struct {
 	DB       *gorm.DB
 	Migrator gorm.Migrator
@@ -19,7 +25,22 @@ type Migration struct {
 	Batch     int
 }
 
+// TableName returns the configured migration table name
+func (Migration) TableName() string {
+	return migrationTableName
+}
+
+// NewMigrator creates a new Migrator with default table name.
 func NewMigrator(db *gorm.DB) *Migrator {
+	return NewMigratorWithTable(db, DefaultTableName)
+}
+
+// NewMigratorWithTable creates a new Migrator with custom table name.
+func NewMigratorWithTable(db *gorm.DB, tableName string) *Migrator {
+	if tableName != "" {
+		migrationTableName = tableName
+	}
+
 	migrator := &Migrator{
 		DB:       db,
 		Migrator: db.Migrator(),

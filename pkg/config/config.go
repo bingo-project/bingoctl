@@ -18,6 +18,21 @@ type Config struct {
 	MysqlOptions *db.MySQLOptions `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 
 	Registries Registries `mapstructure:"registries" json:"registries" yaml:"registries"`
+
+	Migrate MigrateConfig `mapstructure:"migrate" json:"migrate" yaml:"migrate"`
+}
+
+type MigrateConfig struct {
+	Table string `mapstructure:"table" json:"table" yaml:"table"`
+}
+
+const DefaultMigrateTable = "bingo_migration"
+
+func (c *Config) GetMigrateTable() string {
+	if c.Migrate.Table != "" {
+		return c.Migrate.Table
+	}
+	return DefaultMigrateTable
 }
 
 type Directory struct {
