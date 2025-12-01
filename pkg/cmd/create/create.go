@@ -326,17 +326,20 @@ func (o *CreateOptions) Run(args []string) error {
 		return err
 	}
 
-	// 11. Run go mod tidy
+	// 11. Generate protobuf files (if applicable)
+	o.runMakeProtoc(projectPath)
+
+	// 12. Run go mod tidy
 	o.runGoModTidy(projectPath)
 
-	// 12. Initialize git repository if requested
+	// 13. Initialize git repository if requested
 	if o.InitGit {
 		if err := o.initializeGit(projectPath); err != nil {
 			console.Warn(fmt.Sprintf("Failed to initialize git repository: %v", err))
 		}
 	}
 
-	// 13. Run make build if requested (after git init so Makefile can access git info)
+	// 14. Run make build if requested (after git init so Makefile can access git info)
 	if o.Build {
 		o.runMakeBuild(projectPath)
 	}
@@ -393,16 +396,70 @@ func (o *CreateOptions) computeServiceList() []string {
 	return result
 }
 
+// runMakeProtoc attempts to generate protobuf files before go mod tidy
+// Returns true if protoc was run (regardless of success), false if skipped
+func (o *CreateOptions) runMakeProtoc(projectPath string) bool {
+	// Check if make is available
+	if _, err := exec.LookPath("make"); err != nil {
+		return false
+	}
+
+	// Check if Makefile exists
+	makefilePath := filepath.Join(projectPath, "Makefile")
+	if !cmdutil.Exists(makefilePath) {
+		return false
+	}
+
+	// Check if protoc target exists in Makefile
+	content, err := os.ReadFile(makefilePath)
+	if err != nil {
+		return false
+	}
+	if !strings.Contains(string(content), "protoc:") {
+		return false
+	}
+
+	// Try to run make protoc
+	fmt.Println("Generating protobuf files...")
+	cmd := exec.Command("make", "protoc")
+	cmd.Dir = projectPath
+	// Suppress output - we'll handle success/failure messaging
+	if err := cmd.Run(); err != nil {
+		// Silently fail - user may not have protoc installed
+		return true
+	}
+
+	console.Info("Protobuf files generated")
+	return true
+}
+
 // runGoModTidy executes go mod tidy to clean up dependencies
 // Failures are warnings only, not blocking errors
 func (o *CreateOptions) runGoModTidy(projectPath string) {
 	fmt.Println("Running go mod tidy...")
 	cmd := exec.Command("go", "mod", "tidy")
 	cmd.Dir = projectPath
+
+	// Capture stderr for better error messaging
+	var stderr strings.Builder
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
-		console.Warn(fmt.Sprintf("go mod tidy failed: %v", err))
+		errOutput := stderr.String()
+		fmt.Fprint(os.Stderr, errOutput)
+
+		// Check if it's a proto-related error
+		if strings.Contains(errOutput, "proto") || strings.Contains(errOutput, "/pb") {
+			console.Warn("go mod tidy failed due to missing protobuf files")
+			fmt.Println()
+			fmt.Println("Next steps:")
+			fmt.Println("  1. Install protoc: https://grpc.io/docs/protoc-installation/")
+			fmt.Println("  2. Run: cd " + o.AppName + " && make protoc")
+			fmt.Println("  3. Run: go mod tidy")
+		} else {
+			console.Warn(fmt.Sprintf("go mod tidy failed: %v", err))
+		}
 	} else {
 		console.Info("go mod tidy completed")
 	}
