@@ -100,11 +100,16 @@ func (migrator *Migrator) Up() {
 }
 
 func (migrator *Migrator) Rollback() {
-	lastMigration := Migration{}
-	migrator.DB.Order("id DESC").First(&lastMigration)
+	var maxBatch *int
+	migrator.DB.Model(&Migration{}).Select("MAX(batch)").Scan(&maxBatch)
+
+	if maxBatch == nil {
+		console.Info("Nothing to rollback.")
+		return
+	}
 
 	var migrations []Migration
-	migrator.DB.Where("batch = ?", lastMigration.Batch).Order("id DESC").Find(&migrations)
+	migrator.DB.Where("batch = ?", *maxBatch).Order("id DESC").Find(&migrations)
 
 	if !migrator.rollbackMigrations(migrations) {
 		console.Info("Nothing to rollback.")
@@ -133,16 +138,14 @@ func (migrator *Migrator) rollbackMigrations(migrations []Migration) bool {
 }
 
 func (migrator *Migrator) getBatch() int {
-	batch := 1
+	var maxBatch *int
+	migrator.DB.Model(&Migration{}).Select("MAX(batch)").Scan(&maxBatch)
 
-	lastMigration := Migration{}
-	migrator.DB.Order("id DESC").First(&lastMigration)
-
-	if lastMigration.ID > 0 {
-		batch = lastMigration.Batch + 1
+	if maxBatch == nil {
+		return 1
 	}
 
-	return batch
+	return *maxBatch + 1
 }
 
 func (migrator *Migrator) runUpMigration(migrationFile MigrationFile, batch int) {
