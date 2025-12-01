@@ -62,18 +62,18 @@ type Registry struct {
 func NewDefaultConfig() *Config {
 	return &Config{
 		Version:     "v1",
-		RootPackage: "bingoctl",
+		RootPackage: "bingo",
 		Directory: Directory{
 			CMD:        "internal/bingoctl/cmd",
-			Model:      "internal/apiserver/model",
-			Store:      "internal/apiserver/store",
+			Model:      "internal/pkg/model",
+			Store:      "internal/pkg/store",
 			Biz:        "internal/apiserver/biz",
 			Controller: "internal/apiserver/http/controller/v1",
-			Middleware: "internal/apiserver/http/middleware",
-			Request:    "internal/apiserver/http/request/v1",
+			Middleware: "internal/pkg/http/middleware",
+			Request:    "pkg/api/apiserver/v1",
 			Job:        "internal/watcher/watcher",
-			Migration:  "internal/apiserver/database/migration",
-			Seeder:     "internal/apiserver/database/seeder",
+			Migration:  "internal/pkg/database/migration",
+			Seeder:     "internal/pkg/database/seeder",
 		},
 	}
 }

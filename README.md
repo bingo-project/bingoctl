@@ -1,6 +1,6 @@
-# Bingo
+# Bingo CLI
 
-Bingo 是一个 Go 语言的脚手架和代码生成工具，用于快速创建和开发基于 Bingo 框架的应用程序。
+Bingo CLI 是一个 Go 语言的脚手架和代码生成工具，用于快速创建和开发基于 Bingo 框架的应用程序。
 
 ## 功能特性
 
@@ -82,13 +82,12 @@ directory:
   cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
-  request: pkg/api/v1
-  biz: internal/apiserver/biz
-  controller: internal/apiserver/controller/v1
-  middleware: internal/pkg/middleware
-  job: internal/watcher/watcher
-  migration: internal/apiserver/database/migration
-  seeder: internal/apiserver/database/seeder
+  biz: internal/apiserver/biz/1
+  controller: internal/apiserver/http/controller/v1
+  middleware: internal/pkg/http/middleware
+  request: pkg/api/apiserver/v1
+  migration: internal/pkg/database/migration
+  seeder: internal/pkg/database/seeder
 
 registries:
   router: internal/apiserver/router/api.go

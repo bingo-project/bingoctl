@@ -8,11 +8,10 @@ directory:
   store: internal/apiserver/store
   biz: internal/apiserver/biz/1
   controller: internal/apiserver/http/controller/v1
-  middleware: internal/apiserver/http/middleware
-  request: internal/apiserver/http/request/v1
-  job: internal/watcher/watcher
-  migration: internal/bingoctl/database/migration
-  seeder: internal/bingoctl/database/seeder
+  middleware: internal/pkg/http/middleware
+  request: pkg/api/apiserver/v1
+  migration: internal/pkg/database/migration
+  seeder: internal/pkg/database/seeder
 
 registries:
   router: internal/apiserver/router/api.go
