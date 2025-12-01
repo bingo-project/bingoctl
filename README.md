@@ -388,6 +388,26 @@ bingo make seeder <name> [-d dir] [-p package]
 bingo make seeder users
 ```
 
+### db - 数据库管理
+
+#### seed - 运行数据填充
+
+运行用户定义的 seeder 填充数据库。
+
+```bash
+bingo db seed [选项]
+
+# 选项
+-v, --verbose      显示详细编译输出
+    --rebuild      强制重新编译 seeder 程序
+    --seeder       指定要运行的 seeder 类名
+
+# 示例
+bingo db seed                    # 运行所有 seeder
+bingo db seed --seeder=User      # 仅运行 UserSeeder
+bingo db seed -v                 # 显示详细输出
+```
+
 #### service - 生成服务模块
 
 生成一个完整的服务模块，包括 HTTP/gRPC 服务器配置。
@@ -476,8 +496,14 @@ bingo make service worker --no-biz
 # 生成数据库迁移文件
 bingo make migration create_users_table
 
+# 运行迁移
+bingo migrate up
+
 # 生成数据填充文件
 bingo make seeder users
+
+# 运行数据填充
+bingo db seed
 ```
 
 ## 目录结构
@@ -518,7 +544,9 @@ myapp/
    - 使用 `bingo gen` 从数据库生成模型
 4. **数据库管理**：
    - 使用 `bingo make migration` 创建迁移文件
+   - 使用 `bingo migrate up` 运行迁移
    - 使用 `bingo make seeder` 创建数据填充文件
+   - 使用 `bingo db seed` 运行数据填充
 5. **扩展功能**：根据需要使用 `make` 命令生成其他组件
 
 ## 开发任务清单
@@ -529,6 +557,7 @@ myapp/
 - [x] `bingo make service` - 生成完整服务模块（HTTP/gRPC）
 - [x] `bingo gen` - 从数据库表生成模型代码
 - [x] `bingo migrate` - 数据库迁移管理（up, rollback, reset, refresh, fresh）
+- [x] `bingo db seed` - 运行数据库填充
 - [x] 服务选择功能（`--services`, `--no-service`, `--add-service`, `--all`）
 - [x] Make 命令支持多服务（`--service` 参数自动推断路径）
 
