@@ -111,6 +111,16 @@ bingoctl create myapp
 bingoctl create myapp --init-git=false
 ```
 
+**构建选项 (Build Options)**
+
+```bash
+# 创建项目但不构建（默认）
+bingoctl create myapp
+
+# 创建项目并执行 make build
+bingoctl create myapp --build
+```
+
 **服务选择 (Service Selection)**
 
 ```bash
@@ -326,6 +336,47 @@ bingoctl make service gateway --http --grpc --with-store --with-controller
 bingoctl make service worker --no-biz
 ```
 
+### migrate - 数据库迁移
+
+运行数据库迁移命令。支持动态编译用户定义的迁移文件。
+
+```bash
+bingoctl migrate <command> [选项]
+
+# 选项
+-v, --verbose   显示详细编译输出
+    --rebuild   强制重新编译迁移程序
+-f, --force     在生产环境强制执行
+```
+
+#### 子命令
+
+```bash
+# 运行所有未执行的迁移
+bingoctl migrate up
+
+# 回滚最后一批迁移
+bingoctl migrate rollback
+
+# 回滚所有迁移
+bingoctl migrate reset
+
+# 回滚所有迁移并重新运行
+bingoctl migrate refresh
+
+# 删除所有表并重新运行迁移
+bingoctl migrate fresh
+```
+
+#### 配置
+
+在 `.bingoctl.yaml` 中配置迁移表名（可选）：
+
+```yaml
+migrate:
+  table: bingo_migration  # 默认值
+```
+
 ### gen - 从数据库生成代码
 
 从数据库表自动生成 model 代码。
@@ -443,6 +494,7 @@ myapp/
 - [x] `bingoctl make` - 代码生成（model, store, biz, controller 等）
 - [x] `bingoctl make service` - 生成完整服务模块（HTTP/gRPC）
 - [x] `bingoctl gen` - 从数据库表生成模型代码
+- [x] `bingoctl migrate` - 数据库迁移管理（up, rollback, reset, refresh, fresh）
 - [x] 服务选择功能（`--services`, `--no-service`, `--add-service`, `--all`）
 - [x] Make 命令支持多服务（`--service` 参数自动推断路径）
 
