@@ -294,7 +294,9 @@ bingoctl make job <name> [-d dir] [-p package]
 bingoctl make job cleanup
 ```
 
-#### migration - 生成数据库迁移文件
+#### migration - 数据库迁移
+
+**生成迁移文件**
 
 ```bash
 bingoctl make migration <name> [-d dir] [-p package] [-t table]
@@ -302,6 +304,31 @@ bingoctl make migration <name> [-d dir] [-p package] [-t table]
 # 示例
 bingoctl make migration create_users_table
 bingoctl make migration create_posts_table -t posts
+```
+
+**运行迁移**
+
+```bash
+bingoctl migrate <command> [选项]
+
+# 选项
+-v, --verbose   显示详细编译输出
+    --rebuild   强制重新编译迁移程序
+-f, --force     在生产环境强制执行
+
+# 子命令
+bingoctl migrate up          # 运行所有未执行的迁移
+bingoctl migrate rollback    # 回滚最后一批迁移
+bingoctl migrate reset       # 回滚所有迁移
+bingoctl migrate refresh     # 回滚所有迁移并重新运行
+bingoctl migrate fresh       # 删除所有表并重新运行迁移
+```
+
+**配置迁移表名**（可选，在 `.bingoctl.yaml`）：
+
+```yaml
+migrate:
+  table: bingo_migration  # 默认值
 ```
 
 #### seeder - 生成数据填充文件
@@ -334,47 +361,6 @@ bingoctl make service <name> [选项]
 bingoctl make service api --http
 bingoctl make service gateway --http --grpc --with-store --with-controller
 bingoctl make service worker --no-biz
-```
-
-### migrate - 数据库迁移
-
-运行数据库迁移命令。支持动态编译用户定义的迁移文件。
-
-```bash
-bingoctl migrate <command> [选项]
-
-# 选项
--v, --verbose   显示详细编译输出
-    --rebuild   强制重新编译迁移程序
--f, --force     在生产环境强制执行
-```
-
-#### 子命令
-
-```bash
-# 运行所有未执行的迁移
-bingoctl migrate up
-
-# 回滚最后一批迁移
-bingoctl migrate rollback
-
-# 回滚所有迁移
-bingoctl migrate reset
-
-# 回滚所有迁移并重新运行
-bingoctl migrate refresh
-
-# 删除所有表并重新运行迁移
-bingoctl migrate fresh
-```
-
-#### 配置
-
-在 `.bingoctl.yaml` 中配置迁移表名（可选）：
-
-```yaml
-migrate:
-  table: bingo_migration  # 默认值
 ```
 
 ### gen - 从数据库生成代码
