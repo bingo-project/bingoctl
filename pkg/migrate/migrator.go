@@ -2,6 +2,7 @@ package migrate
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/bingo-project/component-base/cli/console"
 	"github.com/mgutz/ansi"
@@ -13,6 +14,20 @@ const DefaultTableName = "bingo_migration"
 
 // migrationTableName stores the configured table name
 var migrationTableName = DefaultTableName
+
+func init() {
+	// Allow overriding table name via environment variable
+	if tableName := os.Getenv("BINGOCTL_MIGRATE_TABLE"); tableName != "" {
+		migrationTableName = tableName
+	}
+}
+
+// SetTableName sets the migration table name
+func SetTableName(name string) {
+	if name != "" {
+		migrationTableName = name
+	}
+}
 
 type Migrator struct {
 	DB       *gorm.DB

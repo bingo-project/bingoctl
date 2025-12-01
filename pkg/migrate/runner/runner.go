@@ -242,22 +242,17 @@ func (r *Runner) runBuildCommand(outputPath string) error {
 func (r *Runner) execute(command string) error {
 	binaryPath := r.binaryPath()
 
-	args := []string{
-		command,
+	cmd := exec.Command(binaryPath, command,
 		"--host", r.dbOptions.Host,
 		"--username", r.dbOptions.Username,
 		"--password", r.dbOptions.Password,
 		"--database", r.dbOptions.Database,
-	}
-
-	// Only pass --table if custom table name is configured (for backward compatibility)
-	if r.migrateTable != "" && r.migrateTable != config.DefaultMigrateTable {
-		args = append(args, "--table", r.migrateTable)
-	}
-
-	cmd := exec.Command(binaryPath, args...)
+	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	// Pass table name via environment variable
+	cmd.Env = append(os.Environ(), "BINGOCTL_MIGRATE_TABLE="+r.migrateTable)
 
 	return cmd.Run()
 }
