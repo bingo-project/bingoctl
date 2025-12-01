@@ -8,7 +8,7 @@ import (
 )
 
 // DefaultTemplateVersion is the recommended template version
-const DefaultTemplateVersion = "develop"
+const DefaultTemplateVersion = "main"
 
 var refRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 

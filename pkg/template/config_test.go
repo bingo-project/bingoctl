@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestLoadBingoctlConfig(t *testing.T) {
+func TestLoadBingoConfig(t *testing.T) {
 	// Create temp file with valid YAML
 	tmpDir := t.TempDir()
-	configPath := filepath.Join(tmpDir, ".bingoctl.yaml")
+	configPath := filepath.Join(tmpDir, ".bingo.yaml")
 
 	content := `version: 1
 services:
@@ -29,9 +29,9 @@ services:
 	}
 
 	// Test loading
-	config, err := LoadBingoctlConfig(configPath)
+	config, err := LoadBingoConfig(configPath)
 	if err != nil {
-		t.Fatalf("loadBingoctlConfig failed: %v", err)
+		t.Fatalf("LoadBingoConfig failed: %v", err)
 	}
 
 	// Verify structure
@@ -57,16 +57,16 @@ services:
 	}
 }
 
-func TestLoadBingoctlConfig_FileNotExists(t *testing.T) {
-	_, err := LoadBingoctlConfig("/nonexistent/path/.bingoctl.yaml")
+func TestLoadBingoConfig_FileNotExists(t *testing.T) {
+	_, err := LoadBingoConfig("/nonexistent/path/.bingo.yaml")
 	if err == nil {
 		t.Error("Expected error for non-existent file, got nil")
 	}
 }
 
-func TestLoadBingoctlConfig_InvalidYAML(t *testing.T) {
+func TestLoadBingoConfig_InvalidYAML(t *testing.T) {
 	tmpDir := t.TempDir()
-	configPath := filepath.Join(tmpDir, ".bingoctl.yaml")
+	configPath := filepath.Join(tmpDir, ".bingo.yaml")
 
 	// Write invalid YAML
 	err := os.WriteFile(configPath, []byte("invalid: yaml: content: ["), 0644)
@@ -74,7 +74,7 @@ func TestLoadBingoctlConfig_InvalidYAML(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
-	_, err = LoadBingoctlConfig(configPath)
+	_, err = LoadBingoConfig(configPath)
 	if err == nil {
 		t.Error("Expected error for invalid YAML, got nil")
 	}

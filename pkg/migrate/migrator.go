@@ -17,7 +17,7 @@ var migrationTableName = DefaultTableName
 
 func init() {
 	// Allow overriding table name via environment variable
-	if tableName := os.Getenv("BINGOCTL_MIGRATE_TABLE"); tableName != "" {
+	if tableName := os.Getenv("BINGO_MIGRATE_TABLE"); tableName != "" {
 		migrationTableName = tableName
 	}
 }

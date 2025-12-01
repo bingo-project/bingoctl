@@ -38,7 +38,7 @@ var (
 	availableServices = []string{"apiserver", "ctl", "admserver", "bot", "scheduler"}
 
 	// defaultServiceMapping defines the default service directory structure
-	// Used when .bingoctl.yaml is not available
+	// Used when .bingo.yaml is not available
 	defaultServiceMapping = map[string]ServiceMapping{
 		"apiserver": {
 			Cmd:      "cmd/bingo-apiserver",
@@ -215,7 +215,7 @@ func (o *CreateOptions) handleFetchError(err error) error {
 		msg = "failed to download template: connection timeout. Try using --no-cache to force re-download"
 	} else if strings.Contains(errMsg, "404") {
 		// Check for HTTP 404 errors
-		msg = "failed to download template: template version not found. Check the version with -r flag (e.g., -r develop)"
+		msg = "failed to download template: template version not found. Check the version with -r flag (e.g., -r main)"
 	} else if strings.Contains(errMsg, "403") {
 		// Check for HTTP 403 errors
 		msg = "failed to download template: access denied. Please check your network permissions"
@@ -247,7 +247,7 @@ func (o *CreateOptions) Run(args []string) error {
 	}
 
 	// 2. Create temporary directory
-	tmpDir := filepath.Join(os.TempDir(), fmt.Sprintf("bingoctl-%d", time.Now().Unix()))
+	tmpDir := filepath.Join(os.TempDir(), fmt.Sprintf("bingo-%d", time.Now().Unix()))
 	defer os.RemoveAll(tmpDir)
 
 	// 3. Copy to temporary directory
@@ -277,13 +277,13 @@ func (o *CreateOptions) Run(args []string) error {
 		}
 	}
 
-	// 7. Copy .bingoctl.example.yaml to .bingoctl.yaml
-	exampleConfigPath := filepath.Join(tmpDir, ".bingoctl.example.yaml")
-	targetConfigPath := filepath.Join(tmpDir, ".bingoctl.yaml")
+	// 7. Copy .bingo.example.yaml to .bingo.yaml
+	exampleConfigPath := filepath.Join(tmpDir, ".bingo.example.yaml")
+	targetConfigPath := filepath.Join(tmpDir, ".bingo.yaml")
 
 	if cmdutil.Exists(exampleConfigPath) {
 		if err := cmdutil.CopyFile(exampleConfigPath, targetConfigPath); err != nil {
-			return fmt.Errorf("复制 .bingoctl.yaml 失败: %w", err)
+			return fmt.Errorf("复制 .bingo.yaml 失败: %w", err)
 		}
 	}
 
@@ -446,7 +446,7 @@ func (o *CreateOptions) initializeGit(projectPath string) error {
 	}
 
 	// Create initial commit
-	cmd = exec.Command("git", "commit", "-m", "Initial commit from bingoctl")
+	cmd = exec.Command("git", "commit", "-m", "Initial commit from bingo")
 	cmd.Dir = projectPath
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to create initial commit: %w", err)
@@ -456,11 +456,11 @@ func (o *CreateOptions) initializeGit(projectPath string) error {
 }
 
 // filterServices deletes unselected service directories
-// Uses service mapping from .bingoctl.yaml if available, otherwise uses default mapping
+// Uses service mapping from .bingo.yaml if available, otherwise uses default mapping
 func (o *CreateOptions) filterServices(targetDir string) error {
-	// Try to load .bingoctl.yaml
-	configPath := filepath.Join(targetDir, ".bingoctl.yaml")
-	config, err := template.LoadBingoctlConfig(configPath)
+	// Try to load .bingo.yaml
+	configPath := filepath.Join(targetDir, ".bingo.yaml")
+	config, err := template.LoadBingoConfig(configPath)
 	if err != nil {
 		// If config file doesn't exist, use default mapping
 		return o.filterServicesWithMapping(targetDir, defaultServiceMapping)
@@ -543,7 +543,7 @@ func (o *CreateOptions) cleanupTemplateFiles(projectPath string) error {
 	readmePath := filepath.Join(projectPath, "README.md")
 	readmeContent := fmt.Sprintf(`# %s
 
-Project created with [bingoctl](https://github.com/bingo-project/bingoctl) based on the [bingo](https://github.com/bingo-project/bingo) scaffold.
+Project created with [bingo](https://github.com/bingo-project/bingoctl) based on the [bingo](https://github.com/bingo-project/bingo) scaffold.
 
 ## Getting Started
 

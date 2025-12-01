@@ -34,8 +34,8 @@ type Runner struct {
 	migrateTable string
 
 	// Directories
-	cacheDir string // ~/.bingoctl/migrator/<id>/ for binary
-	tmpDir   string // <project>/.bingoctl_tmp/ for temp source
+	cacheDir string // ~/.bingo/migrator/<id>/ for binary
+	tmpDir   string // <project>/.bingo_tmp/ for temp source
 
 	// Options
 	verbose bool
@@ -72,10 +72,10 @@ func NewRunner(verbose, rebuild bool) (*Runner, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
 	}
-	cacheDir := filepath.Join(homeDir, ".bingoctl", "migrator", fmt.Sprintf("%s_%s", projectName, pathHash))
+	cacheDir := filepath.Join(homeDir, ".bingo", "migrator", fmt.Sprintf("%s_%s", projectName, pathHash))
 
 	// Temp directory in project for compilation (to access internal packages)
-	tmpDir := filepath.Join(pwd, ".bingoctl_tmp")
+	tmpDir := filepath.Join(pwd, ".bingo_tmp")
 
 	return &Runner{
 		projectPath:   pwd,
@@ -123,7 +123,7 @@ func (r *Runner) validate() error {
 
 	// Check database config
 	if r.dbOptions == nil {
-		return fmt.Errorf("database configuration not found in .bingoctl.yaml")
+		return fmt.Errorf("database configuration not found in .bingo.yaml")
 	}
 
 	return nil
@@ -219,7 +219,7 @@ func (r *Runner) generateMainGo() error {
 func (r *Runner) runBuildCommand(outputPath string) error {
 	// Build from project directory, compiling the temp main.go
 	// This allows access to internal packages
-	cmd := exec.Command("go", "build", "-o", outputPath, "./.bingoctl_tmp")
+	cmd := exec.Command("go", "build", "-o", outputPath, "./.bingo_tmp")
 	cmd.Dir = r.projectPath
 
 	if r.verbose {
@@ -252,7 +252,7 @@ func (r *Runner) execute(command string) error {
 	cmd.Stderr = os.Stderr
 
 	// Pass table name via environment variable
-	cmd.Env = append(os.Environ(), "BINGOCTL_MIGRATE_TABLE="+r.migrateTable)
+	cmd.Env = append(os.Environ(), "BINGO_MIGRATE_TABLE="+r.migrateTable)
 
 	return cmd.Run()
 }

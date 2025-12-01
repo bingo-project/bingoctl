@@ -18,16 +18,17 @@ var (
 	CfgFile string
 )
 
-func NewDefaultBingoCtlCommand() *cobra.Command {
-	return NewBingoCtlCommand(os.Stdin, os.Stdout, os.Stderr)
+func NewDefaultBingoCommand() *cobra.Command {
+	return NewBingoCommand(os.Stdin, os.Stdout, os.Stderr)
 }
 
-func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
+func NewBingoCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	var cmds = &cobra.Command{
-		Use:   "bingoctl",
-		Short: "bingoctl is the bingoctl startup client",
-		Long:  `bingoctl is the client side tool for bingoctl startup.`,
-		Run:   runHelp,
+		Use:   "bingo",
+		Short: "Scaffold and code generator for Bingo framework",
+		Long: `Bingo is a scaffold and code generation tool for Go,
+used to quickly create and develop applications based on the Bingo framework.`,
+		Run: runHelp,
 	}
 
 	// Load config

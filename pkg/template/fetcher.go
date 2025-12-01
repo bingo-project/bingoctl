@@ -25,7 +25,7 @@ const (
 
 // Fetcher handles template downloading and caching
 type Fetcher struct {
-	cacheDir string        // ~/.bingoctl/templates
+	cacheDir string        // ~/.bingo/templates
 	timeout  time.Duration // 30s
 	mirror   string        // mirror address from env var
 }
@@ -38,10 +38,10 @@ func NewFetcher() (*Fetcher, error) {
 		return nil, fmt.Errorf("failed to get user home directory: %w", err)
 	}
 
-	cacheDir := filepath.Join(homeDir, ".bingoctl", "templates")
+	cacheDir := filepath.Join(homeDir, ".bingo", "templates")
 
 	// Read mirror from environment variable
-	mirror := os.Getenv("BINGOCTL_TEMPLATE_MIRROR")
+	mirror := os.Getenv("BINGO_TEMPLATE_MIRROR")
 
 	return &Fetcher{
 		cacheDir: cacheDir,
@@ -97,7 +97,7 @@ func (f *Fetcher) downloadWithTimeout(url string) (string, error) {
 	}
 
 	// Create temporary file
-	tmpFile, err := os.CreateTemp(f.cacheDir, "bingoctl-*.tar.gz")
+	tmpFile, err := os.CreateTemp(f.cacheDir, "bingo-*.tar.gz")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}
@@ -147,7 +147,7 @@ func (f *Fetcher) extractTarball(tarPath, destDir string) error {
 	tr := tar.NewReader(gzr)
 
 	// Extract to temporary directory first to detect root
-	tmpExtractDir := filepath.Join(os.TempDir(), fmt.Sprintf("bingoctl-extract-%d", time.Now().UnixNano()))
+	tmpExtractDir := filepath.Join(os.TempDir(), fmt.Sprintf("bingo-extract-%d", time.Now().UnixNano()))
 	defer os.RemoveAll(tmpExtractDir)
 
 	rootDirs := make(map[string]bool)

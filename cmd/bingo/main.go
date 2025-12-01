@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	command := cmd.NewDefaultBingoCtlCommand()
+	command := cmd.NewDefaultBingoCommand()
 	cobra.CheckErr(command.Execute())
 }

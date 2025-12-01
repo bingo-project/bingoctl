@@ -22,7 +22,7 @@ func LoadConfig(cfg string, data interface{}) {
 		viper.AddConfigPath(".")
 
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".bingoctl")
+		viper.SetConfigName(".bingo")
 	}
 
 	// If a config file is found, read it in.
