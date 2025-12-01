@@ -86,6 +86,9 @@ type CreateOptions struct {
 	// Git initialization
 	InitGit bool // Initialize git repository (default true)
 
+	// Build options
+	Build bool // Run make build after creation (default false)
+
 	selectedServices []string // Final computed service list (internal)
 }
 
@@ -126,6 +129,8 @@ func NewCmdCreate() *cobra.Command {
 		"Force re-download template (for branches)")
 	cmd.Flags().BoolVar(&o.InitGit, "init-git", true,
 		"Initialize git repository in the created project")
+	cmd.Flags().BoolVar(&o.Build, "build", false,
+		"Run make build after project creation")
 
 	return cmd
 }
@@ -331,8 +336,10 @@ func (o *CreateOptions) Run(args []string) error {
 		}
 	}
 
-	// 13. Run make build (after git init so Makefile can access git info)
-	o.runMakeBuild(projectPath)
+	// 13. Run make build if requested (after git init so Makefile can access git info)
+	if o.Build {
+		o.runMakeBuild(projectPath)
+	}
 
 	// Success message - show in green
 	console.Info(fmt.Sprintf("Project '%s' created successfully", o.AppName))
