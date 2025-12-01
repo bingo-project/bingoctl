@@ -2,6 +2,7 @@ package version
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
@@ -43,7 +44,12 @@ func (o *Options) Validate(cmd *cobra.Command, args []string) (err error) {
 
 // Run executes a creat subcommand using the specified options.
 func (o *Options) Run(args []string) (err error) {
-	fmt.Println("version: v1.5.5")
+	version := "dev"
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" {
+		version = info.Main.Version
+	}
+
+	fmt.Printf("version: %s\n", version)
 
 	return nil
 }
