@@ -1,13 +1,35 @@
-# Changelog
+# 更新日志
 
-All notable changes to this project will be documented in this file.
+本项目的所有重要变更都将记录在此文件中。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
+项目遵循 [语义化版本](https://semver.org/lang/zh-CN/spec/v2.0.0.html)。
 
-## [1.5.0] - 2025-01-29
+## [1.6.0] - 2025-12-01
 
-### Changed - 重大变更
+### 新增
+
+- 新增 `bingo migrate` 数据库迁移管理命令
+  - `migrate up` - 运行所有未执行的迁移
+  - `migrate rollback` - 回滚最后一批迁移
+  - `migrate reset` - 回滚所有迁移
+  - `migrate refresh` - 回滚所有迁移并重新运行
+  - `migrate fresh` - 删除所有表并重新运行迁移
+  - 支持 `--force` 参数在生产环境强制执行
+  - 支持 `--verbose` 和 `--rebuild` 参数
+- 新增 `bingo db seed` 数据库填充命令
+  - 支持 `--seeder` 参数指定要运行的 seeder
+  - 支持 `--verbose` 和 `--rebuild` 参数
+- 新增 `bingo make migration` 生成迁移文件命令
+- 新增 `bingo make seeder` 生成 seeder 文件命令
+
+### 变更
+
+- 项目创建时先运行 `make protoc` 再运行 `go mod tidy`
+
+## [1.5.0] - 2025-11-28
+
+### 变更 - 重大变更
 
 **模板系统重构：从内置模板改为在线拉取**
 
@@ -19,13 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **强制刷新**：支持 `--no-cache` 参数强制重新下载模板
 - **镜像配置**：支持通过 `BINGO_TEMPLATE_MIRROR` 环境变量配置 GitHub 镜像
 
-### Added
+### 新增
 
 - 支持通过 `-r` 参数指定模板版本或分支
 - 支持通过 `--no-cache` 参数强制刷新模板
 - 支持通过环境变量配置 GitHub 镜像
 
-### Migration Guide
+### 迁移指南
 
 从 v1.4.x 升级到 v1.5.0：
 
@@ -37,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 最后一个使用内置模板系统的版本。
 
-### Features
+### 功能
 
 - 内置项目模板，无需网络连接即可创建项目
 - 支持生成各层代码（model, store, biz, controller 等）
@@ -62,5 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ 无需网络连接
 - ✅ 模板版本与 bingo 版本绑定
 
+[1.6.0]: https://github.com/bingo-project/bingoctl/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/bingo-project/bingoctl/compare/v1.4.7...v1.5.0
 [1.4.7]: https://github.com/bingo-project/bingoctl/releases/tag/v1.4.7

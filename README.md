@@ -1,36 +1,37 @@
 # Bingo CLI
 
-Bingo CLI 是一个 Go 语言的脚手架和代码生成工具，用于快速创建和开发基于 Bingo 框架的应用程序。
+[English](./README.md) | [中文](./docs/zh/README.md)
 
-## 功能特性
+Bingo CLI is a scaffolding and code generation tool written in Go, designed for quickly creating and developing applications based on the Bingo framework.
 
-- 🚀 快速创建项目脚手架
-- 📝 代码生成器，支持生成各层代码
-- 🔄 数据库迁移管理
-- 🗄️ 从数据库表自动生成模型代码
-- 🛠️ 灵活的配置系统
-- 🎯 支持 HTTP 和 gRPC 服务
+## Features
 
-## 安装
+- 🚀 Rapid project scaffolding
+- 📝 Code generators for all layers
+- 🔄 Database migration management
+- 🗄️ Auto-generate model code from database tables
+- 🛠️ Flexible configuration system
+- 🎯 Support for HTTP and gRPC services
+
+## Installation
 
 ```bash
 go install github.com/bingo-project/bingoctl/cmd/bingo@latest
 ```
 
-> 如需安装旧版本（v1.4.x 使用内置模板），可以指定版本：`go install github.com/bingo-project/bingoctl/cmd/bingo@v1.4.7`
-> 版本变更历史请查看 [CHANGELOG.md](CHANGELOG.md)
+> See [CHANGELOG](./docs/en/CHANGELOG.md) for version history
 
-## 命令补全
+## Shell Completion
 
-bingo 支持多种 shell 的命令行自动补全功能。
+bingo supports command-line auto-completion for multiple shells.
 
 ### Zsh
 
 ```bash
-# 临时启用（当前会话）
+# Temporary (current session)
 source <(bingo completion zsh)
 
-# 永久启用
+# Permanent
 ## Linux
 bingo completion zsh > "${fpath[1]}/_bingo"
 
@@ -38,15 +39,15 @@ bingo completion zsh > "${fpath[1]}/_bingo"
 bingo completion zsh > $(brew --prefix)/share/zsh/site-functions/_bingo
 ```
 
-> 如果补全不生效，确保 `.zshrc` 中已启用：`autoload -U compinit; compinit`
+> If completion doesn't work, ensure `.zshrc` has: `autoload -U compinit; compinit`
 
 ### Bash
 
 ```bash
-# 临时启用（当前会话）
+# Temporary (current session)
 source <(bingo completion bash)
 
-# 永久启用
+# Permanent
 ## Linux
 bingo completion bash > /etc/bash_completion.d/bingo
 
@@ -54,7 +55,7 @@ bingo completion bash > /etc/bash_completion.d/bingo
 bingo completion bash > $(brew --prefix)/etc/bash_completion.d/bingo
 ```
 
-> 需要安装 `bash-completion` 包
+> Requires the `bash-completion` package
 
 ### Fish
 
@@ -66,12 +67,12 @@ bingo completion fish > ~/.config/fish/completions/bingo.fish
 
 ```powershell
 bingo completion powershell > bingo.ps1
-# 将生成的脚本添加到 PowerShell profile 中
+# Add the generated script to your PowerShell profile
 ```
 
-## 配置文件
+## Configuration File
 
-在项目根目录下创建配置文件 `.bingo.yaml`：
+Create a configuration file `.bingo.yaml` in your project root:
 
 ```yaml
 version: v1
@@ -105,470 +106,470 @@ mysql:
   database: bingo
 ```
 
-## 命令使用
+## Commands
 
-### 全局选项
+### Global Options
 
 ```bash
--c, --config string   配置文件路径（默认使用 .bingo.yaml）
+-c, --config string   Config file path (defaults to .bingo.yaml)
 ```
 
-### create - 创建项目
+### create - Create Project
 
-从零创建一个新的项目脚手架。从 GitHub 下载和缓存 Bingo 项目模板。
+Create a new project scaffold from scratch. Downloads and caches Bingo project templates from GitHub.
 
 ```bash
-bingo create <package-name> [选项]
+bingo create <package-name> [options]
 
-# 示例
+# Example
 bingo create github.com/myorg/myapp
 ```
 
-#### 创建命令选项
+#### Create Command Options
 
-**模板版本 (Template Version)**
+**Template Version**
 
 ```bash
-# 使用推荐版本（默认）
+# Use recommended version (default)
 bingo create myapp
 
-# 使用特定版本
+# Use specific version
 bingo create myapp -r v1.2.3
 
-# 使用分支（开发版本）
+# Use branch (development version)
 bingo create myapp -r main
 
-# 强制重新下载分支模板
+# Force re-download branch template
 bingo create myapp -r main --no-cache
 ```
 
-**自定义模块名 (Module Name)**
+**Custom Module Name**
 
 ```bash
-# 替换包名
+# Replace package name
 bingo create myapp -m github.com/mycompany/myapp
 ```
 
-**Git 初始化 (Git Initialization)**
+**Git Initialization**
 
 ```bash
-# 创建项目并初始化 git 仓库（默认）
+# Create project and initialize git repo (default)
 bingo create myapp
 
-# 创建项目但不初始化 git
+# Create project without git initialization
 bingo create myapp --init-git=false
 ```
 
-**构建选项 (Build Options)**
+**Build Options**
 
 ```bash
-# 创建项目但不构建（默认）
+# Create project without building (default)
 bingo create myapp
 
-# 创建项目并执行 make build
+# Create project and run make build
 bingo create myapp --build
 ```
 
-**服务选择 (Service Selection)**
+**Service Selection**
 
 ```bash
-# 只包含 apiserver（默认）
+# Include only apiserver (default)
 bingo create myapp
 
-# 创建所有可用服务
+# Create all available services
 bingo create myapp --all
-# 或
+# or
 bingo create myapp -a
 
-# 明确指定服务
+# Explicitly specify services
 bingo create myapp --services apiserver,ctl,scheduler
 
-# 添加服务到默认的 apiserver
+# Add service to default apiserver
 bingo create myapp --add-service admserver
 
-# 排除服务
+# Exclude service
 bingo create myapp --no-service bot
 
-# 仅骨架，不包含任何服务
+# Skeleton only, no services
 bingo create myapp --services none
 ```
 
-**缓存管理 (Cache Management)**
+**Cache Management**
 
 ```bash
-# 使用缓存（默认）- 加快创建速度
+# Use cache (default) - speeds up creation
 bingo create myapp
 
-# 强制刷新模板（用于分支）
+# Force refresh template (for branches)
 bingo create myapp -r main --no-cache
 
-# 缓存位置：~/.bingo/templates/
+# Cache location: ~/.bingo/templates/
 ```
 
-**镜像配置 (Mirror Configuration)**
+**Mirror Configuration**
 
-对于 GitHub 访问困难的地区，可以配置镜像：
+For regions with difficult GitHub access, configure a mirror:
 
 ```bash
-# 使用环境变量
+# Using environment variable
 export BINGO_TEMPLATE_MIRROR=https://ghproxy.com/
 bingo create myapp
 
-# 或临时设置
+# Or temporary setting
 BINGO_TEMPLATE_MIRROR=https://ghproxy.com/ bingo create myapp
 ```
 
-### make - 代码生成
+### make - Code Generation
 
-生成各种类型的代码文件。
+Generate various types of code files.
 
-#### 全局选项
+#### Global Options
 
 ```bash
--d, --directory string   指定生成文件的目录
--p, --package string     指定包名
--t, --table string       从数据库表读取字段
--s, --service string     目标服务名称，用于自动推断路径
+-d, --directory string   Specify the directory for generated files
+-p, --package string     Specify package name
+-t, --table string       Read fields from database table
+-s, --service string     Target service name for automatic path inference
 ```
 
-#### 服务选择
+#### Service Selection
 
-当项目包含多个服务时，可以使用 `--service` 参数自动推断生成路径。路径推断优先级：
+When a project contains multiple services, use the `--service` parameter for automatic path inference. Path inference priority:
 
-1. **明确指定目录** (`-d`) - 最高优先级
-2. **服务参数** (`--service`) - 自动推断路径
-3. **配置默认路径** - 通常是 apiserver 的路径
+1. **Explicit directory** (`-d`) - Highest priority
+2. **Service parameter** (`--service`) - Auto-infer path
+3. **Config default path** - Usually apiserver path
 
 ```bash
-# 为默认服务（通常是 apiserver）生成代码
+# Generate code for default service (usually apiserver)
 bingo make model user
 
-# 为特定服务自动推断路径
+# Auto-infer path for specific service
 bingo make model user --service admserver
 
-# 生成完整 CRUD（为指定服务）
+# Generate complete CRUD (for specified service)
 bingo make crud order --service admserver
 
-# 明确指定目录（优先级最高）
+# Explicitly specify directory (highest priority)
 bingo make model user -d custom/path
 ```
 
-**路径推断规则：**
-1. 扫描 `cmd/` 目录识别已存在的服务
-2. 若配置路径包含服务名，则智能替换（如 `internal/apiserver/model` → `internal/admserver/model`）
-3. 否则使用默认模式：`internal/{service}/{suffix}`
+**Path Inference Rules:**
+1. Scan `cmd/` directory to identify existing services
+2. If config path contains service name, intelligently replace (e.g., `internal/apiserver/model` → `internal/admserver/model`)
+3. Otherwise use default pattern: `internal/{service}/{suffix}`
 
-#### crud - 生成完整 CRUD 代码
+#### crud - Generate Complete CRUD Code
 
-一次性生成 model、store、biz、controller、request 的完整代码。
+Generate complete code for model, store, biz, controller, and request at once.
 
 ```bash
 bingo make crud <name>
 
-# 示例
+# Example
 bingo make crud user
 ```
 
-#### model - 生成模型代码
+#### model - Generate Model Code
 
 ```bash
 bingo make model <name> [-d dir] [-p package] [-t table]
 
-# 示例
+# Examples
 bingo make model user
-bingo make model user -t users  # 从 users 表生成
+bingo make model user -t users  # Generate from users table
 ```
 
-#### store - 生成存储层代码
+#### store - Generate Store Layer Code
 
 ```bash
 bingo make store <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make store user
 ```
 
-#### biz - 生成业务逻辑层代码
+#### biz - Generate Business Logic Layer Code
 
 ```bash
 bingo make biz <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make biz user
 ```
 
-#### controller - 生成控制器代码
+#### controller - Generate Controller Code
 
 ```bash
 bingo make controller <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make controller user
 ```
 
-#### request - 生成请求验证代码
+#### request - Generate Request Validation Code
 
 ```bash
 bingo make request <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make request user
 ```
 
-#### middleware - 生成中间件代码
+#### middleware - Generate Middleware Code
 
 ```bash
 bingo make middleware <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make middleware auth
 ```
 
-#### cmd - 生成命令行代码
+#### cmd - Generate Command Line Code
 
 ```bash
 bingo make cmd <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make cmd serve
 ```
 
-#### job - 生成定时任务代码
+#### job - Generate Scheduled Job Code
 
 ```bash
 bingo make job <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make job cleanup
 ```
 
-#### migration - 数据库迁移
+#### migration - Database Migration
 
-**生成迁移文件**
+**Generate Migration File**
 
 ```bash
 bingo make migration <name> [-d dir] [-p package] [-t table]
 
-# 示例
+# Examples
 bingo make migration create_users_table
 bingo make migration create_posts_table -t posts
 ```
 
-**运行迁移**
+**Run Migrations**
 
 ```bash
-bingo migrate <command> [选项]
+bingo migrate <command> [options]
 
-# 选项
--v, --verbose   显示详细编译输出
-    --rebuild   强制重新编译迁移程序
--f, --force     在生产环境强制执行
+# Options
+-v, --verbose   Show detailed compilation output
+    --rebuild   Force recompile migration program
+-f, --force     Force execution in production environment
 
-# 子命令
-bingo migrate up          # 运行所有未执行的迁移
-bingo migrate rollback    # 回滚最后一批迁移
-bingo migrate reset       # 回滚所有迁移
-bingo migrate refresh     # 回滚所有迁移并重新运行
-bingo migrate fresh       # 删除所有表并重新运行迁移
+# Subcommands
+bingo migrate up          # Run all pending migrations
+bingo migrate rollback    # Rollback the last batch of migrations
+bingo migrate reset       # Rollback all migrations
+bingo migrate refresh     # Rollback all and re-run migrations
+bingo migrate fresh       # Drop all tables and re-run migrations
 ```
 
-**配置迁移表名**（可选，在 `.bingo.yaml`）：
+**Configure Migration Table Name** (optional, in `.bingo.yaml`):
 
 ```yaml
 migrate:
-  table: bingo_migration  # 默认值
+  table: bingo_migration  # Default value
 ```
 
-#### seeder - 生成数据填充文件
+#### seeder - Generate Seeder File
 
 ```bash
 bingo make seeder <name> [-d dir] [-p package]
 
-# 示例
+# Example
 bingo make seeder users
 ```
 
-### db - 数据库管理
+### db - Database Management
 
-#### seed - 运行数据填充
+#### seed - Run Database Seeders
 
-运行用户定义的 seeder 填充数据库。
+Run user-defined seeders to populate the database.
 
 ```bash
-bingo db seed [选项]
+bingo db seed [options]
 
-# 选项
--v, --verbose      显示详细编译输出
-    --rebuild      强制重新编译 seeder 程序
-    --seeder       指定要运行的 seeder 类名
+# Options
+-v, --verbose      Show detailed compilation output
+    --rebuild      Force recompile seeder program
+    --seeder       Specify seeder class name to run
 
-# 示例
-bingo db seed                    # 运行所有 seeder
-bingo db seed --seeder=User      # 仅运行 UserSeeder
-bingo db seed -v                 # 显示详细输出
+# Examples
+bingo db seed                    # Run all seeders
+bingo db seed --seeder=User      # Run only UserSeeder
+bingo db seed -v                 # Show detailed output
 ```
 
-#### service - 生成服务模块
+#### service - Generate Service Module
 
-生成一个完整的服务模块，包括 HTTP/gRPC 服务器配置。
+Generate a complete service module, including HTTP/gRPC server configuration.
 
 ```bash
-bingo make service <name> [选项]
+bingo make service <name> [options]
 
-# 选项
---http                  启用 HTTP 服务器
---grpc                  启用 gRPC 服务器
---with-biz              生成业务层（默认 true）
---no-biz                不生成业务层（覆盖 --with-biz）
---with-store            生成存储层
---with-controller       生成控制器层
---with-middleware       生成中间件目录
---with-router           生成路由目录
+# Options
+--http                  Enable HTTP server
+--grpc                  Enable gRPC server
+--with-biz              Generate business layer (default true)
+--no-biz                Don't generate business layer (overrides --with-biz)
+--with-store            Generate store layer
+--with-controller       Generate controller layer
+--with-middleware       Generate middleware directory
+--with-router           Generate router directory
 
-# 示例
+# Examples
 bingo make service api --http
 bingo make service gateway --http --grpc --with-store --with-controller
 bingo make service worker --no-biz
 ```
 
-### gen - 从数据库生成代码
+### gen - Generate Code from Database
 
-从数据库表自动生成 model 代码。
+Auto-generate model code from database tables.
 
 ```bash
 bingo gen -t <table1,table2,...>
 
-# 示例
+# Examples
 bingo gen -t users
 bingo gen -t users,posts,comments
 ```
 
-### version - 查看版本
+### version - Show Version
 
 ```bash
 bingo version
 ```
 
-## 使用示例
+## Usage Examples
 
-### 1. 创建新项目
+### 1. Create New Project
 
 ```bash
-# 创建项目（默认包含 apiserver 服务）
+# Create project (includes apiserver service by default)
 bingo create github.com/myorg/blog
 
-# 创建包含所有服务的项目
+# Create project with all services
 bingo create github.com/myorg/blog --all
 
-# 创建并指定特定服务
+# Create with specific services
 bingo create github.com/myorg/blog --services apiserver,admserver
 
-# 进入项目目录
+# Enter project directory
 cd blog
 
-# 生成用户模块的完整 CRUD 代码
+# Generate complete CRUD code for user module
 bingo make crud user
 
-# 为 admserver 服务生成 CRUD 代码
+# Generate CRUD code for admserver service
 bingo make crud user --service admserver
 ```
 
-### 2. 从数据库生成模型
+### 2. Generate Models from Database
 
 ```bash
-# 从现有数据库表生成模型
+# Generate models from existing database tables
 bingo gen -t users,posts,comments
 ```
 
-### 3. 生成新服务
+### 3. Generate New Service
 
 ```bash
-# 生成一个带 HTTP 服务器的 API 服务
+# Generate an API service with HTTP server
 bingo make service api --http --with-store --with-controller
 
-# 生成一个纯业务处理的 worker 服务
+# Generate a pure business processing worker service
 bingo make service worker --no-biz
 ```
 
-### 4. 生成迁移和数据填充
+### 4. Generate Migrations and Seeders
 
 ```bash
-# 生成数据库迁移文件
+# Generate database migration file
 bingo make migration create_users_table
 
-# 运行迁移
+# Run migrations
 bingo migrate up
 
-# 生成数据填充文件
+# Generate seeder file
 bingo make seeder users
 
-# 运行数据填充
+# Run seeders
 bingo db seed
 ```
 
-## 目录结构
+## Directory Structure
 
-使用 bingo 创建的项目典型目录结构：
+Typical directory structure for a project created with bingo:
 
 ```
 myapp/
-├── cmd/                          # 命令行入口
+├── cmd/                          # Command entry points
 │   └── myapp/
 ├── internal/
 │   ├── apiserver/
-│   │   ├── biz/                 # 业务逻辑层
-│   │   ├── controller/          # 控制器
+│   │   ├── biz/                 # Business logic layer
+│   │   ├── controller/          # Controllers
 │   │   ├── database/
-│   │   │   ├── migration/       # 数据库迁移
-│   │   │   └── seeder/          # 数据填充
-│   │   ├── model/               # 数据模型
-│   │   ├── router/              # 路由
-│   │   └── store/               # 存储层
+│   │   │   ├── migration/       # Database migrations
+│   │   │   └── seeder/          # Database seeders
+│   │   ├── model/               # Data models
+│   │   ├── router/              # Routes
+│   │   └── store/               # Store layer
 │   ├── pkg/
-│   │   └── middleware/          # 中间件
+│   │   └── middleware/          # Middleware
 │   └── watcher/
-│       └── watcher/             # 定时任务
+│       └── watcher/             # Scheduled jobs
 ├── pkg/
 │   └── api/
-│       └── v1/                  # API 请求/响应定义
-├── .bingo.yaml                  # bingo 配置文件
+│       └── v1/                  # API request/response definitions
+├── .bingo.yaml                  # bingo configuration file
 └── go.mod
 ```
 
-## 开发工作流
+## Development Workflow
 
-1. **初始化项目**：使用 `bingo create` 创建新项目
-2. **配置数据库**：在 `.bingo.yaml` 中配置数据库连接
-3. **生成代码**：
-   - 使用 `bingo make crud` 快速生成 CRUD 代码
-   - 使用 `bingo gen` 从数据库生成模型
-4. **数据库管理**：
-   - 使用 `bingo make migration` 创建迁移文件
-   - 使用 `bingo migrate up` 运行迁移
-   - 使用 `bingo make seeder` 创建数据填充文件
-   - 使用 `bingo db seed` 运行数据填充
-5. **扩展功能**：根据需要使用 `make` 命令生成其他组件
+1. **Initialize Project**: Create a new project with `bingo create`
+2. **Configure Database**: Set up database connection in `.bingo.yaml`
+3. **Generate Code**:
+   - Use `bingo make crud` to quickly generate CRUD code
+   - Use `bingo gen` to generate models from database
+4. **Database Management**:
+   - Use `bingo make migration` to create migration files
+   - Use `bingo migrate up` to run migrations
+   - Use `bingo make seeder` to create seeder files
+   - Use `bingo db seed` to run seeders
+5. **Extend Functionality**: Use `make` commands to generate other components as needed
 
-## 开发任务清单
+## Development Checklist
 
-### 核心功能 ✅
-- [x] `bingo create` - 从 GitHub 拉取模板创建项目
-- [x] `bingo make` - 代码生成（model, store, biz, controller 等）
-- [x] `bingo make service` - 生成完整服务模块（HTTP/gRPC）
-- [x] `bingo gen` - 从数据库表生成模型代码
-- [x] `bingo migrate` - 数据库迁移管理（up, rollback, reset, refresh, fresh）
-- [x] `bingo db seed` - 运行数据库填充
-- [x] 服务选择功能（`--services`, `--no-service`, `--add-service`, `--all`）
-- [x] Make 命令支持多服务（`--service` 参数自动推断路径）
+### Core Features ✅
+- [x] `bingo create` - Create project from GitHub template
+- [x] `bingo make` - Code generation (model, store, biz, controller, etc.)
+- [x] `bingo make service` - Generate complete service module (HTTP/gRPC)
+- [x] `bingo gen` - Generate model code from database tables
+- [x] `bingo migrate` - Database migration management (up, rollback, reset, refresh, fresh)
+- [x] `bingo db seed` - Run database seeders
+- [x] Service selection (`--services`, `--no-service`, `--add-service`, `--all`)
+- [x] Make commands support multi-service (`--service` parameter for auto path inference)
 
-### 待完成任务 📋
-- [ ] 缓存管理命令：`bingo cache list/clean`（未来版本）
+### Pending Tasks 📋
+- [ ] Cache management commands: `bingo cache list/clean` (future version)
 
-### 文档 📚
-- [x] README 更新至最新功能
-- [x] 所有新参数说明完整
-- [x] 使用示例覆盖主要场景
+### Documentation 📚
+- [x] README updated with latest features
+- [x] All new parameters documented
+- [x] Usage examples cover main scenarios
 
-## 许可证
+## License
 
-[许可证信息]
+[License information]
