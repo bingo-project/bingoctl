@@ -98,3 +98,6 @@ Temporary Items
 
 # Config
 .bingo.yaml
+
+# Worktrees
+.worktrees/
