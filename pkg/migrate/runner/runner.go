@@ -1,5 +1,5 @@
 // ABOUTME: Dynamic migration runner that compiles and executes user migrations
-// ABOUTME: Generates temporary Go program, compiles it, and runs migration commands
+// ABOUTME: Generates temporary Go program in project dir, compiles it, and runs migration commands
 package runner
 
 import (
@@ -32,8 +32,9 @@ type Runner struct {
 	// Database config
 	dbOptions *db.MySQLOptions
 
-	// Cache directory
-	cacheDir string
+	// Directories
+	cacheDir string // ~/.bingoctl/migrator/<id>/ for binary
+	tmpDir   string // <project>/.bingoctl_tmp/ for temp source
 
 	// Options
 	verbose bool
@@ -64,13 +65,16 @@ func NewRunner(verbose, rebuild bool) (*Runner, error) {
 
 	migrationPath := filepath.Join(pwd, migrationDir)
 
-	// Calculate cache directory
+	// Cache directory for compiled binary
 	pathHash := CalculatePathHash(pwd)
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
 	}
 	cacheDir := filepath.Join(homeDir, ".bingoctl", "migrator", fmt.Sprintf("%s_%s", projectName, pathHash))
+
+	// Temp directory in project for compilation (to access internal packages)
+	tmpDir := filepath.Join(pwd, ".bingoctl_tmp")
 
 	return &Runner{
 		projectPath:   pwd,
@@ -80,6 +84,7 @@ func NewRunner(verbose, rebuild bool) (*Runner, error) {
 		migrationPath: migrationPath,
 		dbOptions:     config.Cfg.MysqlOptions,
 		cacheDir:      cacheDir,
+		tmpDir:        tmpDir,
 		verbose:       verbose,
 		rebuild:       rebuild,
 	}, nil
@@ -148,29 +153,26 @@ func (r *Runner) needsBuild() (bool, error) {
 func (r *Runner) build() error {
 	fmt.Println("Compiling migrations...")
 
-	// Create cache directory
+	// Create directories
 	if err := os.MkdirAll(r.cacheDir, 0755); err != nil {
 		return fmt.Errorf("failed to create cache directory: %w", err)
 	}
+	if err := os.MkdirAll(r.tmpDir, 0755); err != nil {
+		return fmt.Errorf("failed to create temp directory: %w", err)
+	}
 
-	// Generate main.go
+	// Ensure cleanup of temp directory
+	defer os.RemoveAll(r.tmpDir)
+
+	// Generate main.go in temp directory
 	if err := r.generateMainGo(); err != nil {
 		return fmt.Errorf("failed to generate main.go: %w", err)
 	}
 
-	// Generate go.mod
-	if err := r.generateGoMod(); err != nil {
-		return fmt.Errorf("failed to generate go.mod: %w", err)
-	}
-
-	// Run go mod tidy
-	if err := r.runCommand("go", "mod", "tidy"); err != nil {
-		return fmt.Errorf("go mod tidy failed: %w", err)
-	}
-
-	// Build
+	// Build from project directory (to access internal packages)
+	// Output binary to cache directory
 	binaryPath := r.binaryPath()
-	if err := r.runCommand("go", "build", "-o", binaryPath, "."); err != nil {
+	if err := r.runBuildCommand(binaryPath); err != nil {
 		return fmt.Errorf("build failed (use --verbose for details): %w", err)
 	}
 
@@ -208,68 +210,31 @@ func (r *Runner) generateMainGo() error {
 		return err
 	}
 
-	mainPath := filepath.Join(r.cacheDir, "main.go")
+	mainPath := filepath.Join(r.tmpDir, "main.go")
 	return os.WriteFile(mainPath, buf.Bytes(), 0644)
 }
 
-func (r *Runner) generateGoMod() error {
-	tplContent, err := tplFS.ReadFile("tpl/go.mod.tpl")
-	if err != nil {
-		return err
-	}
-
-	tmpl, err := template.New("gomod").Parse(string(tplContent))
-	if err != nil {
-		return err
-	}
-
-	// Get Go version
-	goVersion := strings.TrimPrefix(runtime.Version(), "go")
-	// Extract major.minor only (e.g., "1.21" from "1.21.5")
-	parts := strings.Split(goVersion, ".")
-	if len(parts) >= 2 {
-		goVersion = parts[0] + "." + parts[1]
-	}
-
-	// Get bingoctl version from go.mod
-	bingoctlVersion := getBingoctlVersion()
-
-	data := map[string]string{
-		"GoVersion":       goVersion,
-		"UserModule":      r.userModule,
-		"UserModulePath":  r.projectPath,
-		"BingoctlVersion": bingoctlVersion,
-	}
-
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return err
-	}
-
-	modPath := filepath.Join(r.cacheDir, "go.mod")
-	return os.WriteFile(modPath, buf.Bytes(), 0644)
-}
-
-func (r *Runner) runCommand(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
-	cmd.Dir = r.cacheDir
+func (r *Runner) runBuildCommand(outputPath string) error {
+	// Build from project directory, compiling the temp main.go
+	// This allows access to internal packages
+	cmd := exec.Command("go", "build", "-o", outputPath, "./.bingoctl_tmp")
+	cmd.Dir = r.projectPath
 
 	if r.verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-	} else {
-		var stderr bytes.Buffer
-		cmd.Stderr = &stderr
-		if err := cmd.Run(); err != nil {
-			if stderr.Len() > 0 {
-				return fmt.Errorf("%w\n%s", err, stderr.String())
-			}
-			return err
-		}
-		return nil
+		return cmd.Run()
 	}
 
-	return cmd.Run()
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		if stderr.Len() > 0 {
+			return fmt.Errorf("%w\n%s", err, stderr.String())
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *Runner) execute(command string) error {
@@ -311,12 +276,4 @@ func readModuleName(dir string) (string, error) {
 	}
 
 	return "", fmt.Errorf("module name not found in go.mod")
-}
-
-// getBingoctlVersion returns the current bingoctl version.
-// In production, this would read from a version constant or go.mod.
-func getBingoctlVersion() string {
-	// Try to get from go.mod of bingoctl itself
-	// For now, return a version that will work with replace directive
-	return "v1.5.0"
 }

@@ -41,7 +41,7 @@ func NewBingoCtlCommand(in io.Reader, out, err io.Writer) *cobra.Command {
 	cmds.AddCommand(makecmd.NewCmdMake())
 	cmds.AddCommand(create.NewCmdCreate())
 	cmds.AddCommand(gen.NewCmdGen())
-	cmds.AddCommand(migrate.NewCmdMigrate())
+	cmds.AddCommand(migrate.NewCmdMigrateWithRunner())
 
 	return cmds
 }

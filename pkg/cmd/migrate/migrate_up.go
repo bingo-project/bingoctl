@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"github.com/bingo-project/component-base/cli/console"
 	cmdutil "github.com/bingo-project/component-base/cli/util"
 	"github.com/spf13/cobra"
 
@@ -33,6 +34,7 @@ func NewCmdUp() *cobra.Command {
 		Short:                 "Run the database migrations",
 		TraverseChildren:      true,
 		Run: func(cmd *cobra.Command, args []string) {
+			cmdutil.CheckErr(o.Validate(cmd, args))
 			cmdutil.CheckErr(o.Run(args))
 		},
 	}
@@ -40,12 +42,26 @@ func NewCmdUp() *cobra.Command {
 	return cmd
 }
 
-// Run executes a new sub command using the specified options.
-func (o *UpOptions) Run(args []string) error {
-	r, err := runner.NewRunner(o.Verbose, o.Rebuild)
-	if err != nil {
-		return err
+// Validate makes sure there is no discrepancy in command options.
+func (o *UpOptions) Validate(cmd *cobra.Command, args []string) error {
+	if o.Production && !o.Force {
+		console.Exit(ErrInProduction.Error())
 	}
 
-	return r.Run("up")
+	return nil
+}
+
+// Run executes a new sub command using the specified options.
+func (o *UpOptions) Run(args []string) error {
+	if o.UseRunner() {
+		r, err := runner.NewRunner(o.Verbose, o.Rebuild)
+		if err != nil {
+			return err
+		}
+		return r.Run("up")
+	}
+
+	o.Migrator().Up()
+
+	return nil
 }
