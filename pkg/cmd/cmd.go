@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bingo-project/bingoctl/pkg/cmd/create"
+	"github.com/bingo-project/bingoctl/pkg/cmd/db"
 	"github.com/bingo-project/bingoctl/pkg/cmd/gen"
 	makecmd "github.com/bingo-project/bingoctl/pkg/cmd/make"
 	"github.com/bingo-project/bingoctl/pkg/cmd/migrate"
@@ -43,6 +44,7 @@ used to quickly create and develop applications based on the Bingo framework.`,
 	cmds.AddCommand(create.NewCmdCreate())
 	cmds.AddCommand(gen.NewCmdGen())
 	cmds.AddCommand(migrate.NewCmdMigrateWithRunner())
+	cmds.AddCommand(db.NewCmdDB())
 
 	return cmds
 }
