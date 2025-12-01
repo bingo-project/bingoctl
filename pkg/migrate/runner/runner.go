@@ -242,13 +242,20 @@ func (r *Runner) runBuildCommand(outputPath string) error {
 func (r *Runner) execute(command string) error {
 	binaryPath := r.binaryPath()
 
-	cmd := exec.Command(binaryPath, command,
+	args := []string{
+		command,
 		"--host", r.dbOptions.Host,
 		"--username", r.dbOptions.Username,
 		"--password", r.dbOptions.Password,
 		"--database", r.dbOptions.Database,
-		"--table", r.migrateTable,
-	)
+	}
+
+	// Only pass --table if custom table name is configured (for backward compatibility)
+	if r.migrateTable != "" && r.migrateTable != config.DefaultMigrateTable {
+		args = append(args, "--table", r.migrateTable)
+	}
+
+	cmd := exec.Command(binaryPath, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

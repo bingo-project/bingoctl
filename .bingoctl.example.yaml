@@ -28,3 +28,7 @@ mysql:
   username: root
   password:
   database: bingo
+
+# Migration configuration (optional)
+migrate:
+  table: bingo_migration  # Migration records table name, default: bingo_migration
