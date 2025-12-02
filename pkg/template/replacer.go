@@ -161,6 +161,15 @@ var renameRules = map[string]string{
 	"cmd/bingoctl":        "cmd/{app}ctl",
 }
 
+// configFileRenameRules defines config file rename mappings
+var configFileRenameRules = map[string]string{
+	"configs/bingo-apiserver.example.yaml": "configs/{app}-apiserver.example.yaml",
+	"configs/bingo-admserver.example.yaml": "configs/{app}-admserver.example.yaml",
+	"configs/bingo-bot.example.yaml":       "configs/{app}-bot.example.yaml",
+	"configs/bingo-scheduler.example.yaml": "configs/{app}-scheduler.example.yaml",
+	"configs/bingoctl.example.yaml":        "configs/{app}ctl.example.yaml",
+}
+
 // RenameDirs renames directories according to explicit rules
 // Only renames directories that still exist (after service filtering)
 func (r *Replacer) RenameDirs() error {
@@ -172,6 +181,31 @@ func (r *Replacer) RenameDirs() error {
 		newFullPath := filepath.Join(r.targetDir, newPath)
 
 		// Skip if old path doesn't exist (may be filtered out)
+		if !fileExists(oldFullPath) {
+			continue
+		}
+
+		// Rename
+		err := os.Rename(oldFullPath, newFullPath)
+		if err != nil {
+			return fmt.Errorf("failed to rename %s to %s: %w", oldPath, newPath, err)
+		}
+	}
+
+	return nil
+}
+
+// RenameConfigFiles renames config files according to explicit rules
+// Only renames files that exist (some may be filtered out with services)
+func (r *Replacer) RenameConfigFiles() error {
+	for oldPath, newPathTemplate := range configFileRenameRules {
+		// Replace {app} placeholder
+		newPath := strings.ReplaceAll(newPathTemplate, "{app}", r.appName)
+
+		oldFullPath := filepath.Join(r.targetDir, oldPath)
+		newFullPath := filepath.Join(r.targetDir, newPath)
+
+		// Skip if old file doesn't exist
 		if !fileExists(oldFullPath) {
 			continue
 		}

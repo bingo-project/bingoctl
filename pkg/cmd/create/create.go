@@ -268,6 +268,11 @@ func (o *CreateOptions) Run(args []string) error {
 		return fmt.Errorf("重命名目录失败: %w", err)
 	}
 
+	// 5.1. Rename config files
+	if err := replacer.RenameConfigFiles(); err != nil {
+		return fmt.Errorf("重命名配置文件失败: %w", err)
+	}
+
 	// 6. Replace module name (only if -m specified)
 	// Only replace if user explicitly provided a new module name
 	// Otherwise, keep original module name from go.mod

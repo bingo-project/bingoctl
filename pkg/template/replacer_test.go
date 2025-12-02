@@ -92,6 +92,75 @@ func main() {
 	}
 }
 
+func TestRenameConfigFiles(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create configs directory
+	configsDir := filepath.Join(tmpDir, "configs")
+	err := os.MkdirAll(configsDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create configs directory: %v", err)
+	}
+
+	// Create test config files (simulating bingo template)
+	testFiles := []string{
+		"bingo-apiserver.example.yaml",
+		"bingo-admserver.example.yaml",
+		"bingo-bot.example.yaml",
+		"bingo-scheduler.example.yaml",
+		"bingoctl.example.yaml",
+		"promtail.example.yaml", // Should not be renamed
+	}
+
+	for _, f := range testFiles {
+		filePath := filepath.Join(configsDir, f)
+		err := os.WriteFile(filePath, []byte("test content"), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create test file %s: %v", f, err)
+		}
+	}
+
+	// Rename config files
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err = r.RenameConfigFiles()
+	if err != nil {
+		t.Fatalf("RenameConfigFiles failed: %v", err)
+	}
+
+	// Verify renamed files
+	expectedFiles := []string{
+		"demo-apiserver.example.yaml",
+		"demo-admserver.example.yaml",
+		"demo-bot.example.yaml",
+		"demo-scheduler.example.yaml",
+		"democtl.example.yaml",
+		"promtail.example.yaml", // Should remain unchanged
+	}
+
+	for _, f := range expectedFiles {
+		filePath := filepath.Join(configsDir, f)
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			t.Errorf("Expected file %s does not exist", f)
+		}
+	}
+
+	// Verify old files are gone
+	oldFiles := []string{
+		"bingo-apiserver.example.yaml",
+		"bingo-admserver.example.yaml",
+		"bingo-bot.example.yaml",
+		"bingo-scheduler.example.yaml",
+		"bingoctl.example.yaml",
+	}
+
+	for _, f := range oldFiles {
+		filePath := filepath.Join(configsDir, f)
+		if _, err := os.Stat(filePath); !os.IsNotExist(err) {
+			t.Errorf("Old file %s should not exist", f)
+		}
+	}
+}
+
 func TestReplaceInProtoFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
