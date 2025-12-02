@@ -20,6 +20,7 @@ func TestShouldReplaceFile(t *testing.T) {
 		{"go.mod", "go.mod", true},
 		{"Makefile", "Makefile", true},
 		{"Dockerfile", "Dockerfile", true},
+		{"Bin.Dockerfile", "Bin.Dockerfile", true},
 		{".gitignore", ".gitignore", true},
 		{".env", ".env", true},
 		{".env.example", ".env.example", true},
@@ -258,6 +259,109 @@ MYSQL_DATABASE=bingo
 	}
 	if strings.Contains(envStr, "MYSQL_DATABASE=bingo") {
 		t.Error(".env.example: MYSQL_DATABASE=bingo should be replaced")
+	}
+}
+
+func TestProtectedPatternsNotReplaced(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test go.mod with bingoctl dependency
+	testFile := filepath.Join(tmpDir, "go.mod")
+	content := `module bingo
+
+go 1.23.1
+
+require (
+	github.com/bingo-project/bingoctl v1.3.4
+	github.com/bingo-project/component-base v0.4.4
+)
+`
+	err := os.WriteFile(testFile, []byte(content), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Replace app name
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err = r.ReplaceAppName()
+	if err != nil {
+		t.Fatalf("ReplaceAppName failed: %v", err)
+	}
+
+	// Verify bingoctl dependency is NOT replaced
+	result, err := os.ReadFile(testFile)
+	if err != nil {
+		t.Fatalf("Failed to read result: %v", err)
+	}
+
+	resultStr := string(result)
+
+	// bingoctl dependency should remain unchanged
+	if !strings.Contains(resultStr, "github.com/bingo-project/bingoctl") {
+		t.Error("github.com/bingo-project/bingoctl should NOT be replaced")
+	}
+
+	// Should not contain democtl in the dependency
+	if strings.Contains(resultStr, "github.com/bingo-project/democtl") {
+		t.Error("bingoctl dependency was incorrectly replaced to democtl")
+	}
+}
+
+func TestReplaceBingoConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test .bingo.example.yaml
+	testFile := filepath.Join(tmpDir, ".bingo.example.yaml")
+	content := `version: v1
+
+rootPackage: bingo
+
+directory:
+  cmd: internal/bingoctl/cmd
+  model: internal/pkg/model
+
+mysql:
+  host: 127.0.0.1:3306
+  username: root
+  password:
+  database: bingo
+`
+	err := os.WriteFile(testFile, []byte(content), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Replace bingo config values
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err = r.ReplaceBingoConfig()
+	if err != nil {
+		t.Fatalf("ReplaceBingoConfig failed: %v", err)
+	}
+
+	// Verify
+	result, err := os.ReadFile(testFile)
+	if err != nil {
+		t.Fatalf("Failed to read result: %v", err)
+	}
+
+	resultStr := string(result)
+
+	// Check rootPackage replacement
+	if !strings.Contains(resultStr, "rootPackage: github.com/mycompany/demo") {
+		t.Error("rootPackage should be replaced with new module name")
+	}
+
+	// Check database replacement
+	if !strings.Contains(resultStr, "database: demo") {
+		t.Error("database should be replaced with app name")
+	}
+
+	// Original values should be gone
+	if strings.Contains(resultStr, "rootPackage: bingo") {
+		t.Error("rootPackage: bingo should be replaced")
+	}
+	if strings.Contains(resultStr, "database: bingo") {
+		t.Error("database: bingo should be replaced")
 	}
 }
 

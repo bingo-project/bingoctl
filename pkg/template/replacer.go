@@ -41,8 +41,9 @@ var replaceableExtensions = map[string]bool{
 }
 
 var replaceableBasenames = map[string]bool{
-	"Makefile":   true,
-	"Dockerfile": true,
+	"Makefile":       true,
+	"Dockerfile":     true,
+	"Bin.Dockerfile": true,
 }
 
 // Replacer handles module name and directory name replacement
@@ -253,6 +254,37 @@ var appNameReplacements = []struct {
 	{"- bingo\r\n", "- {app}\r\n"},
 }
 
+// ReplaceBingoConfig replaces values in .bingo.example.yaml
+// Replaces rootPackage and database fields with the new module/app name
+func (r *Replacer) ReplaceBingoConfig() error {
+	configPath := filepath.Join(r.targetDir, ".bingo.example.yaml")
+	if !fileExists(configPath) {
+		return nil
+	}
+
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read %s: %w", configPath, err)
+	}
+
+	str := string(content)
+
+	// Replace rootPackage: bingo -> rootPackage: {newModule}
+	if r.newModule != "" {
+		str = strings.ReplaceAll(str, "rootPackage: bingo", "rootPackage: "+r.newModule)
+	}
+
+	// Replace database: bingo -> database: {appName}
+	str = strings.ReplaceAll(str, "database: bingo", "database: "+r.appName)
+
+	err = os.WriteFile(configPath, []byte(str), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write %s: %w", configPath, err)
+	}
+
+	return nil
+}
+
 // ReplaceAppName replaces app name references in files
 // Should be called after ReplaceModuleName to avoid conflicts with module paths
 func (r *Replacer) ReplaceAppName() error {
@@ -273,6 +305,15 @@ func (r *Replacer) ReplaceAppName() error {
 	})
 }
 
+// protectedPatterns are patterns that should not be modified during replacement
+// These are external dependencies that should remain unchanged
+var protectedPatterns = []string{
+	"github.com/bingo-project/bingoctl",
+}
+
+// placeholder is used to temporarily protect patterns from replacement
+const placeholder = "___PROTECTED_BINGOCTL___"
+
 // replaceAppNameInFile replaces app name patterns in a single file
 func (r *Replacer) replaceAppNameInFile(path string) error {
 	content, err := os.ReadFile(path)
@@ -282,10 +323,22 @@ func (r *Replacer) replaceAppNameInFile(path string) error {
 
 	str := string(content)
 
-	// Apply all replacement patterns
+	// Step 1: Protect external dependencies with placeholder
+	for i, pattern := range protectedPatterns {
+		ph := fmt.Sprintf("%s_%d_", placeholder, i)
+		str = strings.ReplaceAll(str, pattern, ph)
+	}
+
+	// Step 2: Apply all replacement patterns
 	for _, repl := range appNameReplacements {
 		newPattern := strings.ReplaceAll(repl.new, "{app}", r.appName)
 		str = strings.ReplaceAll(str, repl.old, newPattern)
+	}
+
+	// Step 3: Restore protected patterns
+	for i, pattern := range protectedPatterns {
+		ph := fmt.Sprintf("%s_%d_", placeholder, i)
+		str = strings.ReplaceAll(str, ph, pattern)
 	}
 
 	err = os.WriteFile(path, []byte(str), 0644)

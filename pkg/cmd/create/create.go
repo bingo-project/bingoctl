@@ -262,29 +262,35 @@ func (o *CreateOptions) Run(args []string) error {
 		}
 	}
 
-	// 5. Rename directories (always execute, only for remaining directories)
-	replacer := template.NewReplacer(tmpDir, "bingo", o.ModuleName, o.AppName)
-	if err := replacer.RenameDirs(); err != nil {
-		return fmt.Errorf("重命名目录失败: %w", err)
-	}
-
-	// 5.1. Rename config files
-	if err := replacer.RenameConfigFiles(); err != nil {
-		return fmt.Errorf("重命名配置文件失败: %w", err)
-	}
-
-	// 6. Replace module name (only if -m specified)
-	// Only replace if user explicitly provided a new module name
-	// Otherwise, keep original module name from go.mod
+	// 5. Replace and rename only when -m flag is provided
+	// Without -m, keep original template structure
 	if o.ModuleName != "" {
+		replacer := template.NewReplacer(tmpDir, "bingo", o.ModuleName, o.AppName)
+
+		// 5.1. Rename directories
+		if err := replacer.RenameDirs(); err != nil {
+			return fmt.Errorf("重命名目录失败: %w", err)
+		}
+
+		// 5.2. Rename config files
+		if err := replacer.RenameConfigFiles(); err != nil {
+			return fmt.Errorf("重命名配置文件失败: %w", err)
+		}
+
+		// 5.3. Replace module name in files
 		if err := replacer.ReplaceModuleName(); err != nil {
 			return fmt.Errorf("替换模块名失败: %w", err)
 		}
-	}
 
-	// 6.1. Replace app name in files (service names, paths, etc.)
-	if err := replacer.ReplaceAppName(); err != nil {
-		return fmt.Errorf("替换应用名失败: %w", err)
+		// 5.4. Replace app name in files (service names, paths, etc.)
+		if err := replacer.ReplaceAppName(); err != nil {
+			return fmt.Errorf("替换应用名失败: %w", err)
+		}
+
+		// 5.5. Replace bingo config values (rootPackage, database)
+		if err := replacer.ReplaceBingoConfig(); err != nil {
+			return fmt.Errorf("替换配置文件失败: %w", err)
+		}
 	}
 
 	// 7. Copy .bingo.example.yaml to .bingo.yaml
@@ -325,7 +331,12 @@ func (o *CreateOptions) Run(args []string) error {
 	}
 
 	// Copy config file for apiserver
-	configsSrcPath := filepath.Join(projectPath, "configs", fmt.Sprintf("%s-apiserver.yaml", o.AppName))
+	// Use app name if -m was provided, otherwise use original "bingo"
+	configAppName := "bingo"
+	if o.ModuleName != "" {
+		configAppName = o.AppName
+	}
+	configsSrcPath := filepath.Join(projectPath, "configs", fmt.Sprintf("%s-apiserver.yaml", configAppName))
 	configsDstPath := filepath.Join(projectPath, "configs", "app-apiserver.yaml")
 	if cmdutil.Exists(configsSrcPath) {
 		cmdutil.CopyFile(configsSrcPath, configsDstPath)
