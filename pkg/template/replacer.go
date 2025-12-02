@@ -161,6 +161,8 @@ var renameRules = map[string]string{
 	"cmd/bingo-bot":       "cmd/{app}-bot",
 	"cmd/bingo-scheduler": "cmd/{app}-scheduler",
 	"cmd/bingoctl":        "cmd/{app}ctl",
+	// internal directories
+	"internal/bingoctl": "internal/{app}ctl",
 	// build/docker directories
 	"build/docker/bingo-apiserver": "build/docker/{app}-apiserver",
 	"build/docker/bingo-admserver": "build/docker/{app}-admserver",

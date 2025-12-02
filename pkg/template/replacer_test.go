@@ -365,6 +365,69 @@ mysql:
 	}
 }
 
+func TestRenameDirs(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test directory structure (simulating bingo template)
+	testDirs := []string{
+		"cmd/bingo-apiserver",
+		"cmd/bingo-admserver",
+		"cmd/bingoctl",
+		"internal/bingoctl",
+		"build/docker/bingo-apiserver",
+		"build/docker/bingoctl",
+	}
+
+	for _, d := range testDirs {
+		dirPath := filepath.Join(tmpDir, d)
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			t.Fatalf("Failed to create test directory %s: %v", d, err)
+		}
+	}
+
+	// Rename directories
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err := r.RenameDirs()
+	if err != nil {
+		t.Fatalf("RenameDirs failed: %v", err)
+	}
+
+	// Verify renamed directories exist
+	expectedDirs := []string{
+		"cmd/demo-apiserver",
+		"cmd/demo-admserver",
+		"cmd/democtl",
+		"internal/democtl",
+		"build/docker/demo-apiserver",
+		"build/docker/democtl",
+	}
+
+	for _, d := range expectedDirs {
+		dirPath := filepath.Join(tmpDir, d)
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			t.Errorf("Expected directory %s does not exist", d)
+		}
+	}
+
+	// Verify old directories are gone
+	oldDirs := []string{
+		"cmd/bingo-apiserver",
+		"cmd/bingo-admserver",
+		"cmd/bingoctl",
+		"internal/bingoctl",
+		"build/docker/bingo-apiserver",
+		"build/docker/bingoctl",
+	}
+
+	for _, d := range oldDirs {
+		dirPath := filepath.Join(tmpDir, d)
+		if _, err := os.Stat(dirPath); !os.IsNotExist(err) {
+			t.Errorf("Old directory %s should not exist", d)
+		}
+	}
+}
+
 func TestReplaceInProtoFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
