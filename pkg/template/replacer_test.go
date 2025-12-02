@@ -161,6 +161,106 @@ func TestRenameConfigFiles(t *testing.T) {
 	}
 }
 
+func TestReplaceAppName(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create test Dockerfile
+	dockerDir := filepath.Join(tmpDir, "build", "docker", "demo-apiserver")
+	err := os.MkdirAll(dockerDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create docker directory: %v", err)
+	}
+
+	dockerfileContent := `FROM alpine:3.22
+WORKDIR /opt/bingo
+COPY bingo-apiserver bin/
+ENTRYPOINT ["/opt/bingo/bin/bingo-apiserver"]
+`
+	err = os.WriteFile(filepath.Join(dockerDir, "Dockerfile"), []byte(dockerfileContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create Dockerfile: %v", err)
+	}
+
+	// Create test docker-compose.yaml
+	deploymentsDir := filepath.Join(tmpDir, "deployments", "docker")
+	err = os.MkdirAll(deploymentsDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create deployments directory: %v", err)
+	}
+
+	composeContent := `networks:
+  bingo:
+    driver: bridge
+
+services:
+  apiserver:
+    build:
+      dockerfile: build/docker/bingo-apiserver/Dockerfile
+    networks:
+      - bingo
+    volumes:
+      - ${DATA_PATH_HOST}/config:/etc/bingo
+      - ${DATA_PATH_HOST}/data/bingo:/opt/bingo/storage/public
+`
+	err = os.WriteFile(filepath.Join(deploymentsDir, "docker-compose.yaml"), []byte(composeContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create docker-compose.yaml: %v", err)
+	}
+
+	// Create test .env.example
+	envContent := `REGISTRY_PREFIX=bingo
+APP_NAME=bingo
+MYSQL_DATABASE=bingo
+`
+	err = os.WriteFile(filepath.Join(deploymentsDir, ".env.example"), []byte(envContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create .env.example: %v", err)
+	}
+
+	// Replace app name
+	r := NewReplacer(tmpDir, "bingo", "github.com/mycompany/demo", "demo")
+	err = r.ReplaceAppName()
+	if err != nil {
+		t.Fatalf("ReplaceAppName failed: %v", err)
+	}
+
+	// Verify Dockerfile
+	dockerfileResult, _ := os.ReadFile(filepath.Join(dockerDir, "Dockerfile"))
+	dockerfileStr := string(dockerfileResult)
+	if !strings.Contains(dockerfileStr, "/opt/demo") {
+		t.Error("Dockerfile: /opt/bingo should be replaced with /opt/demo")
+	}
+	if !strings.Contains(dockerfileStr, "demo-apiserver") {
+		t.Error("Dockerfile: bingo-apiserver should be replaced with demo-apiserver")
+	}
+
+	// Verify docker-compose.yaml
+	composeResult, _ := os.ReadFile(filepath.Join(deploymentsDir, "docker-compose.yaml"))
+	composeStr := string(composeResult)
+	if strings.Contains(composeStr, "bingo:") {
+		t.Error("docker-compose.yaml: network name 'bingo:' should be replaced")
+	}
+	if strings.Contains(composeStr, "/etc/bingo") {
+		t.Error("docker-compose.yaml: /etc/bingo should be replaced with /etc/demo")
+	}
+	if strings.Contains(composeStr, "build/docker/bingo-apiserver") {
+		t.Error("docker-compose.yaml: build/docker/bingo-apiserver should be replaced")
+	}
+
+	// Verify .env.example
+	envResult, _ := os.ReadFile(filepath.Join(deploymentsDir, ".env.example"))
+	envStr := string(envResult)
+	if strings.Contains(envStr, "REGISTRY_PREFIX=bingo") {
+		t.Error(".env.example: REGISTRY_PREFIX=bingo should be replaced")
+	}
+	if strings.Contains(envStr, "APP_NAME=bingo") {
+		t.Error(".env.example: APP_NAME=bingo should be replaced")
+	}
+	if strings.Contains(envStr, "MYSQL_DATABASE=bingo") {
+		t.Error(".env.example: MYSQL_DATABASE=bingo should be replaced")
+	}
+}
+
 func TestReplaceInProtoFile(t *testing.T) {
 	tmpDir := t.TempDir()
 

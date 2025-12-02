@@ -282,6 +282,11 @@ func (o *CreateOptions) Run(args []string) error {
 		}
 	}
 
+	// 6.1. Replace app name in files (service names, paths, etc.)
+	if err := replacer.ReplaceAppName(); err != nil {
+		return fmt.Errorf("替换应用名失败: %w", err)
+	}
+
 	// 7. Copy .bingo.example.yaml to .bingo.yaml
 	exampleConfigPath := filepath.Join(tmpDir, ".bingo.example.yaml")
 	targetConfigPath := filepath.Join(tmpDir, ".bingo.yaml")

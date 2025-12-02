@@ -154,11 +154,18 @@ func (r *Replacer) replaceInFile(path string) error {
 // renameRules defines directory rename mappings
 // Only these explicitly listed directories will be renamed
 var renameRules = map[string]string{
+	// cmd directories
 	"cmd/bingo-apiserver": "cmd/{app}-apiserver",
 	"cmd/bingo-admserver": "cmd/{app}-admserver",
 	"cmd/bingo-bot":       "cmd/{app}-bot",
 	"cmd/bingo-scheduler": "cmd/{app}-scheduler",
 	"cmd/bingoctl":        "cmd/{app}ctl",
+	// build/docker directories
+	"build/docker/bingo-apiserver": "build/docker/{app}-apiserver",
+	"build/docker/bingo-admserver": "build/docker/{app}-admserver",
+	"build/docker/bingo-bot":       "build/docker/{app}-bot",
+	"build/docker/bingo-scheduler": "build/docker/{app}-scheduler",
+	"build/docker/bingoctl":        "build/docker/{app}ctl",
 }
 
 // configFileRenameRules defines config file rename mappings
@@ -215,6 +222,75 @@ func (r *Replacer) RenameConfigFiles() error {
 		if err != nil {
 			return fmt.Errorf("failed to rename %s to %s: %w", oldPath, newPath, err)
 		}
+	}
+
+	return nil
+}
+
+// appNameReplacements defines app name replacement patterns
+// Order matters: more specific patterns should come first
+var appNameReplacements = []struct {
+	old string
+	new string
+}{
+	// Service names (more specific, should be first)
+	{"bingo-apiserver", "{app}-apiserver"},
+	{"bingo-admserver", "{app}-admserver"},
+	{"bingo-bot", "{app}-bot"},
+	{"bingo-scheduler", "{app}-scheduler"},
+	{"bingoctl", "{app}ctl"},
+	// Paths
+	{"/opt/bingo", "/opt/{app}"},
+	{"/etc/bingo", "/etc/{app}"},
+	{"/var/log/bingo", "/var/log/{app}"},
+	{"/data/bingo", "/data/{app}"},
+	// Generic app name (catches env vars, network names, etc.)
+	{"=bingo\n", "={app}\n"},
+	{"=bingo\r\n", "={app}\r\n"},
+	// Network references in yaml
+	{"  bingo:\n", "  {app}:\n"},
+	{"- bingo\n", "- {app}\n"},
+	{"- bingo\r\n", "- {app}\r\n"},
+}
+
+// ReplaceAppName replaces app name references in files
+// Should be called after ReplaceModuleName to avoid conflicts with module paths
+func (r *Replacer) ReplaceAppName() error {
+	return filepath.WalkDir(r.targetDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if r.shouldReplaceFile(path) {
+			return r.replaceAppNameInFile(path)
+		}
+
+		return nil
+	})
+}
+
+// replaceAppNameInFile replaces app name patterns in a single file
+func (r *Replacer) replaceAppNameInFile(path string) error {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+
+	str := string(content)
+
+	// Apply all replacement patterns
+	for _, repl := range appNameReplacements {
+		newPattern := strings.ReplaceAll(repl.new, "{app}", r.appName)
+		str = strings.ReplaceAll(str, repl.old, newPattern)
+	}
+
+	err = os.WriteFile(path, []byte(str), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write file %s: %w", path, err)
 	}
 
 	return nil
