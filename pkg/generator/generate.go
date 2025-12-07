@@ -78,8 +78,8 @@ func GetMapDirectory(tmpl string) (dir string) {
 	if tmpl == string(TmplBiz) {
 		dir = config.Cfg.Directory.Biz
 	}
-	if tmpl == string(TmplController) {
-		dir = config.Cfg.Directory.Controller
+	if tmpl == string(TmplHandler) {
+		dir = config.Cfg.Directory.Handler
 	}
 	if tmpl == string(TmplMiddleware) {
 		dir = config.Cfg.Directory.Middleware

@@ -34,7 +34,7 @@ type Options struct {
 	EnableGRPC     bool
 	WithBiz        bool
 	WithStore      bool
-	WithController bool
+	WithHandler    bool
 	WithMiddleware bool
 	WithRouter     bool
 	NoBiz          bool

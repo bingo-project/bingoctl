@@ -83,9 +83,9 @@ directory:
   cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
-  biz: internal/apiserver/biz/1
-  controller: internal/apiserver/http/controller/v1
-  middleware: internal/pkg/http/middleware
+  biz: internal/apiserver/biz
+  handler: internal/apiserver/handler/http
+  middleware: internal/pkg/middleware/http
   request: pkg/api/apiserver/v1
   migration: internal/pkg/database/migration
   seeder: internal/pkg/database/seeder
@@ -261,7 +261,7 @@ bingo make model user -d custom/path
 
 #### crud - 生成完整 CRUD 代码
 
-一次性生成 model、store、biz、controller、request 的完整代码。
+一次性生成 model、store、biz、handler、request 的完整代码。
 
 ```bash
 bingo make crud <name>
@@ -298,13 +298,13 @@ bingo make biz <name> [-d dir] [-p package]
 bingo make biz user
 ```
 
-#### controller - 生成控制器代码
+#### handler - 生成处理器代码
 
 ```bash
-bingo make controller <name> [-d dir] [-p package]
+bingo make handler <name> [-d dir] [-p package]
 
 # 示例
-bingo make controller user
+bingo make handler user
 ```
 
 #### request - 生成请求验证代码
@@ -422,13 +422,13 @@ bingo make service <name> [选项]
 --with-biz              生成业务层（默认 true）
 --no-biz                不生成业务层（覆盖 --with-biz）
 --with-store            生成存储层
---with-controller       生成控制器层
+--with-handler          生成处理器层
 --with-middleware       生成中间件目录
 --with-router           生成路由目录
 
 # 示例
 bingo make service api --http
-bingo make service gateway --http --grpc --with-store --with-controller
+bingo make service gateway --http --grpc --with-store --with-handler
 bingo make service worker --no-biz
 ```
 
@@ -485,7 +485,7 @@ bingo gen -t users,posts,comments
 
 ```bash
 # 生成一个带 HTTP 服务器的 API 服务
-bingo make service api --http --with-store --with-controller
+bingo make service api --http --with-store --with-handler
 
 # 生成一个纯业务处理的 worker 服务
 bingo make service worker --no-biz
@@ -518,7 +518,7 @@ myapp/
 ├── internal/
 │   ├── apiserver/
 │   │   ├── biz/                 # 业务逻辑层
-│   │   ├── controller/          # 控制器
+│   │   ├── handler/             # 处理器
 │   │   ├── database/
 │   │   │   ├── migration/       # 数据库迁移
 │   │   │   └── seeder/          # 数据填充

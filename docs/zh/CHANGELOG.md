@@ -62,7 +62,7 @@
 ### 功能
 
 - 内置项目模板，无需网络连接即可创建项目
-- 支持生成各层代码（model, store, biz, controller 等）
+- 支持生成各层代码（model, store, biz, handler 等）
 - 支持从数据库表生成模型代码
 - 支持多服务架构
 

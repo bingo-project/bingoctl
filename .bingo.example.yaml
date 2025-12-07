@@ -6,9 +6,9 @@ directory:
   cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
-  biz: internal/apiserver/biz/1
-  controller: internal/apiserver/http/controller/v1
-  middleware: internal/pkg/http/middleware
+  biz: internal/apiserver/biz
+  handler: internal/apiserver/handler/http
+  middleware: internal/pkg/middleware/http
   request: pkg/api/apiserver/v1
   migration: internal/pkg/database/migration
   seeder: internal/pkg/database/seeder

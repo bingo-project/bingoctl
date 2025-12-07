@@ -18,7 +18,7 @@ const (
 	TmplStore      Tmpl = "store"
 	TmplRequest    Tmpl = "request"
 	TmplBiz        Tmpl = "biz"
-	TmplController Tmpl = "controller"
+	TmplHandler    Tmpl = "handler"
 	TmplMiddleware Tmpl = "middleware"
 	TmplJob        Tmpl = "job"
 	TmplMigration  Tmpl = "migration"

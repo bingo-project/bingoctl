@@ -105,9 +105,9 @@ func (o *CrudOptions) Run(args []string) error {
 		console.Error(err.Error())
 	}
 
-	// 5.Controller
+	// 5.Handler
 	o.ReSetDirectory()
-	err = o.GenerateCode(string(generator.TmplController), args[0])
+	err = o.GenerateCode(string(generator.TmplHandler), args[0])
 	if err != nil {
 		console.Error(err.Error())
 	}

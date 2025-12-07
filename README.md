@@ -83,9 +83,9 @@ directory:
   cmd: internal/bingoctl/cmd
   model: internal/pkg/model
   store: internal/apiserver/store
-  biz: internal/apiserver/biz/1
-  controller: internal/apiserver/http/controller/v1
-  middleware: internal/pkg/http/middleware
+  biz: internal/apiserver/biz
+  handler: internal/apiserver/handler/http
+  middleware: internal/pkg/middleware/http
   request: pkg/api/apiserver/v1
   migration: internal/pkg/database/migration
   seeder: internal/pkg/database/seeder
@@ -261,7 +261,7 @@ bingo make model user -d custom/path
 
 #### crud - Generate Complete CRUD Code
 
-Generate complete code for model, store, biz, controller, and request at once.
+Generate complete code for model, store, biz, handler, and request at once.
 
 ```bash
 bingo make crud <name>
@@ -298,13 +298,13 @@ bingo make biz <name> [-d dir] [-p package]
 bingo make biz user
 ```
 
-#### controller - Generate Controller Code
+#### handler - Generate Handler Code
 
 ```bash
-bingo make controller <name> [-d dir] [-p package]
+bingo make handler <name> [-d dir] [-p package]
 
 # Example
-bingo make controller user
+bingo make handler user
 ```
 
 #### request - Generate Request Validation Code
@@ -422,13 +422,13 @@ bingo make service <name> [options]
 --with-biz              Generate business layer (default true)
 --no-biz                Don't generate business layer (overrides --with-biz)
 --with-store            Generate store layer
---with-controller       Generate controller layer
+--with-handler          Generate handler layer
 --with-middleware       Generate middleware directory
 --with-router           Generate router directory
 
 # Examples
 bingo make service api --http
-bingo make service gateway --http --grpc --with-store --with-controller
+bingo make service gateway --http --grpc --with-store --with-handler
 bingo make service worker --no-biz
 ```
 
@@ -485,7 +485,7 @@ bingo gen -t users,posts,comments
 
 ```bash
 # Generate an API service with HTTP server
-bingo make service api --http --with-store --with-controller
+bingo make service api --http --with-store --with-handler
 
 # Generate a pure business processing worker service
 bingo make service worker --no-biz
@@ -518,7 +518,7 @@ myapp/
 ├── internal/
 │   ├── apiserver/
 │   │   ├── biz/                 # Business logic layer
-│   │   ├── controller/          # Controllers
+│   │   ├── handler/             # Handlers
 │   │   ├── database/
 │   │   │   ├── migration/       # Database migrations
 │   │   │   └── seeder/          # Database seeders
@@ -554,7 +554,7 @@ myapp/
 
 ### Core Features ✅
 - [x] `bingo create` - Create project from GitHub template
-- [x] `bingo make` - Code generation (model, store, biz, controller, etc.)
+- [x] `bingo make` - Code generation (model, store, biz, handler, etc.)
 - [x] `bingo make service` - Generate complete service module (HTTP/gRPC)
 - [x] `bingo gen` - Generate model code from database tables
 - [x] `bingo migrate` - Database migration management (up, rollback, reset, refresh, fresh)

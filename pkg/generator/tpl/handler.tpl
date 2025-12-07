@@ -13,13 +13,13 @@ import (
 	"{{.RootPackage}}/pkg/auth"
 )
 
-type {{.StructName}}Controller struct {
+type {{.StructName}}Handler struct {
 	a *auth.Authz
 	b biz.IBiz
 }
 
-func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName}}Controller {
-	return &{{.StructName}}Controller{a: a, b: biz.NewBiz(ds)}
+func New{{.StructName}}Handler(ds store.IStore, a *auth.Authz) *{{.StructName}}Handler {
+	return &{{.StructName}}Handler{a: a, b: biz.NewBiz(ds)}
 }
 
 // List
@@ -33,7 +33,7 @@ func New{{.StructName}}Controller(ds store.IStore, a *auth.Authz) *{{.StructName
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}} [GET]
-func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
+func (h *{{.StructName}}Handler) List(c *gin.Context) {
 	log.C(c).Infow("List {{.VariableName}} function called")
 
 	var req v1.List{{.StructName}}Request
@@ -43,7 +43,7 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 		return
 	}
 
-	resp, err := ctrl.b.{{.StructNamePlural}}().List(c, &req)
+	resp, err := h.b.{{.StructNamePlural}}().List(c, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -64,7 +64,7 @@ func (ctrl *{{.StructName}}Controller) List(c *gin.Context) {
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}} [POST]
-func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
+func (h *{{.StructName}}Handler) Create(c *gin.Context) {
 	log.C(c).Infow("Create {{.VariableName}} function called")
 
 	var req v1.Create{{.StructName}}Request
@@ -75,7 +75,7 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 	}
 
 	// Create {{.VariableName}}
-	resp, err := ctrl.b.{{.StructNamePlural}}().Create(c, &req)
+	resp, err := h.b.{{.StructNamePlural}}().Create(c, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -96,11 +96,11 @@ func (ctrl *{{.StructName}}Controller) Create(c *gin.Context) {
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [GET]
-func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
+func (h *{{.StructName}}Handler) Get(c *gin.Context) {
 	log.C(c).Infow("Get {{.VariableName}} function called")
 
 	ID := cast.ToUint(c.Param("id"))
-	{{.VariableName}}, err := ctrl.b.{{.StructNamePlural}}().Get(c, ID)
+	{{.VariableName}}, err := h.b.{{.StructNamePlural}}().Get(c, ID)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -122,7 +122,7 @@ func (ctrl *{{.StructName}}Controller) Get(c *gin.Context) {
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [PUT]
-func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
+func (h *{{.StructName}}Handler) Update(c *gin.Context) {
 	log.C(c).Infow("Update {{.VariableName}} function called")
 
 	var req v1.Update{{.StructName}}Request
@@ -133,7 +133,7 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 	}
 
 	ID := cast.ToUint(c.Param("id"))
-	resp, err := ctrl.b.{{.StructNamePlural}}().Update(c, ID, &req)
+	resp, err := h.b.{{.StructNamePlural}}().Update(c, ID, &req)
 	if err != nil {
 		core.WriteResponse(c, err, nil)
 
@@ -154,11 +154,11 @@ func (ctrl *{{.StructName}}Controller) Update(c *gin.Context) {
 // @Failure	   400		{object}	core.ErrResponse
 // @Failure	   500		{object}	core.ErrResponse
 // @Router    /v1/{{.VariableNamePlural}}/{id} [DELETE]
-func (ctrl *{{.StructName}}Controller) Delete(c *gin.Context) {
+func (h *{{.StructName}}Handler) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete {{.VariableName}} function called")
 
 	ID := cast.ToUint(c.Param("id"))
-	if err := ctrl.b.{{.StructNamePlural}}().Delete(c, ID); err != nil {
+	if err := h.b.{{.StructNamePlural}}().Delete(c, ID); err != nil {
 		core.WriteResponse(c, err, nil)
 
 		return

@@ -58,8 +58,8 @@ func (o *Options) GenerateService(name string) error {
 			return err
 		}
 	}
-	if o.WithController {
-		if err := o.createDirectoryWithFile("controller", "internal", o.ServiceName, "controller"); err != nil {
+	if o.WithHandler {
+		if err := o.createDirectoryWithFile("handler", "internal", o.ServiceName, "handler"); err != nil {
 			return err
 		}
 	}
@@ -359,9 +359,9 @@ func (o *Options) createDirectoryWithFile(dirType string, parts ...string) error
 	case "biz":
 		fileName = "biz.go"
 		tplName = "biz.go.tpl"
-	case "controller":
-		fileName = "controller.go"
-		tplName = "controller.go.tpl"
+	case "handler":
+		fileName = "handler.go"
+		tplName = "handler.go.tpl"
 	default:
 		// For other directories, just create .gitkeep
 		gitkeepPath := filepath.Join(dir, ".gitkeep")

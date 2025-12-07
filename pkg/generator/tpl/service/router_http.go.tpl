@@ -17,8 +17,8 @@ func InstallHTTPRoutes(g *gin.Engine) {
 	{
 		// Add your routes here
 		// Example:
-		// v1.GET("/users", controller.ListUsers)
-		// v1.POST("/users", controller.CreateUser)
+		// v1.GET("/users", handler.ListUsers)
+		// v1.POST("/users", handler.CreateUser)
 		_ = v1
 	}
 }

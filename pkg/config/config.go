@@ -41,7 +41,7 @@ type Directory struct {
 	Store      string `mapstructure:"store" json:"store" yaml:"store"`
 	Request    string `mapstructure:"request" json:"request" yaml:"request"`
 	Biz        string `mapstructure:"biz" json:"biz" yaml:"biz"`
-	Controller string `mapstructure:"controller" json:"controller" yaml:"controller"`
+	Handler    string `mapstructure:"handler" json:"handler" yaml:"handler"`
 	Middleware string `mapstructure:"middleware" json:"middleware" yaml:"middleware"`
 	Job        string `mapstructure:"job" json:"job" yaml:"job"`
 	Migration  string `mapstructure:"migration" json:"migration" yaml:"migration"`
@@ -68,7 +68,7 @@ func NewDefaultConfig() *Config {
 			Model:      "internal/pkg/model",
 			Store:      "internal/pkg/store",
 			Biz:        "internal/apiserver/biz",
-			Controller: "internal/apiserver/http/controller/v1",
+			Handler:    "internal/apiserver/handler/http",
 			Middleware: "internal/pkg/http/middleware",
 			Request:    "pkg/api/apiserver/v1",
 			Job:        "internal/watcher/watcher",

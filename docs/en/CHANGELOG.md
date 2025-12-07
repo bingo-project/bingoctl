@@ -62,7 +62,7 @@ Last version using the built-in template system.
 ### Features
 
 - Built-in project templates, no network connection required
-- Support generating code for all layers (model, store, biz, controller, etc.)
+- Support generating code for all layers (model, store, biz, handler, etc.)
 - Support generating model code from database tables
 - Support multi-service architecture
 

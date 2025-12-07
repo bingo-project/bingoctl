@@ -169,8 +169,8 @@ func TestExtractSuffix(t *testing.T) {
 		},
 		{
 			name:     "internal with nested path",
-			path:     "internal/apiserver/controller/v1",
-			expected: "controller/v1",
+			path:     "internal/apiserver/handler/v1",
+			expected: "handler/v1",
 		},
 		{
 			name:     "pkg prefix",
@@ -232,9 +232,9 @@ func TestInferDirectoryForService(t *testing.T) {
 		},
 		{
 			name:        "smart replacement with nested path",
-			baseDir:     "internal/apiserver/controller/v1",
+			baseDir:     "internal/apiserver/handler/v1",
 			serviceName: "admserver",
-			expected:    "internal/admserver/controller/v1",
+			expected:    "internal/admserver/handler/v1",
 		},
 		{
 			name:        "fallback pattern",
