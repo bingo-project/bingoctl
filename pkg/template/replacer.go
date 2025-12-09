@@ -46,12 +46,19 @@ var replaceableBasenames = map[string]bool{
 	"Bin.Dockerfile": true,
 }
 
+// BingoRootPackage is the root package of the bingo template
+// This should match the module name in bingo's go.mod
+const BingoRootPackage = "github.com/bingo-project/bingo"
+
+// BingoAppName is the default app name used in bingo template
+const BingoAppName = "bingo"
+
 // Replacer handles module name and directory name replacement
 type Replacer struct {
 	targetDir string // target directory
-	oldModule string // "bingo"
-	newModule string // "github.com/mycompany/demo"
-	appName   string // "demo"
+	oldModule string // e.g., "github.com/bingo-project/bingo"
+	newModule string // e.g., "github.com/mycompany/demo"
+	appName   string // e.g., "demo"
 }
 
 // NewReplacer creates a new Replacer instance
@@ -271,13 +278,13 @@ func (r *Replacer) ReplaceBingoConfig() error {
 
 	str := string(content)
 
-	// Replace rootPackage: bingo -> rootPackage: {newModule}
+	// Replace rootPackage: {oldModule} -> rootPackage: {newModule}
 	if r.newModule != "" {
-		str = strings.ReplaceAll(str, "rootPackage: bingo", "rootPackage: "+r.newModule)
+		str = strings.ReplaceAll(str, "rootPackage: "+r.oldModule, "rootPackage: "+r.newModule)
 	}
 
 	// Replace database: bingo -> database: {appName}
-	str = strings.ReplaceAll(str, "database: bingo", "database: "+r.appName)
+	str = strings.ReplaceAll(str, "database: "+BingoAppName, "database: "+r.appName)
 
 	err = os.WriteFile(configPath, []byte(str), 0644)
 	if err != nil {

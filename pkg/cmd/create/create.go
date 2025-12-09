@@ -265,7 +265,7 @@ func (o *CreateOptions) Run(args []string) error {
 	// 5. Replace and rename only when -m flag is provided
 	// Without -m, keep original template structure
 	if o.ModuleName != "" {
-		replacer := template.NewReplacer(tmpDir, "bingo", o.ModuleName, o.AppName)
+		replacer := template.NewReplacer(tmpDir, template.BingoRootPackage, o.ModuleName, o.AppName)
 
 		// 5.1. Rename directories
 		if err := replacer.RenameDirs(); err != nil {
@@ -332,7 +332,7 @@ func (o *CreateOptions) Run(args []string) error {
 
 	// Copy config file for apiserver
 	// Use app name if -m was provided, otherwise use original "bingo"
-	configAppName := "bingo"
+	configAppName := template.BingoAppName
 	if o.ModuleName != "" {
 		configAppName = o.AppName
 	}
