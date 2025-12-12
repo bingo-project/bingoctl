@@ -1,15 +1,16 @@
 package router
 
 import (
-	"github.com/bingo-project/component-base/web"
 	"github.com/gin-gonic/gin"
+
+	"{{.RootPackage}}/internal/pkg/core"
 )
 
-// InstallHTTPRoutes registers HTTP routes.
-func InstallHTTPRoutes(g *gin.Engine) {
+// MapRoutes registers HTTP routes.
+func MapRoutes(g *gin.Engine) {
 	// Health check
 	g.GET("/healthz", func(c *gin.Context) {
-		web.WriteResponse(c, nil, map[string]string{"status": "ok"})
+		core.Response(c, map[string]string{"status": "ok"}, nil)
 	})
 
 	// API v1 routes

@@ -1,12 +1,19 @@
-server:
 {{- if .EnableHTTP}}
+http:
+  enabled: true
   addr: :8080
-  mode: release
 {{- end}}
 {{- if .EnableGRPC}}
 
-grpc-server:
+grpc:
+  enabled: true
   addr: :9090
+{{- end}}
+{{- if .EnableWS}}
+
+websocket:
+  enabled: true
+  addr: :8081
 {{- end}}
 
 log:

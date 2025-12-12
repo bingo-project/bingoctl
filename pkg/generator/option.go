@@ -32,12 +32,12 @@ type Options struct {
 	// Service flags
 	EnableHTTP     bool
 	EnableGRPC     bool
-	WithBiz        bool
+	EnableWS       bool
 	WithStore      bool
-	WithHandler    bool
 	WithMiddleware bool
-	WithRouter     bool
 	NoBiz          bool
+	NoRouter       bool
+	NoHandler      bool
 
 	// Service selection
 	Service string // Target service name for path inference
