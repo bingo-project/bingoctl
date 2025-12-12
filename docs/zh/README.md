@@ -11,7 +11,7 @@ Bingo CLI 是一个 Go 语言的脚手架和代码生成工具，用于快速创
 - 🔄 数据库迁移管理
 - 🗄️ 从数据库表自动生成模型代码
 - 🛠️ 灵活的配置系统
-- 🎯 支持 HTTP 和 gRPC 服务
+- 🎯 支持 HTTP、gRPC 和 WebSocket 服务
 
 ## 安装
 
@@ -411,26 +411,32 @@ bingo db seed -v                 # 显示详细输出
 
 #### service - 生成服务模块
 
-生成一个完整的服务模块，包括 HTTP/gRPC 服务器配置。
+生成一个完整的服务模块，支持 HTTP/gRPC/WebSocket 服务器配置。
 
 ```bash
 bingo make service <name> [选项]
 
-# 选项
+# 服务器选项
 --http                  启用 HTTP 服务器
 --grpc                  启用 gRPC 服务器
---with-biz              生成业务层（默认 true）
---no-biz                不生成业务层（覆盖 --with-biz）
+--ws                    启用 WebSocket 服务器
+
+# 层级选项（启用服务器时，默认生成 biz/router/handler）
+--no-biz                不生成业务层
+--no-router             不生成路由
+--no-handler            不生成处理器
 --with-store            生成存储层
---with-handler          生成处理器层
 --with-middleware       生成中间件目录
---with-router           生成路由目录
 
 # 示例
 bingo make service api --http
-bingo make service gateway --http --grpc --with-store --with-handler
+bingo make service gateway --http --grpc
+bingo make service realtime --ws
+bingo make service chat --http --ws --with-store
 bingo make service worker --no-biz
 ```
+
+生成的服务遵循 `cmd/{app}-{service}/` 命名规范。例如，如果 rootPackage 是 `github.com/myorg/demo`，运行 `bingo make service admin` 会创建 `cmd/demo-admin/main.go`。
 
 ### gen - 从数据库生成代码
 
@@ -485,7 +491,13 @@ bingo gen -t users,posts,comments
 
 ```bash
 # 生成一个带 HTTP 服务器的 API 服务
-bingo make service api --http --with-store --with-handler
+bingo make service api --http --with-store
+
+# 生成一个 WebSocket 服务
+bingo make service realtime --ws
+
+# 生成一个同时支持 HTTP 和 WebSocket 的服务
+bingo make service chat --http --ws
 
 # 生成一个纯业务处理的 worker 服务
 bingo make service worker --no-biz
