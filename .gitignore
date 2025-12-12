@@ -104,3 +104,6 @@ Temporary Items
 
 # Temporary build directories
 .bingo_tmp/
+
+# Plans
+docs/plans/
