@@ -1,6 +1,6 @@
 # Bingo CLI
 
-[English](./README.md) | [中文](./docs/zh/README.md)
+[English](./README.md) | [中文](./README.zh.md)
 
 Bingo CLI is a scaffolding and code generation tool written in Go, designed for quickly creating and developing applications based on the Bingo framework.
 
@@ -19,7 +19,7 @@ Bingo CLI is a scaffolding and code generation tool written in Go, designed for 
 go install github.com/bingo-project/bingoctl/cmd/bingo@latest
 ```
 
-> See [CHANGELOG](./docs/en/CHANGELOG.md) for version history
+> See [CHANGELOG](./CHANGELOG.md) for version history
 
 ## Shell Completion
 

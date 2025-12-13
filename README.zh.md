@@ -1,6 +1,6 @@
 # Bingo CLI
 
-[English](../../README.md) | [中文](./README.md)
+[English](./README.md) | [中文](./README.zh.md)
 
 Bingo CLI 是一个 Go 语言的脚手架和代码生成工具，用于快速创建和开发基于 Bingo 框架的应用程序。
 
