@@ -278,9 +278,9 @@ func (r *Replacer) ReplaceBingoConfig() error {
 
 	str := string(content)
 
-	// Replace rootPackage: bingo -> rootPackage: {newModule}
+	// Replace rootPackage: github.com/bingo-project/bingo -> rootPackage: {newModule}
 	if r.newModule != "" {
-		str = strings.ReplaceAll(str, "rootPackage: "+BingoAppName, "rootPackage: "+r.newModule)
+		str = strings.ReplaceAll(str, "rootPackage: "+BingoRootPackage, "rootPackage: "+r.newModule)
 	}
 
 	// Replace database: bingo -> database: {appName}
