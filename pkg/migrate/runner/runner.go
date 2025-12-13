@@ -61,7 +61,7 @@ func NewRunner(verbose, rebuild bool) (*Runner, error) {
 	// Get migration directory from config
 	migrationDir := config.Cfg.Directory.Migration
 	if migrationDir == "" {
-		migrationDir = "internal/apiserver/database/migration"
+		migrationDir = "internal/pkg/database/migration"
 	}
 
 	migrationPath := filepath.Join(pwd, migrationDir)

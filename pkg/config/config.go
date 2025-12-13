@@ -69,7 +69,7 @@ func NewDefaultConfig() *Config {
 			Store:      "internal/pkg/store",
 			Biz:        "internal/apiserver/biz",
 			Handler:    "internal/apiserver/handler/http",
-			Middleware: "internal/pkg/http/middleware",
+			Middleware: "internal/pkg/middleware/http",
 			Request:    "pkg/api/apiserver/v1",
 			Job:        "internal/watcher/watcher",
 			Migration:  "internal/pkg/database/migration",

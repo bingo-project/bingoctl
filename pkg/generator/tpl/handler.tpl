@@ -10,15 +10,15 @@ import (
 	"{{.RootPackage}}/internal/pkg/core"
 	"{{.RootPackage}}/internal/pkg/errno"
 	v1 "{{.RootPackage}}/{{.RequestPath}}{{.RelativePath}}"
-	"{{.RootPackage}}/pkg/auth"
+	"{{.RootPackage}}/internal/pkg/auth"
 )
 
 type {{.StructName}}Handler struct {
-	a *auth.Authz
+	a *auth.Authorizer
 	b biz.IBiz
 }
 
-func New{{.StructName}}Handler(ds store.IStore, a *auth.Authz) *{{.StructName}}Handler {
+func New{{.StructName}}Handler(ds store.IStore, a *auth.Authorizer) *{{.StructName}}Handler {
 	return &{{.StructName}}Handler{a: a, b: biz.NewBiz(ds)}
 }
 
@@ -38,19 +38,19 @@ func (h *{{.StructName}}Handler) List(c *gin.Context) {
 
 	var req v1.List{{.StructName}}Request
 	if err := c.ShouldBindQuery(&req); err != nil {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
+		core.Response(c, nil, errno.ErrInvalidArgument.WithMessage("%s", err.Error()))
 
 		return
 	}
 
-	resp, err := h.b.{{.StructNamePlural}}().List(c, &req)
+	resp, err := h.b.{{.StructName}}().List(c, &req)
 	if err != nil {
-		core.WriteResponse(c, err, nil)
+		core.Response(c, nil, err)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, resp)
+	core.Response(c, resp, nil)
 }
 
 // Create
@@ -69,20 +69,20 @@ func (h *{{.StructName}}Handler) Create(c *gin.Context) {
 
 	var req v1.Create{{.StructName}}Request
 	if err := c.ShouldBindJSON(&req); err != nil {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
+		core.Response(c, nil, errno.ErrInvalidArgument.WithMessage("%s", err.Error()))
 
 		return
 	}
 
 	// Create {{.VariableName}}
-	resp, err := h.b.{{.StructNamePlural}}().Create(c, &req)
+	resp, err := h.b.{{.StructName}}().Create(c, &req)
 	if err != nil {
-		core.WriteResponse(c, err, nil)
+		core.Response(c, nil, err)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, resp)
+	core.Response(c, resp, nil)
 }
 
 // Get
@@ -100,14 +100,14 @@ func (h *{{.StructName}}Handler) Get(c *gin.Context) {
 	log.C(c).Infow("Get {{.VariableName}} function called")
 
 	ID := cast.ToUint(c.Param("id"))
-	{{.VariableName}}, err := h.b.{{.StructNamePlural}}().Get(c, ID)
+	{{.VariableName}}, err := h.b.{{.StructName}}().Get(c, ID)
 	if err != nil {
-		core.WriteResponse(c, err, nil)
+		core.Response(c, nil, err)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, {{.VariableName}})
+	core.Response(c, {{.VariableName}}, nil)
 }
 
 // Update
@@ -127,20 +127,20 @@ func (h *{{.StructName}}Handler) Update(c *gin.Context) {
 
 	var req v1.Update{{.StructName}}Request
 	if err := c.ShouldBindJSON(&req); err != nil {
-		core.WriteResponse(c, errno.ErrInvalidParameter.SetMessage(err.Error()), nil)
+		core.Response(c, nil, errno.ErrInvalidArgument.WithMessage("%s", err.Error()))
 
 		return
 	}
 
 	ID := cast.ToUint(c.Param("id"))
-	resp, err := h.b.{{.StructNamePlural}}().Update(c, ID, &req)
+	resp, err := h.b.{{.StructName}}().Update(c, ID, &req)
 	if err != nil {
-		core.WriteResponse(c, err, nil)
+		core.Response(c, nil, err)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, resp)
+	core.Response(c, resp, nil)
 }
 
 // Delete
@@ -158,11 +158,11 @@ func (h *{{.StructName}}Handler) Delete(c *gin.Context) {
 	log.C(c).Infow("Delete {{.VariableName}} function called")
 
 	ID := cast.ToUint(c.Param("id"))
-	if err := h.b.{{.StructNamePlural}}().Delete(c, ID); err != nil {
-		core.WriteResponse(c, err, nil)
+	if err := h.b.{{.StructName}}().Delete(c, ID); err != nil {
+		core.Response(c, nil, err)
 
 		return
 	}
 
-	core.WriteResponse(c, nil, nil)
+	core.Response(c, nil, nil)
 }

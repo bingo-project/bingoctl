@@ -11,6 +11,7 @@ import (
 	"{{.RootPackage}}/internal/pkg/errno"
 	model "{{.RootPackage}}/{{.ModelPath}}{{.RelativePath}}"
 	v1 "{{.RootPackage}}/{{.RequestPath}}{{.RelativePath}}"
+	"{{.RootPackage}}/pkg/store/where"
 )
 
 type {{.StructName}}Biz interface {
@@ -23,7 +24,7 @@ type {{.StructName}}Biz interface {
 	{{.StructName}}Expansion
 }
 
-type {{.StructName}}Expansion interface{
+type {{.StructName}}Expansion interface {
 }
 
 type {{.VariableName}}Biz struct {
@@ -37,7 +38,7 @@ func New{{.StructName}}(ds store.IStore) *{{.VariableName}}Biz {
 }
 
 func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructName}}Request) (*v1.List{{.StructName}}Response, error) {
-	count, list, err := b.ds.{{.StructName}}().List(ctx, req)
+	count, list, err := b.ds.{{.StructName}}().ListWithRequest(ctx, req)
 	if err != nil {
 		log.C(ctx).Errorw("Failed to list {{.VariableName}}", "err", err)
 
@@ -56,7 +57,7 @@ func (b *{{.VariableName}}Biz) List(ctx context.Context, req *v1.List{{.StructNa
 }
 
 func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.StructName}}Request) (*v1.{{.StructName}}Info, error) {
-	var {{.VariableName}}M model.{{.StructName}}
+	var {{.VariableName}}M model.{{.StructName}}M
 	_ = copier.Copy(&{{.VariableName}}M, req)
 
 	err := b.ds.{{.StructName}}().Create(ctx, &{{.VariableName}}M)
@@ -76,9 +77,9 @@ func (b *{{.VariableName}}Biz) Create(ctx context.Context, req *v1.Create{{.Stru
 }
 
 func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.{{.StructName}}Info, error) {
-	{{.VariableName}}, err := b.ds.{{.StructName}}().Get(ctx, ID)
+	{{.VariableName}}, err := b.ds.{{.StructName}}().Get(ctx, where.F("id", ID))
 	if err != nil {
-		return nil, errno.ErrResourceNotFound
+		return nil, errno.ErrNotFound
 	}
 
 	var resp v1.{{.StructName}}Info
@@ -88,12 +89,12 @@ func (b *{{.VariableName}}Biz) Get(ctx context.Context, ID uint) (*v1.{{.StructN
 }
 
 func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Update{{.StructName}}Request) (*v1.{{.StructName}}Info, error) {
-	{{.VariableName}}M, err := b.ds.{{.StructName}}().Get(ctx, ID)
+	{{.VariableName}}M, err := b.ds.{{.StructName}}().Get(ctx, where.F("id", ID))
 	if err != nil {
-		return nil, errno.ErrResourceNotFound
+		return nil, errno.ErrNotFound
 	}
 
-    {{.UpdatableFields}}
+	{{.UpdatableFields}}
 
 	if err := b.ds.{{.StructName}}().Update(ctx, {{.VariableName}}M); err != nil {
 		return nil, err
@@ -106,5 +107,5 @@ func (b *{{.VariableName}}Biz) Update(ctx context.Context, ID uint, req *v1.Upda
 }
 
 func (b *{{.VariableName}}Biz) Delete(ctx context.Context, ID uint) error {
-	return b.ds.{{.StructName}}().Delete(ctx, ID)
+	return b.ds.{{.StructName}}().Delete(ctx, where.F("id", ID))
 }

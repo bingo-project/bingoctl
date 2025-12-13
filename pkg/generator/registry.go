@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -16,6 +17,12 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	if registry.Filepath == "" {
 		return nil
 	}
+
+	// Check if the registry file is in the same package as the generated file
+	// If so, skip import to avoid self-referencing import
+	registryDir := filepath.Dir(registry.Filepath)
+	generatedDir := strings.TrimSuffix(o.Directory, "/")
+	samePackage := registryDir == generatedDir
 
 	// Package
 	pkg := ""
@@ -42,7 +49,7 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	}
 
 	// 注册 interface
-	newContent, err := RegisterInterface(registry.Interface, string(content), interfaceTemplate, registerTemplate, importPath)
+	newContent, err := RegisterInterface(registry.Interface, string(content), interfaceTemplate, registerTemplate, importPath, samePackage)
 	if err != nil {
 		return err
 	}
@@ -57,7 +64,7 @@ func (o *Options) Register(registry config.Registry, interfaceTemplate, register
 	return nil
 }
 
-func RegisterInterface(name, content, interfaceTemplate, registerTemplate, importPath string) (data string, err error) {
+func RegisterInterface(name, content, interfaceTemplate, registerTemplate, importPath string, samePackage bool) (data string, err error) {
 	// Check if already registered
 	if strings.Contains(content, interfaceTemplate) {
 		return "", errors.New("interface already registered: " + interfaceTemplate)
@@ -75,6 +82,11 @@ func RegisterInterface(name, content, interfaceTemplate, registerTemplate, impor
 
 	newContent := strings.Replace(content, match, str, 1)
 	newContent = newContent + "\n" + registerTemplate
+
+	// Skip import if same package to avoid self-referencing import
+	if samePackage {
+		return newContent, nil
+	}
 
 	// Import path
 	if strings.Contains(newContent, importPath) {
